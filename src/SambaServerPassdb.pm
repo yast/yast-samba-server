@@ -69,8 +69,9 @@ my @backends = ("smbpasswd");
  #
 BEGIN { $TYPEINFO{Read} = ["function", "boolean"]; }
 sub Read {
+    my $self = shift;
 
-    my $ret = SCR::Read (".etc.smb.value.global.passdb backend");
+    my $ret = SCR->Read (".etc.smb.value.global.passdb backend");
     
     if ( defined $ret )
     {
@@ -87,6 +88,7 @@ sub Read {
  #
 BEGIN { $TYPEINFO{Write} = ["function", "boolean"]; }
 sub Write {
+    my $self = shift;
 
     my $pom = join(" ", @backends);
     
@@ -96,7 +98,7 @@ sub Write {
     }
     
     # write down the settings
-    my $ret = SCR::Write (".etc.smb.value.global.\"passdb backend\"", join(" ", @backends) );
+    my $ret = SCR->Write (".etc.smb.value.global.\"passdb backend\"", join(" ", @backends) );
     if( $ret == 0 )
     {
 	y2error ("Cannot write passdb backend");
@@ -112,6 +114,7 @@ sub Write {
  #
 BEGIN { $TYPEINFO{GetBackends} = ["function", ["list", "string"] ]; }
 sub GetBackends {
+    my $self = shift;
     return \@backends;
 }
 
@@ -120,6 +123,7 @@ sub GetBackends {
  #
 BEGIN { $TYPEINFO{SetBackends} = ["function", "void", ["list", "string"] ]; }
 sub SetBackends {
+    my $self = shift;
     @backends = @{$_[0]};
     
     $modified = 1;
@@ -129,6 +133,7 @@ sub SetBackends {
 BEGIN { $TYPEINFO{BackendSAM} = ["function", "string", "string" ]; }
 sub BackendSAM 
 {
+    my $self = shift;
     my $url = shift;
     my @parts = split (/:/, $url);
     
@@ -142,6 +147,7 @@ sub BackendSAM
     
 BEGIN { $TYPEINFO{BackendDetails} = ["function", "string", "string" ]; }
 sub BackendDetails {
+    my $self = shift;
     my @parts = split (/:/, shift);
     
     if ( defined $parts[1] )
@@ -159,6 +165,7 @@ sub BackendDetails {
 BEGIN { $TYPEINFO{BackendString} = ["function", "string", "string", "string" ]; }
 sub BackendString
 {
+    my $self = shift;
     my $type = shift;
     my $url = shift;
     
