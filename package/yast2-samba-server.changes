@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 15 16:40:52 CET 2004 - mlazar@suse.cz
+
+- fixed typo: GlobalSetStr => GlobalGetStr
+
+-------------------------------------------------------------------
 Mon Nov 15 11:40:15 CET 2004 - mlazar@suse.cz
 
 - added writable flag to shares list and Add Share dialog (#39656)

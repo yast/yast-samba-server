@@ -899,9 +899,9 @@ symbol LDAPDialog () ``{
     term contents = 
     `VBox(
 	// text entry label
-	`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), SambaConfig::GlobalSetStr("ldap suffix", "")),
+	`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), SambaConfig::GlobalGetStr("ldap suffix", "")),
 	// text entry label
-	`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), SambaConfig::GlobalSetStr("ldap admin dn", "")),
+	`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), SambaConfig::GlobalGetStr("ldap admin dn", "")),
 	Mode::config() ? `Empty() : 
 	    `HBox(
 		// push button label
