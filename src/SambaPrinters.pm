@@ -152,7 +152,7 @@ global define void disableAllPrinters() ``{
     // disable each share with printable = true
     foreach(string share, SambaConfig::GetShares(), {
 	if (toboolean(SambaConfig::GetShare(share, "printable", nil))) 
-	    Sambaconfig::DisableShare(share);
+	    SambaConfig::DisableShare(share);
     });
 }
 

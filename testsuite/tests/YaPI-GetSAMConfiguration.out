@@ -1,20 +1,2 @@
-Read	.etc.smb.value.global."ldap admin dn" "uid=fool,dc=test,dc=domain"
-Read	.etc.smb.value.global."ldap suffix" "dc=test,dc=domain"
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."ssl" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_passwd" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_shadow" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_group" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."pam_password" nil
-Read	.sysconfig.ldap.BASE_CONFIG_DN nil
-Read	.sysconfig.ldap.FILE_SERVER nil
-Read	.sysconfig.ldap.BIND_DN nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."binddn" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_map_attribute" nil
-Read	.init.scripts.exists "autofs" nil
-Log	Service autofs does not exist.
-Execute	.passwd.init $["base_directory":"/etc"] true
-Read	.passwd.passwd.pluslines []
+Read	.etc.smb.all $["comment":"", "file":-1, "kind":"section", "name":"", "type":-1, "value":[$["comment":nil, "kind":"section", "name":"global", "type":nil, "value":[$["kind":"value", "name":"workgroup", "type":nil, "value":"Test"], $["kind":"value", "name":"ldap admin dn", "type":nil, "value":"uid=fool,dc=test,dc=domain"], $["kind":"value", "name":"domain master", "type":nil, "value":"no"], $["kind":"value", "name":"security", "type":nil, "value":"user"], $["kind":"value", "name":"preferred master", "type":nil, "value":"yes"], $["kind":"value", "name":"ldap suffix", "type":nil, "value":"dc=test,dc=domain"], $["kind":"value", "name":"local master", "type":nil, "value":"no"], $["kind":"value", "name":"domain logons", "type":nil, "value":"no"]]], $["comment":nil, "kind":"section", "name":"lp", "type":nil, "value":[$["kind":"value", "name":"comment", "type":nil, "value":"testing printer"], $["kind":"value", "name":"printable", "type":nil, "value":"yes"], $["kind":"value", "name":"path", "type":nil, "value":"/var/spool/lp"]]]]]
 Return	$["ldap admin dn":"uid=fool,dc=test,dc=domain", "ldap suffix":"dc=test,dc=domain"]

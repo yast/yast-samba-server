@@ -1,4 +1,0 @@
-Execute	.target.bash "/usr/sbin/rcsmb restart" 0
-Execute	.target.bash "/usr/sbin/rcnmb restart" 0
-Return	true
-Return	true

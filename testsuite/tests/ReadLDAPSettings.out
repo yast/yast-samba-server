@@ -1,6 +1,0 @@
-Read	.etc.smb.value.global."ldap admin dn" "uid=root,dc=example,dc=com"
-Read	.etc.smb.value.global."ldap suffix" "dc=example,dc=com"
-Return	nil
-Return	uid=root,dc=example,dc=com
-Return	dc=example,dc=com
-Return	false

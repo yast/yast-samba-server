@@ -83,6 +83,8 @@ sub getServerUrl {
 # TODO: test it
 sub installSchema {
 
+    return if Mode::test();
+
     my $url = getServerUrl();
     unless ($url) {
 	y2warning("No ldapsam backend found");
@@ -175,6 +177,7 @@ sub getLdapError {
 # try to setup users plugin
 sub setupUsersPlugin {
     my $res;
+    return if Mode::test();
     
     # only Common (SUSE) LDAP server contains (SUSE) UsersPlugin
     return unless isLDAPDefault() and usingCommonLDAP();
@@ -273,6 +276,7 @@ sub tryBind {
 }
 
 sub createSuffixes {
+    return if Mode::test();
     my $suffix = SambaConfig->GlobalGetStr("ldap suffix", "");
 
     # create "ldap XXX suffix" on ldap server if first "passdb backend" is "ldapsam"
@@ -305,7 +309,7 @@ sub Enable {
     my $group_suffix = "ou=Groups";
     
     # try to lookup user/group suffix
-    if (Ldap->LDAPInit()) {
+    if (!Mode::test() && Ldap->LDAPInit()) {
 	Ldap->ReadConfigModules();
 	my $conf = Ldap->GetConfigModules();
 	while(my ($dn, $c) = each %$conf) {
@@ -379,7 +383,7 @@ sub writePasswd {
     return "Cannot write samba configuration." unless SambaConfig->Write();
     
     # change password
-    SambaSecret->WriteLDAPBindPw($Passwd) or return;
+    SambaSecrets->WriteLDAPBindPw($Passwd) or return;
 
     $OrgPasswd = $Passwd;
     $OrgAdminDN = $admin_dn;
@@ -418,7 +422,7 @@ BEGIN{$TYPEINFO{Read}=["function","boolean","string"]}
 sub Read {
     my ($self,$name) = @_;
     
-    Ldap->Read();
+    Ldap->Read() unless Mode::test();
     
     readPasswd();
     return TRUE;

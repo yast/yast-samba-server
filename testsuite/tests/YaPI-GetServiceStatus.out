@@ -1,10 +1,8 @@
 Return	Disabled service
-Read	.init.scripts.exists "smbd" true
-Read	.init.scripts.runlevel "smbd" nil
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" nil
 Return	0
 Return	Enabled service
-Read	.init.scripts.exists "smbd" true
-Read	.init.scripts.runlevel "smbd" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
-Read	.init.scripts.exists "nmbd" true
-Read	.init.scripts.runlevel "nmbd" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
-Return	1
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
+Return	0

@@ -50,7 +50,7 @@ sub Export {
 BEGIN{$TYPEINFO{Import}=["function", "void", "any"]}
 sub Import {
     my ($self, $any) = @_;
-    $self->SetServiceAutostart(($any =~ /^(1|Enabled?|True|Yes)$/i) ? 1 : 0);
+    $self->SetServiceAutoStart(($any =~ /^(1|Enabled?|True|Yes)$/i) ? 1 : 0);
 }
 
 # Read

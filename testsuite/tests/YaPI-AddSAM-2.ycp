@@ -3,80 +3,30 @@
 // test for YaPI::Samba::AddSAM()
 // $Id$
 
-    include "testsuite.ycp";
+    import "SambaConfig";
 
-    list rwe = [
-            $[
-                "passwd" : $[
-                    "passwd" : $[
-                        "plusline" : ""
-                    ]
-                ],
-                "target" : $[
-                    "tmpdir" : "/tmp",
-                    "size" : 0
-                ],
-                "etc" : $[
-                    "smb" : $[
-                        "value_types" : $[
-                            "global" : $[
-                                "workgroup" : 0,
-                                "domain master" : 0,
-                                "security" : 0,
-                                "passdb backend" : 0,
-                                "preferred master" : 0,
-                                "local master" : 0,
-                                "domain logons" : 0
-                            ],
-                            "lp" : $[
-                                "comment" : 0,
-                                "printable" : 0,
-                                "path" : 0
-                            ]
-                        ],
-                        "section_types" : $[
-                            "lp" : 0
-                        ],
-                        "value" : $[
-                            "global" : $[
-                                "workgroup" : "Test",
-                                "domain master" : "no",
-                                "security" : "user",
-                                "preferred master" : "yes",
-                                "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
-                                "domain logons" : "no",
-                                "local master" : "no"
-                            ],
-                            "lp" : $[
-                                "comment" : "testing printer",
-                                "printable" : "yes",
-                                "path" : "/var/spool/lp"
-                            ]
-                        ],
-                        "section" : $[
-                            "lp" : $[]
-                        ]
-                    ],
-                    "printcap" : []
-                ]
-            ],
-            $[],
-            $[
-                "passwd" : $[
-                    "init" : true
-                ],
-                "target" : $[
-                    "bash" : 1,
-                    "bash_output" : $[]
-                ],
-                "background" : $[
-                    "run_output" : true
-                ]
-            ]
-        ];
-    TESTSUITE_INIT(rwe, nil);
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    map r = depth_union(r_common, $["etc" : $["smb" : $["all" : SambaConfig::Config2All( $[
+                    "global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
+                        "preferred master" : "yes",
+                        "local master" : "no",
+                        "domain logons" : "no"],
+                    "lp" : $[
+                        "comment" : "testing printer",
+                        "printable" : "yes",
+                        "path" : "/var/spool/lp"]])]]]);
+    map w = depth_union(w_common, $[]);
+    map x = depth_union(x_common, $[]);
+
+    TESTSUITE_INIT([r,w,x], nil);
     import "YaPI::Samba";
 
     // add as non-default
-    TEST( ``(YaPI::Samba::AddSAM( "smbpasswd:/var/lib/smbusers" , false)), rwe, nil);
+    TEST( ``(YaPI::Samba::AddSAM( "smbpasswd:/var/lib/smbusers" , false)), [r,w,x], nil);
 }

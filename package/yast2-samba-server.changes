@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Nov 19 14:50:11 CET 2004 - mlazar@suse.cz
+
+- fixed some typo
+- update testsuite
+
+-------------------------------------------------------------------
 Tue Nov 16 16:43:33 CET 2004 - mlazar@suse.cz
 
 - writeable parametr replaced with inverted synonym "read only"

@@ -112,7 +112,7 @@ sub WriteLDAPBindPw {
     my ($self, $passwd) = @_;
     
     # change password
-    my $cmd = "smbpasswd -w '$passwd'";
+    my $cmd = "smbpasswd -w '".($passwd||"")."'";
     my $result = SCR->Execute(".target.bash_output", $cmd);
     if ($result->{exit}) {
 	y2error($result->{stderr} || "Cannot set the LDAP password.");

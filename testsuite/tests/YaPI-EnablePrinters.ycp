@@ -4,80 +4,28 @@
 // $Id$
 // testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
 
+    import "SambaConfig";
+
     include "testsuite.ycp";
+    include "./tests/tests-common.yh";
 
-    list rwe = [
-            $[
-                "passwd" : $[
-                    "passwd" : $[
-                        "pluslines" : []
-                    ]
-                ],
-                "target" : $[
-                    "tmpdir" : "/tmp",
-                    "size" : 0
-                ],
-                "etc" : $[
-                    "smb" : $[
-                        "value_type" : $[
-                            "global" : $[
-                                "workgroup" : 0,
-                                "domain master" : 0,
-                                "security" : 0,
-                                "preferred master" : 0,
-                                "domain logons" : 0,
-                                "local master" : 0
-                            ],
-                            "lp" : $[
-                                "comment" : 0,
-                                "printable" : 0,
-                                "path" : 0
-                            ]
-                        ],
-                        "section_type" : $[
-                            "lp" : 0
-                        ],
-                        "value" : $[
-                            "global" : $[
-                                "workgroup" : "Test",
-                                "domain master" : "no",
-                                "security" : "user",
-                                "preferred master" : "yes",
-                                "local master" : "no",
-                                "domain logons" : "no"
-                            ],
-                            "lp" : $[
-                                "comment" : "testing printer",
-                                "printable" : "yes",
-                                "path" : "/var/spool/lp"
-                            ]
-                        ],
-                        "section" : $[
-                            "lp" : $[]
-                        ]
-                    ],
-                    "printcap" : []
-                ]
-            ],
-            $[],
-            $[
-                "passwd" : $[
-                    "init" : true
-                ],
-                "target" : $[
-                    "bash" : 1,
-                    "bash_output" : $[]
-                ],
-                "background" : $[
-                    "run_output" : true
-                ]
-            ]
-        ];
-    TESTSUITE_INIT(rwe, nil);
+    map r = depth_union(r_common, $["etc" : $["smb" : $["all" : SambaConfig::Config2All( $[
+                    "global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "no",
+                        "local master" : "no"],
+                    "lp" : $[
+                        "comment" : "testing printer",
+                        "printable" : "yes",
+                        "path" : "/var/spool/lp"]])]]]);
+    map w = depth_union(w_common, $[]);
+    map x = depth_union(x_common, $[]);
+
+    TESTSUITE_INIT([r,w,x], nil);
     import "YaPI::Samba";
-    import "Mode";
 
-    Mode::test = true;
-
-    TEST( ``(YaPI::Samba::EnablePrinters( ["lp"], true)), rwe, nil);
+    TEST( ``(YaPI::Samba::EnablePrinters( ["lp"], true)), [r,w,x], nil);
 }

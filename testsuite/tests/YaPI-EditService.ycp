@@ -4,26 +4,19 @@
 // $Id$
 // testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
 
-    include "testsuite.ycp";
+    import "SambaConfig";
 
-    list rwe = [
-            $[
-                "target" : $[
-                    "tmpdir" : "/tmp",
-                    "size" : 0
-                ]
-            ],
-            $[],
-            $[
-                "target" : $[
-                    "bash_output" : $[]
-                ]
-            ]
-        ];
-    TESTSUITE_INIT(rwe, nil);
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    map r = depth_union(r_common, $[]);
+    map w = depth_union(w_common, $[]);
+    map x = depth_union(x_common, $[]);
+
+    TESTSUITE_INIT([r,w,x], nil);
     import "YaPI::Samba";
     
-    TEST( ``("Enable disabled service"), rwe, nil);
+    TEST( ``("Enable disabled service"), [r,w,x], nil);
 
     // enable service, but it's disabled
     TEST( ``( YaPI::Samba::EditService( true ) ), [ 
@@ -36,7 +29,7 @@
 	] ]
     ], nil );
 
-    TEST( ``("Disable disabled service"), rwe, nil);
+    TEST( ``("Disable disabled service"), [r,w,x], nil);
 
     // disable service, but it's already disabled
     TEST( ``( YaPI::Samba::EditService( false ) ), [
@@ -49,7 +42,7 @@
 	] ]
     ], nil );
 
-    TEST( ``("Enable enabled service"), rwe, nil);
+    TEST( ``("Enable enabled service"), [r,w,x], nil);
 
     // enable service, but it's already enabled
     TEST( ``( YaPI::Samba::EditService( true ) ), [ 
@@ -77,7 +70,7 @@
 	] ]
     ], nil );
 
-    TEST( ``("Disable enabled service"), rwe, nil);
+    TEST( ``("Disable enabled service"), [r,w,x], nil);
 
     // disable service, but it's enabled
     TEST( ``( YaPI::Samba::EditService( false ) ), [

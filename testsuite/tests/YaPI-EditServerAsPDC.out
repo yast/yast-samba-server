@@ -1,81 +1,33 @@
-Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value.global."security" "user"
-Read	.etc.smb.value.global."password server" nil
-Read	.etc.smb.value.global."idmap uid" nil
-Read	.etc.smb.value.global."winbind uid" nil
-Read	.etc.smb.value.global."idmap gid" nil
-Read	.etc.smb.value.global."winbind gid" nil
-Read	.init.scripts.exists "winbind" nil
-Log	Service winbind does not exist.
-Read	.init.scripts.exists "nmb" nil
-Log	Service nmb does not exist.
-Execute	.background.run_output "/usr/bin/nmbstatus" true
-Read	.etc.smb.value.global."passdb backend" nil
-Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
-Read	.etc.smb.value.global."domain logons" "no"
-Read	.etc.smb.value_type.global."domain logons" 0
-Read	.etc.smb.value.global."domain master" "no"
-Read	.etc.smb.value_type.global."domain master" 0
-Read	.etc.smb.value.global."local master" "no"
-Read	.etc.smb.value_type.global."local master" 0
-Read	.etc.smb.value.global."preferred master" "yes"
-Read	.etc.smb.value_type.global."preferred master" 0
-Read	.etc.smb.value.global."security" "user"
-Read	.etc.smb.value_type.global."security" 0
-Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value_type.global."workgroup" 0
-Read	.init.scripts.exists "smb" nil
-Log	Service smb does not exist.
-Read	.target.stat "/etc/samba/secrets.tdb" nil
-Log	Cannot get the list of trusted domains
-Dir	.etc.smb.section: []
-Read	.etc.smb.value.global."ldap admin dn" nil
-Read	.etc.smb.value.global."ldap suffix" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."ssl" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_passwd" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_shadow" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_group" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."pam_password" nil
-Read	.sysconfig.ldap.BASE_CONFIG_DN nil
-Read	.sysconfig.ldap.FILE_SERVER nil
-Read	.sysconfig.ldap.BIND_DN nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."binddn" nil
-Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_map_attribute" nil
-Read	.init.scripts.exists "autofs" nil
-Log	Service autofs does not exist.
-Execute	.passwd.init $["base_directory":"/etc"] true
-Read	.passwd.passwd.pluslines []
-Read	.init.scripts.exists "SuSEfirewall2_init" nil
-Log	Service SuSEfirewall2_init does not exist.
-Write	.etc.smb.value.global."add machine script" "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$" true
-Write	.etc.smb.value_type.global."add machine script" 0 true
-Write	.etc.smb.value.global."domain logons" "yes" true
-Write	.etc.smb.value_type.global."domain logons" 0 true
-Write	.etc.smb.value.global."domain master" "yes" true
-Write	.etc.smb.value_type.global."domain master" 0 true
-Write	.etc.smb.value.global."encrypt passwords" "yes" true
-Write	.etc.smb.value_type.global."encrypt passwords" 0 true
-Write	.etc.smb.value.global."ldap idmap suffix" "ou=Idmap" true
-Write	.etc.smb.value_type.global."ldap idmap suffix" 0 true
-Write	.etc.smb.value.global."ldap machine suffix" "ou=Computers" true
-Write	.etc.smb.value_type.global."ldap machine suffix" 0 true
-Write	.etc.smb.value.global."local master" "yes" true
+Read	.etc.smb.all $["comment":"", "file":-1, "kind":"section", "name":"", "type":-1, "value":[$["comment":nil, "kind":"section", "name":"global", "type":nil, "value":[$["kind":"value", "name":"workgroup", "type":nil, "value":"Test"], $["kind":"value", "name":"domain master", "type":nil, "value":"no"], $["kind":"value", "name":"security", "type":nil, "value":"user"], $["kind":"value", "name":"preferred master", "type":nil, "value":"yes"], $["kind":"value", "name":"local master", "type":nil, "value":"no"], $["kind":"value", "name":"domain logons", "type":nil, "value":"no"]]]]]
+Read	.target.stat "/etc/samba/secrets.tdb" $["xxx":"yyy"]
+Execute	.target.bash_output "/usr/bin/tdbdump /etc/samba/secrets.tdb" $["exit":"0", "stderr":"test std error", "stdout":"test std out"]
+Execute	.target.bash_output "LANG=C net getlocalsid -s /dev/null" $["exit":"0", "stderr":"test std error", "stdout":"test std out"]
+Write	.etc.smb.value.global."local master" "Yes" true
 Write	.etc.smb.value_type.global."local master" 0 true
+Write	.etc.smb.value.global.workgroup "Test" true
+Write	.etc.smb.value_type.global.workgroup 0 true
 Write	.etc.smb.value.global."os level" "65" true
 Write	.etc.smb.value_type.global."os level" 0 true
+Write	.etc.smb.value.global."domain master" "Yes" true
+Write	.etc.smb.value_type.global."domain master" 0 true
+Write	.etc.smb.value.global."preffered master" "Yes" true
+Write	.etc.smb.value_type.global."preffered master" 0 true
+Write	.etc.smb.value.global.security "user" true
+Write	.etc.smb.value_type.global.security 0 true
+Write	.etc.smb.value.global."add machine script" "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$" true
+Write	.etc.smb.value_type.global."add machine script" 0 true
 Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value_type.global."preferred master" 0 true
-Write	.etc.smb.value.global."security" "user" true
-Write	.etc.smb.value_type.global."security" 0 true
-Write	.etc.smb.value.global."workgroup" "Test" true
-Write	.etc.smb.value_type.global."workgroup" 0 true
+Write	.etc.smb.value.global."domain logons" "Yes" true
+Write	.etc.smb.value_type.global."domain logons" 0 true
 Write	.etc.smb.section_type.global 0 true
-Write	.etc.smb.value.global."ldap admin dn" nil true
-Write	.etc.smb.value.global."ldap suffix" nil true
-Write	.etc.smb.value.global."idmap backend" nil true
+Write	.etc.smb.value.netlogon.comment "Network Logon Service" true
+Write	.etc.smb.value_type.netlogon.comment 0 true
+Write	.etc.smb.value.netlogon.path "/var/lib/samba/netlogon" true
+Write	.etc.smb.value_type.netlogon.path 0 true
+Write	.etc.smb.value.netlogon."write list" "root" true
+Write	.etc.smb.value_type.netlogon."write list" 0 true
+Write	.etc.smb.section_type.netlogon 0 true
+Write	.etc.smb.section_comment.netlogon "\n" true
 Write	.etc.smb nil true
-Execute	.target.bash "touch /var/lib/YaST2/samba_server_done_once" 1
 Return	true

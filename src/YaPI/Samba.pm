@@ -163,8 +163,8 @@ to get the error hash.
 BEGIN { $TYPEINFO{GetServiceStatus} = ["function", "string" ]; }
 sub GetServiceStatus {
     my $self = shift;
-    SambaService->read();
-    return SambaService->GetServiceAutostart();
+    SambaService->Read();
+    return SambaService->GetServiceAutoStart();
 }
 
 =item *
@@ -204,7 +204,7 @@ sub EditService {
     my $enable = shift;
 
     SambaService->Read();
-    SambaService->SetServiceAutostart($enable);
+    SambaService->SetServiceAutoStart($enable);
     SambaService->Write() or return undef;
     
     return 1;
@@ -333,12 +333,12 @@ to get the error hash.
 
 =cut
 
-BEGIN { $TYPEINFO{GetSAMBackends} = ["function", [ "list", "string" ] ]; }
+BEGIN { $TYPEINFO{GetSAMBackends} = ["function", ["list", "string" ] ]; }
 sub GetSAMBackends {
     my $self = shift;
     
     SambaConfig->Read();
-    return split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
+    return [ split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd") ];
 }
 
 =item *
@@ -495,6 +495,9 @@ sub DeleteSAM {
     my $self = shift;
     my $sam = shift;
     
+    SambaConfig->Read();
+    SambaBackend->Read();
+
     my @current = split " ", SambaConfig->GlobalGetStr("passdb backend", "");
     
     unless( grep( /^$sam$/, @current ) ) {
@@ -529,8 +532,8 @@ sub EnableShare {
     my $on = shift;
 
     SambaConfig->Read();
-    SambaConfig->AdjustShare($on);
-    Sambaconfig->Write() or return undef;
+    SambaConfig->ShareAdjust($name, $on);
+    SambaConfig->Write() or return undef;
 
     return 1;
 }
