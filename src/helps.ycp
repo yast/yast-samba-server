@@ -44,29 +44,25 @@ All available workgroups or domains found on your network are listed here.</p>
 ") +
 
     /* Samba selecting workgroup or domain 2/2 - Installation step 1 */
-_("Select one of them or type your own new name and click <b>Next</b>.</p>"),
+_("<p>Select one of them or type your own new name and click <b>Next</b>.</p>"),
 
     /* Samba select Samba Server type - Installation step 2 */
-    "inst_step2" : _("<p><b><big>Samba Server Type</big></b><br>
-A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>
-<p>The backup controller uses another domain controller for validation.
-The primary controller uses its own information about users and their passwords.</p>
-") + "<p>" + _("The available options in the configuration dialogs 
-depend on the settings in this selection. 
-") + "</p>",
+    "inst_step2" : _("<p><b><big>Samba Server Type</big></b></p>")
++("<p>A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>")
++("<p>The backup controller uses another domain controller for validation.
+The primary controller uses its own information about users and their passwords.</p>")
++("<p>The available options in the configuration dialogs depend on the settings in this selection.</p>"),
 
     /* Samba select Samba Server type - Installation step 2 */
-    "inst_step2_no_bdc" : _("<p><b><big>Samba Server Type</big></b><br>
-A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>
-") + "<p>" + _("The available options in the configuration dialogs 
-depend on the settings in this selection. 
-") + "</p>",
+    "inst_step2_no_bdc" : _("<p><b><big>Samba Server Type</big></b></p>")
++("<p>A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>")
++("<p>The available options in the configuration dialogs 
+depend on the settings in this selection.</p>"),
 
     /* Share list dialog help 1/4 */
-    "smb_conf_tab_shares" : _("<p><b><big>Shares</big></b><br>
-This is a list of already configured shares, whether they 
-are enabled or disabled, and some basic information about them.<br></p>
-") +
+    "smb_conf_tab_shares" : _("<p><b><big>Shares</big></b></p>")
++_("<p>This is a list of already configured shares, whether they 
+are enabled or disabled, and some basic information about them.<br></p>") +
 
     /* Share list dialog help 2/4 */
     _("<p>A share can be <i>enabled</i> or <i>disabled</i>.

@@ -1,3 +1,11 @@
+/**
+ * File:	data/add_machine.ycp
+ * Package:	Configuration of samba-server
+ * Authors:	???@suse.??
+ *
+ * $Id$
+ */
+
 {
 
 import "YaPI::USERS";

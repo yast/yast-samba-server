@@ -20,7 +20,10 @@ textdomain "samba-server";
 import "URL";
 import "Popup";
 
+import "CWM";
 import "Ldap";
+import "Label";
+import "Wizard";
 
 import "SambaConfig";
 import "SambaBackend";
@@ -262,18 +265,18 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	`TextEntry(`id("ldap admin dn"), _("&Administration DN:")),
 	// TODO: if Mode::config() => no ask for pssword
 	// translators: password enrty label
-	`Password(`id(`passwd1), `opt(`notify), _("Administration Password:")),
+	`Password(`id(`passwd1), `opt(`notify), _("Administration &Password:")),
 	// translators: reenter password enrty label
-	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (Again):")),
+	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (A&gain):")),
 	`ReplacePoint(`id("passwd_label"), `Label("")),
 	`Empty(`opt(`vstretch))));
     term passdb = 
 	// translators: frame title (passdb == password database)
 	`Frame(_("Passdb Back-End"), `VBox(
 	    // translators: check box label
-	    `Left(`CheckBox(`id(`ldap_passdb_backend_enable), `opt(`notify), _("Use LDAP &Password Back-End"))),
+	    `Left(`CheckBox(`id(`ldap_passdb_backend_enable), `opt(`notify), _("Use LDAP Password &Back-End"))),
 	    // translators: text entry label
-	    `TextEntry(`id(`ldap_passdb_backend_url), _("LDAP Server URL")),
+	    `TextEntry(`id(`ldap_passdb_backend_url), _("LDAP Server &URL")),
 	    `Empty(`opt(`vstretch))));
 
     term idmap = 
@@ -282,7 +285,7 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	    // translators: check box label
 	    `Left(`CheckBox(`id(`ldap_idmap_backend_enable), `opt(`notify), _("Use LDAP &Idmap Back-End"))),
 	    // translators: text entry label
-	    `TextEntry(`id(`ldap_idmap_backend_url), _("LDAP Server URL")),
+	    `TextEntry(`id(`ldap_idmap_backend_url), _("LDAP Server U&RL")),
 	    `Empty(`opt(`vstretch))));
 
 	
@@ -298,9 +301,9 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	    basedn,
 	    `VWeight(8, `Empty()),
 	    `Right(`HBox(
-		`PushButton(`id(`ldap_try_connect), _("Test Connection")),
-		`MenuButton(`id(`ldap_advanced_settings), _("Advanced Settings..."), [
-		    `item(`id(`ldap_expert_settings), _("E&xpert LDAP Settings")),
+		`PushButton(`id(`ldap_try_connect), _("&Test Connection")),
+		`MenuButton(`id(`ldap_advanced_settings), _("Advanced &Settings..."), [
+		    `item(`id(`ldap_expert_settings), _("Expert LDAP Settings")),
 		    `item(`id(`ldap_suse_defaults), _("Default Values"))])))),
 	`HSpacing(1)));
 

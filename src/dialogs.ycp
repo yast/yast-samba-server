@@ -885,7 +885,7 @@ symbol EnsureRootAccountDialog () ``{
     UI::OpenDialog(`HVSquash(
         `VBox(
 	    `Label( _("For a proper function, Samba server needs an\nadministrative account (root).\nIt will be created now.")),
-	    `Password(`id(`passwd1), _("Samba root Password:")),
+	    `Password(`id(`passwd1), _("Samba root &Password:")),
             `Password(`id(`passwd2), _("Reenter the password for &verification:")),
             `HBox(
                 `PushButton(`id(`ok), `opt(`default), Label::OKButton()),

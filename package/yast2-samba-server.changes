@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar  4 10:21:39 UTC 2005 - mlazar@suse.cz
+
+- addeded missing "&", "<p>", "$Id", headers, ...
+
+-------------------------------------------------------------------
 Fri Mar  4 10:13:59 CET 2005 - mlazar@suse.cz
 
 - SambaRole.pm: fixed typo: preffered master -> preferred master

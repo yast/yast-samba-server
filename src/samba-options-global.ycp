@@ -1,3 +1,10 @@
+/**
+ * File:	include/samba-options-global.ycp
+ * Package:	Configuration of samba-server
+ * Authors:	mlazar@suse.cz
+ *
+ * $Id$
+ */
 {
 textdomain "samba-server";
 
