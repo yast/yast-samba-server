@@ -1,3 +1,3 @@
 Write	.etc.smb.value.global."passdb backend" "smbpasswd ldapsam:ldaps://ldap.example.com" true
 Return	true
-Dump	false
+Return	false

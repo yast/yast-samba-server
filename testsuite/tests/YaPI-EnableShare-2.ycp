@@ -6,7 +6,7 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "passwd" : $[
                     "passwd" : $[
@@ -14,7 +14,8 @@
                     ]
                 ],
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ],
                 "etc" : $[
                     "smb" : $[
@@ -24,8 +25,8 @@
                                 "domain master" : 0,
                                 "security" : 0,
                                 "preferred master" : 0,
-                                "local master" : 0,
-                                "domain logons" : 0
+                                "domain logons" : 0,
+                                "local master" : 0
                             ],
                             "lp" : $[
                                 "comment" : 0,
@@ -42,8 +43,8 @@
                                 "domain master" : "no",
                                 "security" : "user",
                                 "preferred master" : "yes",
-                                "domain logons" : "no",
-                                "local master" : "no"
+                                "local master" : "no",
+                                "domain logons" : "no"
                             ],
                             "lp" : $[
                                 "comment" : "testing printer",
@@ -71,12 +72,13 @@
                     "run_output" : true
                 ]
             ]
-        ],nil);
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "YaPI::Samba";
     import "Mode";
 
     Mode::test = true;
 
     // disable
-    DUMP(YaPI::Samba::EnableShare( "lp", false));
+    TEST( ``(YaPI::Samba::EnableShare( "lp", false)), rwe, nil);
 }

@@ -58,4 +58,4 @@ Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
 Read	.init.scripts.exists "SuSEfirewall2_init" nil
 Log	Service SuSEfirewall2_init does not exist.
-Dump	$["comment":"testing printer", "commentout":"0", "path":"/var/spool/lp", "printable":"1"]
+Return	$["comment":"testing printer", "commentout":"0", "path":"/var/spool/lp", "printable":"1"]

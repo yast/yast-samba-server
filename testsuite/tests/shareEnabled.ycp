@@ -5,10 +5,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -17,22 +18,23 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     include "samba-server/routines.ycp";
     
     // test commentout
-    TEST( ``( shareEnabled( $[ "commentout" : true ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "commentout" : false ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "commentout" : true ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "commentout" : false ] ) ), rwe, nil);
 
     // test available flag
-    TEST( ``( shareEnabled( $[ "available" : "yes" ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "no" ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "true" ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "false" ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "yes" ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "no" ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "true" ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "false" ] ) ), rwe, nil);
 
     // available and commentout
-    TEST( ``( shareEnabled( $[ "available" : "yes", "commentout": false ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "no", "commentout": false ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "true", "commentout": true ] ) ), [], nil );
-    TEST( ``( shareEnabled( $[ "available" : "false", "commentout": true ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "yes", "commentout": false ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "no", "commentout": false ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "true", "commentout": true ] ) ), rwe, nil);
+    TEST( ``( shareEnabled( $[ "available" : "false", "commentout": true ] ) ), rwe, nil);
 }

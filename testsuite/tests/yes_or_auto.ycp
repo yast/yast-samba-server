@@ -7,14 +7,15 @@
     
     include "samba-server/routines.ycp";
 
-    DUMP( yes_or_auto( "yes" ) );    
-    DUMP( yes_or_auto( "yEs" ) );    
-    DUMP( yes_or_auto( "1") );    
-    DUMP( yes_or_auto( "true" ) );    
-    DUMP( yes_or_auto( "TRue" ) );    
-    DUMP( yes_or_auto( "no") );    
-    DUMP( yes_or_auto( "0" ) );    
-    DUMP( yes_or_auto( "FALSE" ) );    
-    DUMP( yes_or_auto( "auto" ) );    
-    DUMP( yes_or_auto( "aUTo" ) );    
+    list rwe = [];
+    TEST( ``( yes_or_auto( "yes" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "yEs" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "1") ), rwe, nil);
+    TEST( ``( yes_or_auto( "true" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "TRue" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "no") ), rwe, nil);
+    TEST( ``( yes_or_auto( "0" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "FALSE" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "auto" ) ), rwe, nil);
+    TEST( ``( yes_or_auto( "aUTo" ) ), rwe, nil);
 }

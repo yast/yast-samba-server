@@ -1,8 +1,8 @@
-Dump	`pdc
-Dump	true
-Dump	`standalone
-Dump	true
-Dump	`bdc
-Dump	true
-Dump	`pdc
-Dump	true
+Return	`pdc
+Return	true
+Return	`standalone
+Return	true
+Return	`bdc
+Return	true
+Return	`pdc
+Return	true

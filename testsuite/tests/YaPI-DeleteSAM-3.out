@@ -1,2 +1,2 @@
 Read	.etc.smb.value.global."passdb backend" "smbpasswd ldapsam:ldap://localhost"
-Dump	nil
+Return	nil

@@ -1,14 +1,14 @@
-Dump	`standalone
-Dump	user
-Dump	Domain logons: nil
-Dump	Domain master: nil
-Dump	Local master: nil
-Dump	Preferred master: nil
+Return	`standalone
+Return	user
+Return	Domain logons: nil
+Return	Domain master: nil
+Return	Local master: nil
+Return	Preferred master: nil
 Return	true
-Dump	false
-Dump	`pdc
-Dump	user
-Dump	Domain logons: true
-Dump	Domain master: yes
-Dump	Local master: true
-Dump	Preferred master: yes
+Return	false
+Return	`pdc
+Return	user
+Return	Domain logons: true
+Return	Domain master: yes
+Return	Local master: true
+Return	Preferred master: yes

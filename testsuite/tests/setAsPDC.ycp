@@ -6,10 +6,11 @@
 
     include "testsuite.ycp";
     
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -18,26 +19,27 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "Samba";
     import "SambaServer";
     
-    DUMP(SambaServer::role);
-    DUMP(Samba::security);
-    DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
-    DUMP( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) );
-    DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
-    DUMP( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) );
+    TEST( ``(SambaServer::role), rwe, nil);
+    TEST( ``(Samba::security), rwe, nil);
+    TEST( ``( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) ), rwe, nil);
     
     Samba::modified = false;
-    TEST( ``( SambaServer::setAsPDC() ), [], nil );
+    TEST( ``( SambaServer::setAsPDC() ), rwe, nil);
 
-    DUMP(SambaServer::modified);
-    DUMP(SambaServer::role);
-    DUMP(Samba::security);
+    TEST( ``(SambaServer::modified), rwe, nil);
+    TEST( ``(SambaServer::role), rwe, nil);
+    TEST( ``(Samba::security), rwe, nil);
 
-    DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
-    DUMP( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) );
-    DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
-    DUMP( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) );
+    TEST( ``( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) ), rwe, nil);
+    TEST( ``( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) ), rwe, nil);
 }

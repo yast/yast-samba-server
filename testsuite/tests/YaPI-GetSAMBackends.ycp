@@ -6,7 +6,7 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "passwd" : $[
                     "passwd" : $[
@@ -14,7 +14,8 @@
                     ]
                 ],
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ],
                 "etc" : $[
                     "smb" : $[
@@ -23,10 +24,10 @@
                                 "workgroup" : 0,
                                 "domain master" : 0,
                                 "security" : 0,
-                                "preferred master" : 0,
                                 "passdb backend" : 0,
-                                "domain logons" : 0,
-                                "local master" : 0
+                                "preferred master" : 0,
+                                "local master" : 0,
+                                "domain logons" : 0
                             ]
                         ],
                         "value" : $[
@@ -34,10 +35,10 @@
                                 "workgroup" : "Test",
                                 "domain master" : "no",
                                 "security" : "user",
-                                "passdb backend" : "smbpassd ldapsam:ldaps://localhost",
                                 "preferred master" : "yes",
-                                "local master" : "no",
-                                "domain logons" : "no"
+                                "passdb backend" : "smbpassd ldapsam:ldaps://localhost",
+                                "domain logons" : "no",
+                                "local master" : "no"
                             ]
                         ]
                     ],
@@ -57,8 +58,9 @@
                     "run_output" : true
                 ]
             ]
-        ],nil);
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "YaPI::Samba";
 
-    DUMP(YaPI::Samba::GetSAMBackends());
+    TEST( ``(YaPI::Samba::GetSAMBackends()), rwe, nil);
 }

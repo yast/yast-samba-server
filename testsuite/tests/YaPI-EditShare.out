@@ -102,4 +102,4 @@ Log	Service nmb does not exist.
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Execute	.target.bash "net getlocalsid" 1
-Dump	true
+Return	true

@@ -5,10 +5,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -17,10 +18,11 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "YaPI::Samba";
     
-    DUMP ("Disabled service");
+    TEST( ``("Disabled service"), rwe, nil);
 
     // disabled service
     TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 
@@ -33,7 +35,7 @@
 	] ]
     ], nil );
 
-    DUMP ("Enabled service");
+    TEST( ``("Enabled service"), rwe, nil);
 
     // enabled service
     TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 

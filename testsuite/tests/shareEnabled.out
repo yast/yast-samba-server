@@ -1,4 +1,4 @@
-Read	.target.size "/etc/install.inf" nil
+Read	.target.size "/etc/install.inf" 0
 Read	.etc.install_inf.Sourcemounted nil
 Read	.etc.install_inf.AutoYaST nil
 Read	.etc.install_inf.Repair nil

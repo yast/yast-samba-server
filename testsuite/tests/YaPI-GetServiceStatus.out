@@ -1,8 +1,8 @@
-Dump	Disabled service
+Return	Disabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.runlevel "smbd" nil
 Return	0
-Dump	Enabled service
+Return	Enabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.runlevel "smbd" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
 Read	.init.scripts.exists "nmbd" true

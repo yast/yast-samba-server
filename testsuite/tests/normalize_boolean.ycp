@@ -7,13 +7,14 @@
     
     include "samba-server/routines.ycp";
 
-    DUMP( normalize_boolean( "yes", nil ) );    
-    DUMP( normalize_boolean( "yEs", nil ) );    
-    DUMP( normalize_boolean( "1", nil ) );    
-    DUMP( normalize_boolean( "true", nil ) );    
-    DUMP( normalize_boolean( "TRue", nil ) );    
-    DUMP( normalize_boolean( "no", nil ) );    
-    DUMP( normalize_boolean( "0", nil ) );    
-    DUMP( normalize_boolean( "FALSE", nil ) );    
-    DUMP( normalize_boolean( nil, true ) );    
+    list rwe = [];
+    TEST( ``( normalize_boolean( "yes", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "yEs", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "1", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "true", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "TRue", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "no", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "0", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( "FALSE", nil ) ), rwe, nil);
+    TEST( ``( normalize_boolean( nil, true ) ), rwe, nil);
 }

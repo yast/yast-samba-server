@@ -5,7 +5,7 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "passwd" : $[
                     "passwd" : $[
@@ -13,14 +13,12 @@
                     ]
                 ],
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ],
                 "etc" : $[
                     "smb" : $[
                         "section_type" : $[
-                            "lp" : 0
-                        ],
-                        "section_types" : $[
                             "lp" : 0
                         ],
                         "value_types" : $[
@@ -28,10 +26,10 @@
                                 "workgroup" : 0,
                                 "domain master" : 0,
                                 "security" : 0,
-                                "preferred master" : 0,
                                 "passdb backend" : 0,
-                                "domain logons" : 0,
-                                "local master" : 0
+                                "preferred master" : 0,
+                                "local master" : 0,
+                                "domain logons" : 0
                             ],
                             "lp" : $[
                                 "comment" : 0,
@@ -39,15 +37,18 @@
                                 "path" : 0
                             ]
                         ],
+                        "section_types" : $[
+                            "lp" : 0
+                        ],
                         "value" : $[
                             "global" : $[
                                 "workgroup" : "Test",
                                 "domain master" : "no",
                                 "security" : "user",
-                                "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
                                 "preferred master" : "yes",
-                                "local master" : "no",
-                                "domain logons" : "no"
+                                "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
+                                "domain logons" : "no",
+                                "local master" : "no"
                             ],
                             "lp" : $[
                                 "comment" : "testing printer",
@@ -75,8 +76,9 @@
                     "run_output" : true
                 ]
             ]
-        ],nil);
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "YaPI::Samba";
 
-    DUMP(YaPI::Samba::DeleteSAM( "ldapsam:ldap://localhost"));
+    TEST( ``(YaPI::Samba::DeleteSAM( "ldapsam:ldap://localhost")), rwe, nil);
 }

@@ -1,1 +1,2 @@
-Dump	["smbpassd", "ldapsam:ldaps://localhost"]
+Read	.etc.smb.value.global."passdb backend" "smbpassd ldapsam:ldaps://localhost"
+Return	["smbpassd", "ldapsam:ldaps://localhost"]

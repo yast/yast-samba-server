@@ -1,7 +1,7 @@
-Dump	["smbpasswd"]
-Dump	true
+Return	["smbpasswd"]
+Return	true
 Write	.etc.smb.value.global."passdb backend" "smbpasswd" true
-Dump	["smbpasswd"]
-Dump	true
-Dump	["ldapsam:ldaps://ldap.example.com"]
-Dump	true
+Return	["smbpasswd"]
+Return	true
+Return	["ldapsam:ldaps://ldap.example.com"]
+Return	true

@@ -6,10 +6,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -18,24 +19,25 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServer";
     
     SambaServer::setRole( `pdc );
-    DUMP(SambaServer::role);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::role), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
     
     SambaServer::modified = false;
     SambaServer::setRole( `standalone );
-    DUMP(SambaServer::role);
+    TEST( ``(SambaServer::role), rwe, nil);
     // this time modified should be set
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::modified), rwe, nil);
 
     SambaServer::setRole( `bdc );
-    DUMP(SambaServer::role);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::role), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 
     SambaServer::setRole( `pdc );
-    DUMP(SambaServer::role);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::role), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 }

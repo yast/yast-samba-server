@@ -6,10 +6,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -18,21 +19,22 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServer";
     
     SambaServer::setLDAPSuffix( "testing" );
-    DUMP(SambaServer::LDAP_suffix);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::LDAP_suffix), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
     
     SambaServer::modified = false;
     SambaServer::setLDAPSuffix( "testing" );
-    DUMP(SambaServer::LDAP_suffix);
+    TEST( ``(SambaServer::LDAP_suffix), rwe, nil);
     // this time modified should not be set
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::modified), rwe, nil);
 
     SambaServer::setLDAPSuffix( "nexttesting" );
-    DUMP(SambaServer::LDAP_suffix);
+    TEST( ``(SambaServer::LDAP_suffix), rwe, nil);
     // modified again
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::modified), rwe, nil);
 }

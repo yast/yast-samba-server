@@ -6,7 +6,7 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "passwd" : $[
                     "passwd" : $[
@@ -14,14 +14,12 @@
                     ]
                 ],
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ],
                 "etc" : $[
                     "smb" : $[
                         "section_type" : $[
-                            "lp" : 0
-                        ],
-                        "section_types" : $[
                             "lp" : 0
                         ],
                         "value_types" : $[
@@ -29,8 +27,8 @@
                                 "ldap suffix" : 0,
                                 "local master" : 0,
                                 "workgroup" : 0,
-                                "domain master" : 0,
                                 "ldap admin dn" : 0,
+                                "domain master" : 0,
                                 "security" : 0,
                                 "preferred master" : 0,
                                 "domain logons" : 0
@@ -41,13 +39,16 @@
                                 "path" : 0
                             ]
                         ],
+                        "section_types" : $[
+                            "lp" : 0
+                        ],
                         "value" : $[
                             "global" : $[
                                 "ldap suffix" : "dc=another",
                                 "local master" : "no",
                                 "workgroup" : "Test",
-                                "domain master" : "no",
                                 "ldap admin dn" : "uid=fool,dc=another",
+                                "domain master" : "no",
                                 "security" : "user",
                                 "preferred master" : "yes",
                                 "domain logons" : "no"
@@ -78,12 +79,13 @@
                     "run_output" : true
                 ]
             ]
-        ],nil);
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "YaPI::Samba";
 
-    DUMP(YaPI::Samba::EditSAMConfiguration( "ldapsam:ldap://localhost", 
+    TEST( ``(YaPI::Samba::EditSAMConfiguration( "ldapsam:ldap://localhost", 
     	$[ "ldap suffix" : "dc=test,dc=domain",
 	    "ldap admin dn" : "uid=fool,dc=test,dc=domain",
 	]
-    ));
+    )), rwe, nil);
 }

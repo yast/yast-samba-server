@@ -1,6 +1,6 @@
-Dump	testing
-Dump	true
-Dump	testing
-Dump	false
-Dump	nexttesting
-Dump	true
+Return	testing
+Return	true
+Return	testing
+Return	false
+Return	nexttesting
+Return	true

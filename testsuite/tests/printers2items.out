@@ -10,4 +10,4 @@ Read	.etc.install_inf.Braille nil
 Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
-Dump	[`item (`id ("hp-dx"), "hp-dx", false), `item (`id ("lp"), "lp", true)]
+Return	[`item (`id ("hp-dx"), "hp-dx", false), `item (`id ("lp"), "lp", true)]

@@ -5,10 +5,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -17,22 +18,23 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServerPassdb";
     
     SambaServerPassdb::SetBackends( ["smbpasswd"] );
-    DUMP(SambaServerPassdb::GetBackends());
-    DUMP(SambaServerPassdb::Modified());
+    TEST( ``(SambaServerPassdb::GetBackends()), rwe, nil);
+    TEST( ``(SambaServerPassdb::Modified()), rwe, nil);
 
     SambaServerPassdb::Write();   
  
     SambaServerPassdb::SetBackends( ["smbpasswd"] );
-    DUMP(SambaServerPassdb::GetBackends());
+    TEST( ``(SambaServerPassdb::GetBackends()), rwe, nil);
     // this time modified should not be set - this does not work ATM
-    DUMP(SambaServerPassdb::Modified());
+    TEST( ``(SambaServerPassdb::Modified()), rwe, nil);
 
     SambaServerPassdb::SetBackends( ["ldapsam:ldaps://ldap.example.com"] );
-    DUMP(SambaServerPassdb::GetBackends ());
+    TEST( ``(SambaServerPassdb::GetBackends ()), rwe, nil);
     // modified again
-    DUMP(SambaServerPassdb::Modified());
+    TEST( ``(SambaServerPassdb::Modified()), rwe, nil);
 }

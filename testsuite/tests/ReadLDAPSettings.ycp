@@ -6,10 +6,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -18,7 +19,8 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServer";
     
     TEST( ``( SambaServer::ReadLDAPSettings() ), [
@@ -34,7 +36,7 @@
 	$[ "passwd" : $[ "init" : true, "passwd" : $[ "pluslines" : [] ] ] ]
     ], nil );
     
-    DUMP( SambaServer::LDAP_admin_dn );
-    DUMP( SambaServer::LDAP_suffix );
-    DUMP( SambaServer::modified );
+    TEST( ``( SambaServer::LDAP_admin_dn ), rwe, nil);
+    TEST( ``( SambaServer::LDAP_suffix ), rwe, nil);
+    TEST( ``( SambaServer::modified ), rwe, nil);
 }

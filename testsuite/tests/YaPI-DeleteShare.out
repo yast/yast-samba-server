@@ -53,4 +53,4 @@ Write	.etc.smb.value.global."ldap admin dn" nil true
 Write	.etc.smb.value.global."ldap suffix" nil true
 Write	.etc.smb nil true
 Execute	.target.bash "net getlocalsid" 1
-Dump	true
+Return	true

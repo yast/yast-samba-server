@@ -1,4 +1,4 @@
-Dump	Enable disabled service
+Return	Enable disabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
@@ -12,7 +12,7 @@ Read	.init.scripts.runlevel "nmbd" nil
 Read	.init.scripts.comment "nmbd" nil
 Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/nmbd" $["exit":0]
 Return	true
-Dump	Disable disabled service
+Return	Disable disabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
@@ -24,7 +24,7 @@ Read	.init.scripts.exists "nmbd" true
 Read	.init.scripts.runlevel "nmbd" nil
 Read	.init.scripts.comment "nmbd" nil
 Return	true
-Dump	Enable enabled service
+Return	Enable enabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
@@ -36,7 +36,7 @@ Read	.init.scripts.exists "nmbd" true
 Read	.init.scripts.runlevel "nmbd" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
 Read	.init.scripts.comment "nmbd" nil
 Return	true
-Dump	Disable enabled service
+Return	Disable enabled service
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true
 Read	.init.scripts.exists "smbd" true

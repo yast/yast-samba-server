@@ -6,4 +6,4 @@ Log	/usr/sbin/rcsmb restart failed: 1
 Execute	.target.bash "/usr/sbin/rcnmb restart" 1
 Log	/usr/sbin/rcnmb restart failed: 1
 Return	false
-Dump	false
+Return	false

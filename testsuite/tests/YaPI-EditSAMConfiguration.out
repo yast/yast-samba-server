@@ -19,4 +19,4 @@ Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
 Write	.etc.smb.value.global."ldap admin dn" "uid=fool,dc=test,dc=domain" true
 Write	.etc.smb.value.global."ldap suffix" "dc=test,dc=domain" true
-Dump	nil
+Return	nil

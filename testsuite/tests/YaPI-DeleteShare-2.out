@@ -25,4 +25,4 @@ Read	.etc.smb.value_type."lp"."printable" 0
 Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
-Dump	nil
+Return	nil

@@ -8,10 +8,11 @@
     
     import "Samba";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -20,23 +21,24 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServer";
     
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::global_config["domain logons"]:nil);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::global_config["domain logons"]:nil), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
     
     Samba::modified = false;
-    TEST( ``( SambaServer::enableNetlogon(true) ), [], nil );
+    TEST( ``( SambaServer::enableNetlogon(true) ), rwe, nil);
 
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::global_config["domain logons"]:nil);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::global_config["domain logons"]:nil), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 
-    TEST( ``( SambaServer::enableNetlogon(false) ), [], nil );
+    TEST( ``( SambaServer::enableNetlogon(false) ), rwe, nil);
 
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::global_config["domain logons"]:nil);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::global_config["domain logons"]:nil), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 }

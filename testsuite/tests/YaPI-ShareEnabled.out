@@ -134,7 +134,7 @@ Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
 Read	.init.scripts.exists "SuSEfirewall2_init" nil
 Log	Service SuSEfirewall2_init does not exist.
-Dump	true
+Return	true
 Read	.etc.smb.value.global."workgroup" "Test"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."password server" nil
@@ -271,4 +271,4 @@ Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
 Read	.init.scripts.exists "SuSEfirewall2_init" nil
 Log	Service SuSEfirewall2_init does not exist.
-Dump	false
+Return	false

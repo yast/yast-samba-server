@@ -10,13 +10,13 @@ Read	.etc.install_inf.Braille nil
 Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
-Dump	yes
-Dump	yes
-Dump	yes
-Dump	yes
-Dump	yes
-Dump	no
-Dump	no
-Dump	no
-Dump	auto
-Dump	true
+Return	yes
+Return	yes
+Return	yes
+Return	yes
+Return	yes
+Return	no
+Return	no
+Return	no
+Return	auto
+Return	true

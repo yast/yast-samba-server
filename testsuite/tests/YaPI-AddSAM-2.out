@@ -1,3 +1,3 @@
 Read	.etc.smb.value.global."passdb backend" "smbpasswd ldapsam:ldap://localhost"
 Write	.etc.smb.value.global."passdb backend" "smbpasswd ldapsam:ldap://localhost smbpasswd:/var/lib/smbusers" true
-Dump	true
+Return	true

@@ -70,4 +70,4 @@ Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
 Read	.init.scripts.exists "SuSEfirewall2_init" nil
 Log	Service SuSEfirewall2_init does not exist.
-Dump	["lp"]
+Return	["lp"]

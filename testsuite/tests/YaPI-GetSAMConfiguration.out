@@ -17,4 +17,4 @@ Read	.init.scripts.exists "autofs" nil
 Log	Service autofs does not exist.
 Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
-Dump	$["ldap admin dn":"uid=fool,dc=test,dc=domain", "ldap suffix":"dc=test,dc=domain"]
+Return	$["ldap admin dn":"uid=fool,dc=test,dc=domain", "ldap suffix":"dc=test,dc=domain"]

@@ -7,14 +7,15 @@
     
     include "samba-server/routines.ycp";
 
-    DUMP( normalize_string( "yes", nil ) );    
-    DUMP( normalize_string( "yEs", nil ) );    
-    DUMP( normalize_string( "1", nil ) );    
-    DUMP( normalize_string( "true", nil ) );    
-    DUMP( normalize_string( "TRue", nil ) );    
-    DUMP( normalize_string( "no", nil ) );    
-    DUMP( normalize_string( "0", nil ) );    
-    DUMP( normalize_string( "FALSE", nil ) );
-    DUMP( normalize_string( "auto", nil ) );
-    DUMP( normalize_string( nil, "true" ) );
+    list rwe = [];
+    TEST( ``( normalize_string( "yes", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "yEs", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "1", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "true", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "TRue", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "no", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "0", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "FALSE", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( "auto", nil ) ), rwe, nil);
+    TEST( ``( normalize_string( nil, "true" ) ), rwe, nil);
 }

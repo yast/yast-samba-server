@@ -10,12 +10,12 @@ Read	.etc.install_inf.Braille nil
 Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
-Dump	true
-Dump	true
-Dump	true
-Dump	true
-Dump	true
-Dump	false
-Dump	false
-Dump	false
-Dump	true
+Return	true
+Return	true
+Return	true
+Return	true
+Return	true
+Return	false
+Return	false
+Return	false
+Return	true

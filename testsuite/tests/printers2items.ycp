@@ -7,5 +7,6 @@
     
     include "samba-server/routines.ycp";
 
-    DUMP( printers2items( $[ "lp" : true, "hp-dx" : false ] ) );    
+    list rwe = [];
+    TEST( ``( printers2items( $[ "lp" : true, "hp-dx" : false ] ) ), rwe, nil);
 }

@@ -8,10 +8,11 @@
     
     import "Samba";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -20,7 +21,8 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServer";
     
     SambaServer::share_printers = false;
@@ -35,20 +37,20 @@
    "yast": true
     ];
     
-    DUMP(SambaServer::share_printers);
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::share_printers), rwe, nil);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
     
     Samba::modified = false;
-    TEST( ``( SambaServer::enablePrinters(true) ), [], nil );
+    TEST( ``( SambaServer::enablePrinters(true) ), rwe, nil);
 
-    DUMP(SambaServer::share_printers);
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::share_printers), rwe, nil);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 
-    TEST( ``( SambaServer::enablePrinters(false) ), [], nil );
+    TEST( ``( SambaServer::enablePrinters(false) ), rwe, nil);
 
-    DUMP(SambaServer::share_printers);
-    DUMP(SambaServer::shares);
-    DUMP(SambaServer::modified);
+    TEST( ``(SambaServer::share_printers), rwe, nil);
+    TEST( ``(SambaServer::shares), rwe, nil);
+    TEST( ``(SambaServer::modified), rwe, nil);
 }

@@ -1,11 +1,11 @@
-Dump	false
-Dump	$[]
-Dump	false
+Return	false
+Return	$[]
+Return	false
 Return	nil
-Dump	true
-Dump	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":false, "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
-Dump	true
+Return	true
+Return	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":false, "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
+Return	true
 Return	nil
-Dump	false
-Dump	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":true, "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
-Dump	true
+Return	false
+Return	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":true, "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
+Return	true

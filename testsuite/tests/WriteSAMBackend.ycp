@@ -5,10 +5,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -17,7 +18,8 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);    
+        ];
+    TESTSUITE_INIT(rwe, nil);
     import "SambaServerPassdb";
 
     SambaServerPassdb::SetBackends ( [ "smbpasswd", "ldapsam:ldaps://ldap.example.com" ] );
@@ -28,5 +30,5 @@
 	$[ "target" : $[ "bash" : 0 ] ] 
     ], true );
     
-    DUMP( SambaServerPassdb::Modified() );
+    TEST( ``( SambaServerPassdb::Modified() ), rwe, nil);
 }

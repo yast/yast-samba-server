@@ -6,10 +6,11 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT([
+    list rwe = [
             $[
                 "target" : $[
-                    "tmpdir" : "/tmp"
+                    "tmpdir" : "/tmp",
+                    "size" : 0
                 ]
             ],
             $[],
@@ -18,13 +19,15 @@
                     "bash_output" : $[]
                 ]
             ]
-        ],nil);
+        ];
+    TESTSUITE_INIT(rwe, nil);
+
     import "SambaServer";
 
-    DUMP(SambaServer::role);
+    TEST(``(SambaServer::role), rwe, nil);
 
-    TEST( ``( SambaServer::setAsPDC() ), [], nil );
+    TEST(``(SambaServer::setAsPDC()), rwe, nil);
 
-    DUMP(SambaServer::DetermineRole());
+    TEST(``(SambaServer::DetermineRole()), rwe, nil);
 
 }
