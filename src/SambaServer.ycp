@@ -246,11 +246,11 @@ global define boolean Read() ``{
 	    _("Read the LDAP settings"),
 	], [
 	    // translators: progress step 1/4
-	    _("Reading global SAMBA settings"),
+	    _("Reading global SAMBA settings..."),
 	    // translators: progress step 2/4
-	    _("Reading the SAMBA shares"),
+	    _("Reading the SAMBA shares..."),
 	    // translators: progress step 3/4
-	    _("Read the printing settings"),
+	    _("Read the printing settings..."),
 	    // translators: progress step 4/4
 	    _("Reading the LDAP settings..."),
 	    // translators: progress finished
@@ -479,9 +479,9 @@ global define boolean Write() ``{
 	    // translators: write progress step
 	    _("Running SuSEconfig..."),
 	    // translators: write progress step
-	    role == `disabled ? _("Disabling SAMBA services") 
+	    role == `disabled ? _("Disabling SAMBA services...") 
 	    // translators: write progress step
-		: _("Enabling SAMBA services"),
+		: _("Enabling SAMBA services..."),
 	    // translators: write progress step
 	    _("Finished")
 	],
