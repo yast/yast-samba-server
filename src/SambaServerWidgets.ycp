@@ -131,8 +131,11 @@ global map widgets = $[
       * @param opt_key any option key
       */
     global define void ShareEditPopupInit (any opt_id, any opt_key) ``{
-	UI::ChangeWidget (`id (opt_key), `Value,
-	    SambaServer::shares[shareToEdit, opt_key]:"not found");
+	if( opt_id != nil ) {
+	    // not adding a new option
+	    UI::ChangeWidget (`id (opt_key), `Value,
+		SambaServer::shares[shareToEdit, opt_key]:"not found");
+	}
 	UI::SetFocus (`id (opt_key));
     }
 
