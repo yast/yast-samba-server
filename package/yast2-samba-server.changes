@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 11 08:30:21 UTC 2005 - mlazar@suse.cz
+
+- SambaAccount.pm: use Crypt::SmbHash to store passwords in Export/Inport
+- added perl testsuite for SambaAccount.pm
+
+-------------------------------------------------------------------
 Fri Mar 11 08:20:55 UTC 2005 - mlazar@suse.cz
 
 - fixed Read/Write firewall settings

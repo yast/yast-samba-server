@@ -12,6 +12,7 @@
 package SambaAccounts;
 
 use strict;
+use Crypt::SmbHash;
 use Data::Dumper;
 
 use YaST::YCP qw(:DATA :LOGGING);
@@ -24,12 +25,12 @@ BEGIN {
 YaST::YCP::Import("SCR");
 }
 
-my %Passwords = ();
+my %Pdb = ();
 my %PdbCache = ();
 
 BEGIN{$TYPEINFO{GetModified}=["function","boolean"]}
 sub GetModified {
-    return keys %Passwords;
+    return keys %Pdb;
 }
 
 BEGIN{$TYPEINFO{Read}=["function","boolean"]}
@@ -39,40 +40,52 @@ sub Read {
 
 BEGIN{$TYPEINFO{Write}=["function","boolean"]}
 sub Write {
-    my $tmp = SCR->Read(".target.tmpdir") . "/inp";
-    foreach my $user (keys %Passwords) {
-	my $passwd = $Passwords{$user}{passwd};
-	y2debug("UserAdd($user, ".($passwd?("*"x length($passwd)):"<undef>").")");
-	if (!SCR->Write(".target.string", $tmp, $passwd . "\n" . $passwd . "\n")) {
-	    y2error("Failed to prepare pdbedit input for user '$user'");
+    my $error = 0;
+    foreach my $user (keys %Pdb) {
+	my $nthash = $Pdb{$user}{nthash};
+	$nthash = "X"x32 unless $nthash;
+	my $lmhash = $Pdb{$user}{lmhash};
+	$lmhash = "X"x32 unless $lmhash;
+
+	my $uid = getpwnam($user);
+	if (!defined $uid) {
+	    y2error("Unknown user '$user'.");
+	    $error = 1;
 	    next;
 	}
-    
-	my $cmd = "cat " . $tmp . " | pdbedit -a -t -u '$user'";
+	
+	y2debug("delete user '$user' (if exist)");
+	SCR->Execute(".target.bash", "pdbedit --delete --user='$user'");
+	
+	y2debug("add user '$user'");
+	my $smbpasswd=sprintf "%s:%d:%s:%s:[%-11s]:LCT-%08X\n", $user, $uid, $lmhash, $nthash, "U", time;
+	my $cmd = "echo '$smbpasswd' | pdbedit -i smbpasswd:/dev/stdin";
 	if (SCR->Execute(".target.bash", $cmd)) {
 	    y2error("Failed to execute '$cmd'");
+	    $error = 1;
 	    next;
 	}
     }
-    SCR->Execute(".target.remove", $tmp);
-    return 1;
+    return $error == 0;
 }
 
 BEGIN{$TYPEINFO{Import}=["function","void","any"]}
 sub Import {
     my ($self, $config) = @_;
-    %Passwords = ();
+    %Pdb = ();
     return unless $config;
-    foreach(@$config) {
-	$Passwords{$_->{user}}{passwd} = $_->{passwd};
+    foreach my $item (@$config) {
+	next unless $item->{user};
+	$Pdb{$item->{user}} = {map {$_, $item->{$_}} grep {$_ ne "user"} keys %$item};
+	$PdbCache{$item->{user}} = 1;
     }
 }
 
 BEGIN{$TYPEINFO{Export}=["function","any"]}
 sub Export {
-    my $list;
-    foreach(keys %Passwords) {
-	push @$list, {user=>$_, passwd=>$Passwords{$_}{passwd}};
+    my $list = [];
+    foreach my $user (sort keys %Pdb) {
+	push @$list, {user=>$user, map {$_, $Pdb{$user}{$_}} keys %{$Pdb{$user}}};
     }
     return $list;
 }
@@ -80,7 +93,8 @@ sub Export {
 BEGIN{$TYPEINFO{UserAdd}=["function","boolean","string","string"]}
 sub UserAdd {
     my ($self, $user, $passwd) = @_;
-    $Passwords{$user}{passwd} = $passwd;
+    $Pdb{$user}{lmhash} = Crypt::SmbHash::lmhash($passwd);
+    $Pdb{$user}{nthash} = Crypt::SmbHash::nthash($passwd);
     $PdbCache{$user} = 1;
     return 0;
 }
@@ -89,7 +103,7 @@ BEGIN{$TYPEINFO{UserExists}=["function","boolean","string"]}
 sub UserExists {
     my ($self, $user) = @_;
     return $PdbCache{$user} if defined $PdbCache{$user};
-    return 0 if Mode->test() || Mode->autoinst();
+    return 0 if Mode->autoinst();
     
     my $cmd = "pdbedit -L -u '$user'";
     my $output = SCR->Execute(".target.bash_output", $cmd);
