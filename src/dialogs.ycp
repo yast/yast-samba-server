@@ -10,10 +10,14 @@
 
 textdomain "samba-server";
 
+import "CWM";
+import "Label";
+import "Mode";
+import "Popup";
+import "Samba";
 import "SambaServer";
 import "SambaServerWidgets";
-import "Label";
-import "Popup";
+import "Wizard";
 
 include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
@@ -39,10 +43,10 @@ global define symbol RoleDialog () ``{
 	    
 	    `VBox(
 		WorkgroupWidget(),
-		`TextEntry(`id(`server_description), _("Server description:"), SambaServer::server_string )
+		`TextEntry(`id(`server_description), _("Server &description:"), SambaServer::server_string )
 	     ) 
 	) ),
-	`PushButton( `id( `advanced ), _("Authentication details") ) 
+	`PushButton( `id( `advanced ), _("&Authentication details") ) 
 	) , 
 	HELPS["RoleDialog"]:"", false, true
     );
@@ -99,7 +103,7 @@ the replication.") );
 	    
 	    if( SambaServer::role != `disabled ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );
-		if( res == `domain && SambaServer::role == `pdc ) {
+		if( res != `workgroup && SambaServer::role == `pdc ) {
 		    if( ! Popup::ContinueCancel( sformat( _("You asked to set this Samba server
 to act as Primary Domain Controller.
 However, '%1' is a domain where already
@@ -108,6 +112,13 @@ The domain will not work coorectly, if there
 are two Primary domain controllers.\n
 Do you really want to continue?"), Samba::workgroup ) ) ) continue;
 		}
+		
+		// save the settings
+		WriteSAMBackend();
+		ReloadSettings();
+		
+		// ask to join the domain
+		AskJoinDomain( Samba::workgroup, res );
 	    }
 
             break;
@@ -133,13 +144,13 @@ global define symbol OverallSharesDialog () ``{
     term contents = 
 	`Frame( _("Available shares"), 
 	`VBox( 
-	    `Left(`CheckBox( `id( `homes ), _("Share homes"), SambaServer::share_homes ) ),
+	    `Left(`CheckBox( `id( `homes ), _("Share &homes"), SambaServer::share_homes ) ),
 	    `HBox( 
-		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share printers"), SambaServer::share_printers ) ),
-		`PushButton( `id( `select_printers ), _("Select...") ),
+		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share &printers"), SambaServer::share_printers ) ),
+		`PushButton( `id( `select_printers ), _("&Select...") ),
 		`HStretch()
 	    ),
-    	`Left(`PushButton( `id( `other_shares ), _("Advanced...")  ) )
+    	`Left(`PushButton( `id( `other_shares ), _("&Advanced...")  ) )
 	)
     );
 
@@ -214,7 +225,7 @@ global define symbol ShareDirsDialog () ``{
 	    `PushButton( `id(`edit), Label::EditButton() ),
 	    `PushButton( `id(`delete), Label::DeleteButton() ),
 	    `HStretch(),
-	    `PushButton( `id(`toggle), _("Toggle Status") )
+	    `PushButton( `id(`toggle), _("&Toggle Status") )
 	)
     );
 
@@ -297,16 +308,16 @@ global define symbol AdvancedDialog () ``{
 	    `Left(`RadioButton( `id( `smbpasswd ), `opt(`notify), _("smbpasswd") )),
 	    `Left(`RadioButton( `id( `ldap ), `opt(`notify), _("LDAP") )),
 	    `VBox(
-		`TextEntry( `id( `ldap_server ), _("LDAP Server:"), 
+		`TextEntry( `id( `ldap_server ), _("LDAP &server:"), 
 		    SambaServer::LDAP_server != nil ? SambaServer::LDAP_server : ""),
-		`TextEntry( `id( `ldap_suffix ), _("Search base DN:"), 
+		`TextEntry( `id( `ldap_suffix ), _("Search &base DN:"), 
 		    SambaServer::LDAP_suffix != nil ? SambaServer::LDAP_suffix: "" ),
-		`TextEntry( `id( `ldap_admin_dn ), _("Administration DN:"), 
+		`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), 
 		    SambaServer::LDAP_admin_dn != nil ? SambaServer::LDAP_admin_dn : ""  ),
 		Mode::config ? `Empty() : 
 		`HBox(
-		    `PushButton( `id( `ldap_test ), _("Test Connection") ),
-		    `PushButton( `id( `ldap_password ), _("Set LDAP Administration Password") )
+		    `PushButton( `id( `ldap_test ), _("&Test Connection") ),
+		    `PushButton( `id( `ldap_password ), _("Set LDAP Administration &Password") )
 		)
 	    )
 	) ) )
@@ -425,12 +436,17 @@ global define symbol EditShareDialog () ``{
     return CWM::Run (w, $[]);
 }
 
+/**
+ * Popup to add a new share by entering its name, path and comment.
+ * 
+ * @return map	description of the new share
+ */
 global define map AddSharePopup() ``{
     UI::OpenDialog( 
 	`VBox(
-	    `TextEntry( `id(`name), _("Share name:") ),
-	    `TextEntry( `id(`comment), _("Share description:") ),
-	    `TextEntry( `id(`path), _("Path of the share:") ),
+	    `TextEntry( `id(`name), _("Share &name:") ),
+	    `TextEntry( `id(`comment), _("Share &description:") ),
+	    `TextEntry( `id(`path), _("&Path of the share:") ),
 	    `HBox( 
 		`PushButton( `id( `ok ), Label::OKButton() ),
 		`PushButton( `id( `cancel ), Label::CancelButton() )

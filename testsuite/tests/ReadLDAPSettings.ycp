@@ -1,0 +1,27 @@
+{
+
+// test for SambaServer::ReadLDAPsettings()
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    TEST( ``( SambaServer::ReadLDAPSettings() ), [
+        // read map
+	$[
+            "etc": $[ "smb" : $[ "value" : $[ "global" :$[
+		"ldap server" : "192.168.1.2",
+		"ldap suffix" : "dc=example,dc=com",
+		"ldap admin dn" : "uid=root,dc=example,dc=com",
+            ] ] ] ] ,
+        ],
+	$[],
+	$[]
+    ], nil );
+    
+    DUMP( SambaServer::LDAP_server );
+    DUMP( SambaServer::LDAP_admin_dn );
+    DUMP( SambaServer::LDAP_suffix );
+    DUMP( SambaServer::modified );
+}

@@ -1,0 +1,28 @@
+{
+
+// test for SambaServer::enableHomes( enable )
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::share_homes = false;
+    
+    DUMP(SambaServer::share_homes);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+    
+    Samba::modified = false;
+    TEST( ``( SambaServer::enableHomes(true) ), [], nil );
+
+    DUMP(SambaServer::share_homes);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+
+    TEST( ``( SambaServer::enableHomes(false) ), [], nil );
+
+    DUMP(SambaServer::share_homes);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+}

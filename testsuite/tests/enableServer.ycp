@@ -1,0 +1,31 @@
+{
+
+// test for Samba::EnableServer( boolean ) - enable/disable smb/nmb service
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    // enable service
+    TEST( ``( SambaServer::enableServer( true ) ), [ 
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    // disable service
+    TEST( ``( SambaServer::enableServer( false ) ), [
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+}

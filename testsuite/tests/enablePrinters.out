@@ -1,0 +1,11 @@
+Dump	false
+Dump	$["printers":$["available":"yes", "browseable":false, "comment":"All Printers", "create mask":"0600", "guest ok":"no", "path":"/var/tmp", "printable":true, "yast":true]]
+Dump	false
+Return	nil
+Dump	true
+Dump	$["printers":$["available":"yes", "browseable":false, "comment":"All Printers", "commentout":false, "create mask":"0600", "guest ok":"no", "path":"/var/tmp", "printable":true, "yast":true]]
+Dump	true
+Return	nil
+Dump	false
+Dump	$["printers":$["available":"yes", "browseable":false, "comment":"All Printers", "commentout":true, "create mask":"0600", "guest ok":"no", "path":"/var/tmp", "printable":true, "yast":true]]
+Dump	true

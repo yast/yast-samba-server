@@ -17,10 +17,20 @@
 
 textdomain "samba-server";
 
+import "CommandLine";
+import "Report";
 import "Require";
+import "Samba";
+import "SambaServer";
 
 include "commandline/commandline.ycp";
 
+/**
+ * Command line "share" commands handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean ShareHandler(map options) ``{
     string share = options["name"]:nil;
     
@@ -109,6 +119,12 @@ global define boolean ShareHandler(map options) ``{
     return true;
 }
 
+/**
+ * Command line "list" command handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean ListHandler( map options ) ``{
     
     // heading
@@ -135,6 +151,12 @@ global define boolean ListHandler( map options ) ``{
     return true;
 }
 
+/**
+ * Command line "backend" command handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean BackendHandler( map options ) ``{
     // check the backend to be present exactly once
     string command = CommandLine::UniqueOption( options, 
@@ -153,6 +175,12 @@ global define boolean BackendHandler( map options ) ``{
     return true;
 }
 
+/**
+ * Command line "role" command handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean RoleHandler( map options ) ``{
     // check the role to be present exactly once
     string command = CommandLine::UniqueOption( options, 
@@ -173,6 +201,12 @@ global define boolean RoleHandler( map options ) ``{
     return true;
 }
 
+/**
+ * Command line "service" command handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean SambaServerEnableHandler( map options ) ``{
     // check the "command" to be present exactly once
     string command = CommandLine::UniqueOption( options, 
@@ -194,6 +228,12 @@ global define boolean SambaServerEnableHandler( map options ) ``{
     return false;
 }
 
+/**
+ * Command line "configure" command handler.
+ *
+ * @param options	map of options from command line
+ * @return boolean	true on success
+ */
 global define boolean ChangeConfiguration( map options ) ``{
 	
     string value = options["workgroup"]:nil;

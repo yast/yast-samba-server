@@ -1,0 +1,38 @@
+{
+
+// test for SambaServer::enablePrinters( enable )
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::share_printers = false;
+    SambaServer::shares[ "printers" ] = $[
+   "comment": "All Printers",
+   "path": "/var/tmp",
+   "printable": true,
+   "create mask": "0600",
+   "browseable": false,
+   "available": "yes",
+   "guest ok": "no",
+   "yast": true
+    ];
+    
+    DUMP(SambaServer::share_printers);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+    
+    Samba::modified = false;
+    TEST( ``( SambaServer::enablePrinters(true) ), [], nil );
+
+    DUMP(SambaServer::share_printers);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+
+    TEST( ``( SambaServer::enablePrinters(false) ), [], nil );
+
+    DUMP(SambaServer::share_printers);
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::modified);
+}

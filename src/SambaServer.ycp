@@ -51,27 +51,89 @@ global boolean write_only = false;
 
 /** ================================ global data =============================*/
 
+/**
+ * Server description
+ */
 global string server_string = "SAMBA Server";
+
+/**
+ * role of the server: `disabled, `standalone, `bdc, `pdc
+ */
 global symbol role = `standalone;
+
+/**
+ * domain master
+ */
 global string domain_master = "auto";
+
+/**
+ * domain logons
+ */
 global boolean domain_logons = false;
+
+/**
+ * local master
+ */
 global boolean local_master = false;
+
+/**
+ * preferred master
+ */
 global string preferred_master = "auto";
+
+/**
+ * add user script
+ */
 global string add_user_script = "";
 
+/**
+ * Should be [homes] section present
+ */
 global boolean share_homes = false;
+
+/**
+ * Should be [printers] section present
+ */
 global boolean share_printers = false;
+
+/**
+ * load printers
+ */
 global boolean load_printers = true;
 
+/**
+ * SAM backend: `smbpasswd or `ldap
+ */
 global symbol SAM = `smbpasswd;
+
+/**
+ * LDAP server
+ */
 global string LDAP_server = nil;
+
+/**
+ * LDAP admin dn
+ */
 global string LDAP_admin_dn = nil;
+
+/**
+ * LDAP suffix
+ */
 global string LDAP_suffix = nil;
 
+/**
+ * all shares
+ */
 global map shares = $[];
 
+/**
+ * status of all available printers
+ */
 global map printer_status = $[];
 
+/**
+ * mapping of name to role
+ */
 global map role2name = $[
     `disabled: "Disabled",
     `standalone: "File and printer sharing",
@@ -79,6 +141,9 @@ global map role2name = $[
     `pdc: "Primary Domain Controller"
 ];
 
+/**
+ * mapping of role2name
+ */
 global map name2role = $[
     "Disabled" : `disabled,
     "File and printer sharing" : `standalone,
@@ -88,11 +153,21 @@ global map name2role = $[
 
 /** ============================= end of global data ==========================*/
 
+/**
+ * list of shares to be removed
+ */
 map removed_shares = $[];
+
+/**
+ * list of all system printers
+ */
 list system_printers = [];
 
 /** ============================= defaults ====================================*/
 
+/**
+ * default settings for [printers]
+ */
 map default_printers = $[
    "comment": "All Printers",
    "path": "/var/tmp",
@@ -104,6 +179,9 @@ map default_printers = $[
    "yast": true
 ];
 
+/**
+ * default settings for a single printer share
+ */
 map default_printer_share = $[
    "path": "/var/tmp",
    "browseable": true,
@@ -111,6 +189,9 @@ map default_printer_share = $[
    "yast": true
 ];
 
+/**
+ * default settings for [homes]
+ */
 map default_homes = $[
     "comment": "Home Directories",
     "valid users": "%S",
@@ -291,10 +372,10 @@ Please, remove one of the options to resolve this conflict."), "printable",
 
     printer_status = $[];
     
-    Progress::Off();
+    Progress::off();
     Printer::Read();
     system_printers = Printer::GetAvailableQueues();
-    Progress::On();
+    Progress::on();
 
     // setup correctly the printer status
     if( haskey( shares, "printers" ) ) {
@@ -610,7 +691,12 @@ global define string Summary() ``{
     return summary;
 }
 
-/** Turn on/off SAMBA server */
+/** 
+ * Turn on/off SAMBA server services (smb and nmb).
+ *
+ * @param on 		should be enabled?
+ * @return boolean 	true on success
+ */
 global define boolean enableServer( boolean on ) ``{
     Runlevel::ServiceAdjust( "nmb", on ? "enable": "disable" );
     Runlevel::ServiceAdjust( "smb", on ? "enable": "disable" );
@@ -673,6 +759,11 @@ global define void setDescription( string description ) ``{
     }
 }
 
+/** 
+ * Turn on/off [printers]
+ *
+ * @param on 		should be enabled?
+ */
 global  define void enablePrinters( boolean on ) ``{
     if( share_printers != on ) {
 	share_printers = on;
@@ -688,6 +779,9 @@ global  define void enablePrinters( boolean on ) ``{
     }
 }
 
+/** 
+ * Turn on all system printers. Will enable [printers] as well.
+ */
 global define void enableAllSystemPrinters() ``{
     foreach(  string printer, system_printers, ``{
 	printer_status[ printer ] = true;
@@ -695,6 +789,11 @@ global define void enableAllSystemPrinters() ``{
     });
 }
 
+/** 
+ * Turn on/off [homes]
+ *
+ * @param on 		should be enabled?
+ */
 global define void enableHomes( boolean on ) ``{
     if( share_homes != on ) {
 	share_homes = on;
@@ -713,7 +812,11 @@ global define void enableHomes( boolean on ) ``{
     }
 }
 
-/** Share the netlogon scripts. */
+/** 
+ * Turn on/off [netlogon] and domain logons
+ *
+ * @param on 		should be enabled?
+ */
 global define void enableLogon( boolean on ) ``{
     domain_logons = on;
     
@@ -730,13 +833,15 @@ global define void enableLogon( boolean on ) ``{
 	    "commentout": false
 	];
     }
+    
+    modified = true;
 }
 
-global define void configureShare( string share, map options ) ``{
-    change( shares, share, options );
-}
-
-/** This will not create machine accounts on the fly!!! */
+/** 
+ * Configure as PDC.
+ *
+ * @return boolean	true on success
+ */
 global define boolean setAsPDC() ``{
     Samba::security = "user";
     domain_logons = true;
@@ -748,6 +853,11 @@ global define boolean setAsPDC() ``{
     return true;
 }
 
+/** 
+ * Configure as BDC.
+ *
+ * @return boolean	true on success
+ */
 global define boolean setAsBDC() ``{
     domain_master = "false";
     domain_logons = true;
@@ -756,12 +866,24 @@ global define boolean setAsBDC() ``{
     return true;
 }
 
+/** 
+ * Configure as a standalone server (no domain logons)
+ *
+ * @return boolean	true on success
+ */
 global define boolean setAsStandalone() ``{
+    domain_master = "false";
     domain_logons = false;
 
     return true;
 }
 
+/** 
+ * Configure for a given role. Calls @ref setAsPDC, @ref setAsBDC and @ref setAsStandalone
+ *
+ * @param  new_role	the new role
+ * @return boolean	true on success
+ */
 global define boolean setRole( symbol new_role ) ``{
 
     // if no change, success
@@ -778,29 +900,59 @@ global define boolean setRole( symbol new_role ) ``{
     return true;
 }
 
+/**
+ * Set the LDAP server.
+ *
+ * @param server	IP or name for a new server
+ */
 global define void setLDAPServer( string server ) ``{
+    if( LDAP_server == server ) return;
+    
     LDAP_server = server;
     modified = true;
 }
 
+/**
+ * Set the LDAP server administration DN.
+ *
+ * @param dn	administration dn
+ */
 global define void setLDAPAdminDN( string dn ) ``{
+    if( LDAP_admin_dn == dn ) return;
+    
     LDAP_admin_dn = dn;
     modified = true;
 }
 
+/**
+ * Set the LDAP server suffix
+ *
+ * @param suffix	suffix dn
+ */
 global define void setLDAPSuffix( string suffix ) ``{
+    if( suffix == LDAP_suffix ) return;
+    
     LDAP_suffix = suffix;
     modified = true;
 }
 
+/**
+ * Set the server SAM backend.
+ *
+ * @param backend	symbol of the new backend
+ */
 global define void setSAMBackend( symbol backend ) ``{
     if( SAM == backend ) return;
     SAM = backend;
     modified = true;
 }
 
-/** Switch of smbpasswd/LDAP - stores configuration!!!
-*/
+/** 
+ * Switch of smbpasswd/LDAP. Store the configuration only.
+ *
+ * @param backend	the new backend
+ * @return boolean	true on success
+ */
 global define boolean switchSAMBackend( symbol backend ) ``{
     // if the backend is already switched, do nothing
     if( backend == (SCR::Read( .sysconfig.samba.SAMBA_SAM ) == "ldap"? `ldap : `smbpasswd) )
@@ -816,6 +968,12 @@ global define boolean switchSAMBackend( symbol backend ) ``{
     return ReloadSettings();
 }
 
+/** 
+ * Switch of smbpasswd/LDAP. Store the configuration and run SuSEconfig to proceed
+ * with the configuration.
+ *
+ * @return boolean	true on success
+ */
 global define boolean WriteSAMBackend() ``{
     // write the sysconfig setting
     if( !SCR::Write( .sysconfig.samba.SAMBA_SAM, SAM == `ldap ? "ldap" : "classic" ) )
@@ -834,16 +992,33 @@ global define boolean WriteSAMBackend() ``{
     return true;
 }
     
+/**
+ * Reload settings for smbd and nmbd. Calls the initscripts with restart
+ * to switch backend if necessary.
+ *
+ * @return boolean	true on success
+ */
 global define boolean ReloadSettings() ``{
     integer ret = SCR::Execute( .target.bash, "/usr/sbin/rcsmb restart" );
     
     if( ret != 0 ) {
-	y2error( "/usr/sbin/rcsmb reload failed: %1", ret );
+	y2error( "/usr/sbin/rcsmb restart failed: %1", ret );
     }
     
-    return ret == 0;
+    boolean result = ret == 0;
+    
+    ret = SCR::Execute( .target.bash, "/usr/sbin/rcnmb restart" );
+    
+    if( ret != 0 ) {
+	y2error( "/usr/sbin/rcnmb restart failed: %1", ret );
+    }
+    
+    return result && ret == 0;
 }
 
+/**
+ * Read LDAP-related settings.
+ */
 global define void ReadLDAPSettings() ``{
     LDAP_server = SCR::Read( .etc.smb.value.global."ldap server" );
     LDAP_admin_dn = SCR::Read( .etc.smb.value.global."ldap admin dn" );
@@ -863,6 +1038,9 @@ global define void ReadLDAPSettings() ``{
     }
 }
 
+/**
+ * Write LDAP-related settings.
+ */
 global define void WriteLDAPSettings() ``{
     // delete if not neccessary
     if( LDAP_server == "" ) LDAP_server = nil;
@@ -891,8 +1069,10 @@ global define void WriteLDAPSettings() ``{
 }
 
 /**
- * Switches backend to LDAP first.
- * @return nil for success, na error message otherwise
+ * Setup LDAP admin password using smbpasswd -w. Switches backend to LDAP first.
+ *
+ * @param password	the new password
+ * @return string 	nil for success, error message otherwise
  */
 global define string setLDAPAdminPassword( string password ) ``{
     switchSAMBackend( `ldap );
@@ -908,6 +1088,14 @@ global define string setLDAPAdminPassword( string password ) ``{
     return result["stderr"]:_("Unknown error");
 }
 
+/**
+ * Test LDAPS connection to the server using ldapsearch.
+ *
+ * @param server	the LDAPS server
+ * @param search_base	base to be tested
+ *
+ * @return boolean	true on success
+ */
 global define boolean testLDAPS( string server, string search_base ) ``{
     map result = SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
     y2debug( "LDAPS test search result: %1", result );
@@ -924,6 +1112,9 @@ to your \"smb.conf\" file manually."), server ) );
     return true;
 }
 
+/**
+ * Disable all printers.
+ */
 global define void disableAllPrinters() ``{
     // disable each share with printable = true
     foreach( string share, map options, shares, ``{
@@ -931,6 +1122,11 @@ global define void disableAllPrinters() ``{
     });
 }
 
+/**
+ * Enable printers in a list. If possible, use [printers] section
+ *
+ * @param enable_names	list of printer names to be enabled
+ */
 global define void enablePrinterNames( list enable_names ) ``{
     
     y2debug( "System printers are: %1", system_printers );
@@ -996,6 +1192,12 @@ YaST2 will not modify this share."), name ) );
     modified = true;
 }
 
+/**
+ * Removes the share's configuration.
+ * 
+ * @param name	name of a share
+ * @return boolean	true on success, false if the share does not exist
+ */
 global define boolean removeShare( string name ) ``{
     // if there is no such share, done
     if( !haskey( shares, name ) ) return false;
@@ -1013,6 +1215,13 @@ global define boolean removeShare( string name ) ``{
     return true;
 }
 
+/**
+ * Adds a new share.
+ * 
+ * @param name		name of a share
+ * @param options	configuration of the share
+ * @return boolean	true on success, false if the share already exists
+ */
 global define boolean addShare( string name, map options ) ``{
     // share already exists
     if( haskey( shares, name ) ) return false;
@@ -1025,6 +1234,13 @@ global define boolean addShare( string name, map options ) ``{
     return true;
 }
 
+/**
+ * Enable/disable a share, does not remove its configuration.
+ * 
+ * @param name		name of a share
+ * @param on		should be enabled?
+ * @return boolean	true on success, false if the share does not exist
+ */
 global define boolean enableShare( string name, boolean on ) ``{
 
     // if there is no such share, exit
@@ -1040,6 +1256,13 @@ global define boolean enableShare( string name, boolean on ) ``{
     return true;
 }
 
+/**
+ * Update the share configuration,
+ * 
+ * @param name		name of a share
+ * @param options	new options of the share
+ * @return boolean	true on success, false if the share does not exist
+ */
 global define boolean updateShare( string name, map options ) ``{
 
     // share does not exists
@@ -1052,6 +1275,12 @@ global define boolean updateShare( string name, map options ) ``{
     return true;
 }
 
+/**
+ * Map role to a localized text.
+ *
+ * @param role		symbol of the role
+ * @return string	localized role name
+ */
 global define string roleName( symbol role ) ``{
     locale s = role2name[role]:"";
     return eval(s);

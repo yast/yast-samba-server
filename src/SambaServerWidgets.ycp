@@ -150,6 +150,7 @@ global map widgets = $[
       * Fallback summary function of a table entry / popup
       * @param opt_id any option id
       * @param opt_key any option key
+      * @return	value of the option
       */
     global define string ShareEditSummary (any opt_id, any opt_key) ``{
 	return sformat ("%1", SambaServer::shares[shareToEdit, opt_key]:"");

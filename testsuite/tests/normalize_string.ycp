@@ -1,0 +1,20 @@
+{
+
+// test for normalize_string
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+
+    DUMP( normalize_string( "yes", nil ) );    
+    DUMP( normalize_string( "yEs", nil ) );    
+    DUMP( normalize_string( "1", nil ) );    
+    DUMP( normalize_string( "true", nil ) );    
+    DUMP( normalize_string( "TRue", nil ) );    
+    DUMP( normalize_string( "no", nil ) );    
+    DUMP( normalize_string( "0", nil ) );    
+    DUMP( normalize_string( "FALSE", nil ) );
+    DUMP( normalize_string( "auto", nil ) );
+    DUMP( normalize_string( nil, "true" ) );
+}

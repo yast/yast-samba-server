@@ -1,0 +1,9 @@
+Execute	.target.bash "/usr/sbin/rcsmb restart" 0
+Execute	.target.bash "/usr/sbin/rcnmb restart" 0
+Return	true
+Execute	.target.bash "/usr/sbin/rcsmb restart" 1
+Log	/usr/sbin/rcsmb restart failed: 1
+Execute	.target.bash "/usr/sbin/rcnmb restart" 1
+Log	/usr/sbin/rcnmb restart failed: 1
+Return	false
+Dump	false

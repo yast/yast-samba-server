@@ -1,0 +1,10 @@
+Write	.sysconfig.samba.SAMBA_SAM "classic" true
+Write	.sysconfig.samba nil true
+Execute	.target.bash "/sbin/SuSEconfig --module samba" 0
+Return	true
+Write	.sysconfig.samba.SAMBA_SAM "classic" true
+Write	.sysconfig.samba nil true
+Execute	.target.bash "/sbin/SuSEconfig --module samba" 1
+Log	SuSEconfig --module samba failed: 1
+Return	false
+Dump	false

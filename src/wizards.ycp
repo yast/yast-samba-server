@@ -13,6 +13,7 @@ textdomain "samba-server";
 
 import "Wizard";
 import "Label";
+import "SambaServer";
 
 include "wizard/sequencer.ycp";
 

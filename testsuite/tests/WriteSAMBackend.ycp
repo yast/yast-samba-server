@@ -1,0 +1,23 @@
+{
+
+// test for SambaServer::WriteSAMBackend()
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    TEST( ``( SambaServer::WriteSAMBackend() ), [
+	$[],
+	$[],
+	$[ "target" : $[ "bash" : 0 ] ] 
+    ], true );
+    
+    TEST( ``( SambaServer::WriteSAMBackend() ), [
+	$[],
+	$[],
+	$[ "target" : $[ "bash" : 1 ] ] 
+    ], true );
+    
+    DUMP( SambaServer::modified );
+}

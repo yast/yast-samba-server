@@ -1,0 +1,11 @@
+Dump	false
+Dump	$[]
+Dump	false
+Return	nil
+Dump	true
+Dump	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":false, "create mask":"0640", "directory mask":"0750", "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
+Dump	true
+Return	nil
+Dump	false
+Dump	$["homes":$["browseable":false, "comment":"Home Directories", "commentout":true, "create mask":"0640", "directory mask":"0750", "guest ok":false, "printable":false, "read only":"no", "valid users":"%S"]]
+Dump	true

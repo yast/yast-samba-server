@@ -1,0 +1,11 @@
+Dump	$[]
+Dump	false
+Dump	false
+Return	nil
+Dump	$["netlogon":$["comment":"Network Logon Service", "commentout":false, "path":"/var/lib/samba/netlogon", "write list":"root"]]
+Dump	true
+Dump	true
+Return	nil
+Dump	$["netlogon":$["comment":"Network Logon Service", "commentout":false, "path":"/var/lib/samba/netlogon", "write list":"root"]]
+Dump	false
+Dump	true

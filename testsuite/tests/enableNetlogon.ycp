@@ -1,0 +1,26 @@
+{
+
+// test for SambaServer::enableLogon( enable )
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::modified);
+    
+    Samba::modified = false;
+    TEST( ``( SambaServer::enableLogon(true) ), [], nil );
+
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::modified);
+
+    TEST( ``( SambaServer::enableLogon(false) ), [], nil );
+
+    DUMP(SambaServer::shares);
+    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::modified);
+}

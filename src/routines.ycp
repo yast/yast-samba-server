@@ -13,12 +13,25 @@ textdomain "samba-server";
 
 /********************************** non UI routines ************************/
 
+/**
+ * Convert string value to a normalized boolean ("yes", "1", "true" -> true).
+ * @param value		the string value
+ * @param default	the default value for value == nil
+ * @return boolean	the converted value or default
+ */
 global define boolean normalize_boolean( string value, boolean default ) ``{
     if( value == nil ) return default;
     string s = toupper( value );
     return ( s == "YES" || s == "1" || s == "TRUE" );
 }
 
+/**
+ * Convert string value to a normalized string ("yes", "1", "true" -> true).
+ * Used if the smb.conf value can be also "auto". Then do not change the value.
+ * @param value		the string value
+ * @param default	the default value for value == nil
+ * @return string	the converted value or default
+ */
 global define string normalize_string( string value, string default ) ``{
     if( value == nil ) return default;
     string s = toupper( value );
@@ -27,15 +40,33 @@ global define string normalize_string( string value, string default ) ``{
     return value;
 }
 
+/**
+ * Return true, if the value is yes or auto (= enabled).
+ *
+ * @param value		string value
+ * @return boolean	true if it is yes or auto
+ */
 global define boolean yes_or_auto( string value ) ``{
     return value == "yes" || toupper( value ) == "AUTO";
 }
 
+/**
+ * Convert share description to items for a table (index, status, name, comment).
+ *
+ * @param shares	map of available shares
+ * @return list 	list of table items
+ */
 global define list shares2items( map shares ) ``{
     integer index = 0;
     return maplist( string name, map descr, shares, ``{ index = index+1; return `item( `id(index), descr["commentout"]:false ? _("Disabled"): _("Enabled") , name, descr["path"]:"", descr["comment"]:"" ); }  );
 }
 
+/**
+ * Test, if the share is enabled = available and not turned off by YaST.
+ *
+ * @param options	description of the share
+ * @return boolean	true if the share is enabled
+ */
 global define boolean shareEnabled( map options ) ``{
     boolean result = !( options["commentout"]:false );
     
@@ -44,6 +75,12 @@ global define boolean shareEnabled( map options ) ``{
     return result;
 }
 
+/**
+ * Convert printer description to items for a multiselectionbox (index, printer name, status).
+ *
+ * @param printers	map of available printers
+ * @return list 	list of box items
+ */
 global define list printers2items( map printers ) ``{
     return maplist( string name, boolean value, printers, ``{
 	return `item( `id( name ), name , value );

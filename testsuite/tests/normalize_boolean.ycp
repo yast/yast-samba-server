@@ -1,0 +1,19 @@
+{
+
+// test for normalize_boolean
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+
+    DUMP( normalize_boolean( "yes", nil ) );    
+    DUMP( normalize_boolean( "yEs", nil ) );    
+    DUMP( normalize_boolean( "1", nil ) );    
+    DUMP( normalize_boolean( "true", nil ) );    
+    DUMP( normalize_boolean( "TRue", nil ) );    
+    DUMP( normalize_boolean( "no", nil ) );    
+    DUMP( normalize_boolean( "0", nil ) );    
+    DUMP( normalize_boolean( "FALSE", nil ) );    
+    DUMP( normalize_boolean( nil, true ) );    
+}
