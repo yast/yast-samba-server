@@ -32,7 +32,7 @@ import "SambaNmbLookup";
 import "CWM";
 import "CWMTab";
 import "CWMServiceStart";
-//HELPME import "CWMFirewallInterfaces";
+import "CWMFirewallInterfaces";
 
 include "samba-server/helps.ycp";
 include "samba-server/dialogs-items.ycp";
@@ -753,10 +753,10 @@ any Installation_Conf_Tab () {
 	    "get_service_auto_start": SambaService::GetServiceAutoStart,
 	    "set_service_auto_start": SambaService::SetServiceAutoStart,
 	]),
-//HELPME	"FIREWALL": CWMFirewallInterfaces::CreateOpenFirewallWidget($[
-//	    "services": [ "samba-server" ],
-//	    "display_details": true
-//	]),
+	"FIREWALL": CWMFirewallInterfaces::CreateOpenFirewallWidget($[
+	    "services": [ "samba-server" ],
+	    "display_details": true
+	]),
 	"SHARES": $[
 	    "widget" : `custom,
 	    "custom_widget" : shares_widget,
