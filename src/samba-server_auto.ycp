@@ -70,16 +70,16 @@ else if (func == "Export") {
 /* Read current state */
 else if (func == "Read") {
     import "Progress";
-    Progress::off();
+    boolean po = Progress::set(false);
     ret = SambaServer::Read();
-    Progress::on();
+    Progress::set(po);
 }
 /* Write givven settings */
 else if (func == "Write") {
     import "Progress";
-    Progress::off();
+    boolean po = Progress::set(false);
     ret = SambaServer::Write(true);
-    Progress::on();
+    Progress::set(po);
 }
 
 /**
