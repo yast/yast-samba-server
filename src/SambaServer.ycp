@@ -27,6 +27,12 @@ import "Ldap";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
+
+/**
+ * list of required packages
+ */
+global list required_packages = ["samba"];
+
 /**
  * Abort function
  * return boolean return true if abort
@@ -1381,6 +1387,15 @@ global define symbol DetermineRole() ``{
     
     return `standalone;
 }
-				    
+/**
+ * Return required packages for auto-installation
+ * @return map of packages to be installed and to be removed
+ */
+global define map AutoPackages() ``{
+	return ($["install": required_packages, "remove": []]);
+
+}
+
+
 /* EOF */
 }

@@ -449,7 +449,7 @@ See Samba documentation for details."),
 ];
 
 /* ensure samba package is installed */
-if( !Require::RequireAndConflictTarget( ["samba"], [], 
+if( !Require::RequireAndConflictTarget( SambaServer::required_packages, [], 
         // notification about package needed 1/2
     _("<p>To configure the Samba server, the <b>%1</b> package must be installed.</p>") +
         // notification about package needed 2/2

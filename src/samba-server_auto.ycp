@@ -61,6 +61,10 @@ else if (func == "Change") {
 else if (func == "Import") {
     ret = SambaServer::Import(param);
 }
+/* Return required packages */
+else if (func == "Export") {
+    ret = SambaServer::AutoPackages();
+}
 /* Return actual state */
 else if (func == "Export") {
     ret = SambaServer::Export();
