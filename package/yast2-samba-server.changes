@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 11 09:09:33 UTC 2005 - mlazar@suse.cz
+
+- SambaService.pm: fixed Import(), better error handling
+- added perl testsuites for SambaService.pm
+
+-------------------------------------------------------------------
 Fri Mar 11 08:30:21 UTC 2005 - mlazar@suse.cz
 
 - SambaAccount.pm: use Crypt::SmbHash to store passwords in Export/Inport
