@@ -90,7 +90,8 @@ remove the information about a share.</p>
 "),
 
     /* Identity dialog help 1/5
-    logon is the Windows synonym for login */
+    logon is the Windows synonym for login, so for consistency
+    with Windows admins the help text uses logon  */
     "smb_conf_tab_identity" : _("<p><b><big>Identity</big></b><br>
 These options allow setup of the identity of the server and its
 primary role in the network.</p>
@@ -108,9 +109,9 @@ If the server should not participate as a domain controller, choose the
 
     /* Samba role dialog help 2/5 */
     "smb_conf_tab_base_settings_no_bdc": _("<p>The <b>Base Settings</b> set up the domain and the
-server role. <b>Primary Domain Controller</b> allow login of Windows
+server role. <b>Primary Domain Controller</b> allows logon of Windows
 clients into a Windows domain. If the server should not participate
-as a domain controller, choose the <b>No DC</b> value.</p>
+as a domain controller, choose <b>No DC</b>.</p>
 "),
 
     /* Samba role dialog help 3/5 */
