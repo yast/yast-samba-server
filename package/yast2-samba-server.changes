@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug  8 08:46:39 CEST 2003 - visnov@suse.de
+
+- add Browse button for adding a share
+- layout fixes
+- do not depend on samba
+- 2.8.2
+
+-------------------------------------------------------------------
 Tue Aug  5 08:28:59 CEST 2003 - visnov@suse.de
 
 - use LDAP system settings for defaults

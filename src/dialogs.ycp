@@ -146,6 +146,7 @@ global define symbol OverallSharesDialog () ``{
     
     /* Samba-server overall shares dialog contents */
     term contents = 
+	`HVSquash(
 	// frame label for global sharing check boxes
 	`Frame( _("Available shares"), 
 	`VBox( 
@@ -159,9 +160,9 @@ global define symbol OverallSharesDialog () ``{
 		`HStretch()
 	    ),
 	// push button
-    	`Left(`PushButton( `id( `other_shares ), _("&Advanced...")  ) )
+    	`PushButton( `id( `other_shares ), _("&Advanced...")  )
 	)
-    );
+    ) );
 
     Wizard::SetContentsButtons(caption, contents, HELPS["OverallShares"]:"",
 	    Label::BackButton(), Label::FinishButton());
@@ -480,8 +481,11 @@ global define map AddSharePopup() ``{
 	    `TextEntry( `id(`name), _("Share &name:") ),
 	    // translators: text entry label
 	    `TextEntry( `id(`comment), _("Share &description:") ),
-	    // translators: text entry label
-	    `TextEntry( `id(`path), _("&Path of the share:") ),
+	    `HBox(
+		// translators: text entry label
+		`TextEntry( `id(`path), _("&Path of the share:") ),
+		`Bottom( `PushButton( `id( `browse ), Label::BrowseButton() ) )
+	    ),
 	    `HBox( 
 		`PushButton( `id( `ok ), Label::OKButton() ),
 		`PushButton( `id( `cancel ), Label::CancelButton() )
@@ -500,20 +504,34 @@ global define map AddSharePopup() ``{
 	if( ret == `cancel ) {
 	    UI::CloseDialog();
 	    return nil;
-	}
+	} else if( ret == `browse ) {
+	    string dir = UI::AskForExistingDirectory ( "/", _("Path for a share") );
+	    if( dir != nil ) {
+		UI::ChangeWidget( `id (`path), `Value, dir );
+	    }
+	} else {
+	    // OK was pressed
 	
-	name = UI::QueryWidget( `id( `name ), `Value );
-	pathvalue = UI::QueryWidget( `id( `path ), `Value );
-	comment = UI::QueryWidget( `id( `comment ), `Value );
+	    name = UI::QueryWidget( `id( `name ), `Value );
+	    pathvalue = UI::QueryWidget( `id( `path ), `Value );
+	    comment = UI::QueryWidget( `id( `comment ), `Value );
 	
-	if( size( name ) == 0 ) {
-	    // translators: error message
-	    Popup::Error( _("Name of a share cannot be empty.") );
-	    ret = nil;
-	} else if( size( pathvalue ) == 0 ) {
-	    // translators: error message
-	    Popup::Error( _("Path of a share cannot be empty.") );
-	    ret = nil;
+	    if( size( name ) == 0 ) {
+		// translators: error message
+		Popup::Error( _("Name of a share cannot be empty.") );
+		ret = nil;
+	    } else if( size( pathvalue ) == 0 ) {
+		// translators: error message
+		Popup::Error( _("Path of a share cannot be empty.") );
+		ret = nil;
+	    } else if( SCR::Read( .target.stat, pathvalue ) == $[] ) {
+		// translators: question popup. A user entered non-existent path
+		// for a share
+		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.
+Do you really want to use this path?"), pathvalue ) ) ) {
+		    ret = nil;
+		}
+	    }
 	}
     } while( ret == nil );
     

@@ -2,7 +2,7 @@
 # neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-pam yast2-printer yast2-country hwinfo
 
 @HEADER@
-Requires:	yast2 samba samba-client yast2-ldap-client yast2-samba-client yast2-pam yast2-printer yast2-country hwinfo
+Requires:	yast2 samba-client yast2-ldap-client yast2-samba-client yast2-pam yast2-printer yast2-country hwinfo
 
 BuildArchitectures:	noarch
 

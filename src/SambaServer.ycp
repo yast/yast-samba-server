@@ -1259,7 +1259,7 @@ global define boolean removeShare( string name ) ``{
     // if there is no such share, done
     if( !haskey( shares, name ) ) return false;
 
-    removed_shares[name]  = shares[share]: nil;
+    removed_shares[name]  = shares[name]: nil;
 
     shares = remove( shares, name );
     
