@@ -1041,6 +1041,8 @@ global define map Export () ``{
     
     result ["service"] = service;
     result ["role"] = role2name[ role ]: "Standalone server";
+    globals_configured = true;
+    shares_configured = true;
 
     return result;
 }

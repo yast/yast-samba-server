@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct  4 15:31:21 CEST 2004 - mlazar@suse.cz
+
+- fixed #45588 - Samba Server Configuration not shown in Summary in autoyast
+
+-------------------------------------------------------------------
 Mon Sep 20 14:12:31 CEST 2004 - mlazar@suse.cz
 
 - updated testsuite
