@@ -53,7 +53,6 @@ global boolean write_only = false;
 
 global string server_string = "SAMBA Server";
 global symbol role = `standalone;
-global string security = "user";
 global string domain_master = "auto";
 global boolean domain_logons = false;
 global boolean local_master = false;
@@ -173,9 +172,6 @@ global define boolean Read() ``{
     
     value = SCR::Read( .etc.smb.value.global."server string" );
     if( value != nil ) server_string = value;
-    value = SCR::Read( .etc.smb.value.global."security" );
-    if( value != nil ) security = value;
-    y2debug( "security = %1", security );
     value = SCR::Read( .etc.smb.value.global."add user script" );
     if( value != nil ) add_user_script = value;
     value = SCR::Read( .etc.smb.value.global."domain master" );
@@ -420,7 +416,6 @@ global define boolean WriteSettings() ``{
 
     // write global settings
     SCR::Write( .etc.smb.value.global."server string", server_string );
-    SCR::Write( .etc.smb.value.global."security", security );
     SCR::Write( .etc.smb.value.global."add user script", add_user_script );
     if( domain_master != "auto" ) 
 	SCR::Write( .etc.smb.value.global."domain master" , domain_master );
@@ -661,6 +656,11 @@ global define boolean enableServer( boolean on ) ``{
 
 }
 
+/**
+ * Set the server description
+ *
+ * @param description a new description
+ */
 global define void setDescription( string description ) ``{
     if( server_string != description ) {
 	server_string = description;
@@ -733,12 +733,12 @@ global define void configureShare( string share, map options ) ``{
 
 /** This will not create machine accounts on the fly!!! */
 global define boolean setAsPDC() ``{
-    security = "user";
+    Samba::security = "user";
     domain_logons = true;
     preferred_master = "yes";
     domain_master = "yes";
     local_master = true;
-    add_user_script = "/usr/sbin/useradd -g machines -c Machine -d /dev/null -s /bin/false  %m$";
+    add_user_script = "/usr/sbin/useradd -c Machine -d /dev/null -s /bin/false  %m$";
     
     return true;
 }
@@ -746,7 +746,7 @@ global define boolean setAsPDC() ``{
 global define boolean setAsBDC() ``{
     domain_master = "false";
     domain_logons = true;
-    security = "user";
+    Samba::security = "user";
     
     return true;
 }
