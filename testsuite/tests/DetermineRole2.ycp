@@ -1,0 +1,16 @@
+{
+
+// test for SambaServer::DetermineRole() for BDC
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    DUMP(SambaServer::role);
+
+    TEST( ``( SambaServer::setAsBDC() ), [], nil );
+
+    DUMP(SambaServer::DetermineRole());
+
+}

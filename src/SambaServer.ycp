@@ -302,22 +302,8 @@ Remove one of the options to resolve this conflict.
     if( !Runlevel::ServiceEnabled( "smb" ) ) {
 	role = `disabled;
     }
-    else if( security == "user" && ! yes_or_auto(domain_master) && domain_logons )
-    {
-	role = `bdc;
-    }
-    else if( security == "user" )
-    {
-	if( domain_logons && yes_or_auto( domain_master ) && yes_or_auto( preferred_master ) && local_master ) {
-	    role = `pdc;
-	}
-	else 
-	{
-	    role = `standalone;
-	}
-    }
-    else role = `standalone;
-    
+    else role = DetermineRole();
+
     y2milestone( "Found role: %1", role );
 
     globals_configured = true;
@@ -1363,6 +1349,30 @@ global define boolean updateShare( string name, map options ) ``{
 global define string roleName( symbol role ) ``{
     locale s = role2name[role]:"";
     return eval(s);
+}
+
+/**
+ * Find out the role of a server using the read settings
+ *
+ * @return symbol	the role it appears to be
+ */
+global define symbol DetermineRole() ``{
+    if( Samba::security == "user" )
+    {
+	if( domain_logons && yes_or_auto( domain_master ) && yes_or_auto( preferred_master ) && local_master ) {
+	    return `pdc;
+	}
+	else if( ! yes_or_auto(domain_master) && domain_logons )
+	{
+	    return `bdc;
+	}
+	else 
+	{
+	    return `standalone;
+	}
+    }
+    
+    return `standalone;
 }
 				    
 /* EOF */

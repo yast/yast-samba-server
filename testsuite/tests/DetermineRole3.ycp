@@ -1,0 +1,16 @@
+{
+
+// test for SambaServer::DetermineRole() for standalone
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    DUMP(SambaServer::role);
+
+    TEST( ``( SambaServer::setAsStandalone() ), [], nil );
+
+    DUMP(SambaServer::DetermineRole());
+
+}
