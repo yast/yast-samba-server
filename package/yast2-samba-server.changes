@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 16 16:43:33 CET 2004 - mlazar@suse.cz
+
+- writeable parametr replaced with inverted synonym "read only"
+- added "inherit ACLS" parametr (see bug #39656)
+
+-------------------------------------------------------------------
 Mon Nov 15 16:40:52 CET 2004 - mlazar@suse.cz
 
 - fixed typo: GlobalSetStr => GlobalGetStr

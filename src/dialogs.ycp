@@ -58,9 +58,7 @@ list sharesItems(boolean filt) {
 	string enabled = SambaConfig::ShareEnabled(name) ? _("Enabled") : _("Disabled");
 	string comment = SambaConfig::ShareGetStr(name, "comment", "");
 	boolean ro = SambaConfig::ShareGetTruth(name, "read only", true);
-	return `item( `id(index), enabled, ro ? 
-	    "" : 
-	    _("Yes"), name, pth , comment);
+	return `item( `id(index), enabled, ro ? _("Yes") : _("No"), name, pth , comment);
     });
 }
 
@@ -497,7 +495,8 @@ symbol AddShareDialog () ``{
             		`Bottom(`PushButton(`id(`browse), Label::BrowseButton()))),
             	    `HBox(
             		// translators: checkbox label
-            		`Left(`CheckBox(`id(`writable), _("&Writable"), false)))),
+            		`Left(`CheckBox(`id(`read_only), _("&Read Only"), false)),
+            		`Left(`CheckBox(`id(`inherit_acls), _("&Inherit ACLS"), true)))),
 		`HSpacing(1))))));
     
     // translators: dialog caption
@@ -516,7 +515,8 @@ symbol AddShareDialog () ``{
 	boolean on = (boolean)UI::QueryWidget ( `id( `directory ), `Value );
 	UI::ChangeWidget ( `id (`path), `Enabled, on );
 	UI::ChangeWidget ( `id (`browse), `Enabled, on );
-	UI::ChangeWidget ( `id (`writable), `Enabled, on );
+	UI::ChangeWidget ( `id (`read_only), `Enabled, on );
+	UI::ChangeWidget ( `id (`inherit_acls), `Enabled, on );
 	
 	ret = (symbol)UI::UserInput ();
 	
@@ -545,7 +545,6 @@ symbol AddShareDialog () ``{
 	    string pathvalue = (string) UI::QueryWidget( `id( `path ), `Value );
 	    string comment = (string) UI::QueryWidget( `id( `comment ), `Value );
 	    boolean printable = (boolean) UI::QueryWidget (`id ( `printer ), `Value );
-	    boolean writable = (boolean)UI::QueryWidget(`id(`writable), `Value);
 	
 	    if( size( name ) == 0 ) {
 		// translators: error message
@@ -582,7 +581,10 @@ symbol AddShareDialog () ``{
 	    }
 	    else
 	    {
-		res["writable"] = writable ? "Yes" : "No";
+		boolean read_only = (boolean)UI::QueryWidget(`id(`read_only), `Value);
+		boolean inherit_acls = (boolean)UI::QueryWidget(`id(`inherit_acls), `Value);
+		res["read only"] = read_only ? "Yes" : "No";
+		res["inherit acls"] = inherit_acls ? "Yes" : "No";
 		res["path"] = pathvalue;
 	    }
 
@@ -614,7 +616,7 @@ any Installation_Conf_Tab () {
 		    `item(`id(`filter_all), "Show &All Shares" ),
 		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )]))),
 	    // translators: table header texts
-	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Writeable"), _("Name"),  _("Path"), _("Comment")), []),
+	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Read Only"), _("Name"),  _("Path"), _("Comment")), []),
 	    `HBox(
 		`PushButton(`id(`add), Label::AddButton() + "..."),
 		`PushButton(`id(`edit), Label::EditButton() + "..."),
