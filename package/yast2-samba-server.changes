@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 11 08:20:55 UTC 2005 - mlazar@suse.cz
+
+- fixed Read/Write firewall settings
+
+-------------------------------------------------------------------
 Fri Mar  4 10:21:39 UTC 2005 - mlazar@suse.cz
 
 - addeded missing "&", "<p>", "$Id", headers, ...
