@@ -48,7 +48,9 @@ global define symbol SambaServerSequence() ``{
 	]
     ];
 
-    string caption = _("samba-server configuration");
+    // translators: inicialization dialog caption
+    string caption = _("Samba server configuration");
+    // translators: inicialization dialog contents
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
@@ -67,7 +69,9 @@ global define symbol SambaServerSequence() ``{
  * @return sequence result
  */
 global define symbol SambaServerAutoSequence() ``{
-    string caption = _("samba-server configuration");
+    // translators: inicialization dialog caption
+    string caption = _("Samba server configuration");
+    // translators: inicialization dialog contents
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();

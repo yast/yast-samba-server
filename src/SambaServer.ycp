@@ -229,15 +229,24 @@ global define boolean Read() ``{
 
     // We do not set help text here, because it was set outside
     Progress::New( caption, " ", steps, [
+	    // translators: progress stage 1/4
 	    _("Read global the SAMBA settings"),
+	    // translators: progress stage 2/4
 	    _("Read the SAMBA shares"),
+	    // translators: progress stage 3/4
 	    _("Read the printing settings"),
+	    // translators: progress stage 4/4
 	    _("Read the LDAP settings"),
 	], [
+	    // translators: progress step 1/4
 	    _("Reading global the SAMBA settings"),
+	    // translators: progress step 2/4
 	    _("Reading the SAMBA shares"),
+	    // translators: progress step 3/4
 	    _("Read the printing settings"),
+	    // translators: progress step 4/4
 	    _("Reading the LDAP settings..."),
+	    // translators: progress finished
 	    _("Finished")
 	],
 	""
@@ -413,6 +422,7 @@ Please, remove one of the options to resolve this conflict."), "printable",
     ReadLDAPSettings();
     
     if(Abort()) return false;
+    // translators: progress finished
     ProgressNextStage(_("Finished"));
 
     modified = false;
@@ -441,14 +451,18 @@ global define boolean Write() ``{
 	    // translators: write progress stage
 	    _("Run SuSEconfig"),
 	    // translators: write progress stage
-	    role == `disabled ? _("Disable SAMBA services") : _("Enable SAMBA services")
+	    role == `disabled ? _("Disable SAMBA services") 
+	    // translators: write progress stage
+		: _("Enable SAMBA services")
 	], [
 	    // translators: write progress step
 	    _("Writing the settings..."),
 	    // translators: write progress step
 	    _("Running SuSEconfig..."),
 	    // translators: write progress step
-	    role == `disabled ? _("Disabling SAMBA services") : _("Enabling SAMBA services"),
+	    role == `disabled ? _("Disabling SAMBA services") 
+	    // translators: write progress step
+		: _("Enabling SAMBA services"),
 	    // translators: write progress step
 	    _("Finished")
 	],
@@ -465,13 +479,23 @@ global define boolean Write() ``{
     WriteSettings();
     WriteLDAPSettings();
 
-    if( !SCR::Write( .etc.smb, nil ) ) Report::Error (sformat(_("Cannot write settings to %1!"), "/etc/samba/smb.conf") );
-    if( !SCR::Write( .sysconfig.samba, nil ) ) Report::Error(sformat(_("Cannot write settings to %1!"), "/etc/sysconfig/samba") );
+    if( !SCR::Write( .etc.smb, nil ) ) {
+	// translators: error message
+	Report::Error (sformat(_("Cannot write settings to %1!"), "/etc/samba/smb.conf") );
+    }
+    
+    if( !SCR::Write( .sysconfig.samba, nil ) ) {
+	// translators: error message
+	Report::Error(sformat(_("Cannot write settings to %1!"), "/etc/sysconfig/samba") );
+    }
 
     // run SuSEconfig for samba
     Progress::NextStage();
 
-    if( ! WriteSAMBackend() ) Report::Error (_("SuSEconfig script failed!"));
+    if( ! WriteSAMBackend() ) {
+	// translators: error message
+	Report::Error (_("SuSEconfig script failed!"));
+    }
     
 
     if(Abort()) return false;
@@ -483,11 +507,13 @@ global define boolean Write() ``{
 	map result = SCR::Execute( .target.bash_output, "smbpasswd -S" );
 	if( result["exit"]:1 != 0 ) {
 	    y2debug( "Error retrieving SID: %1", result );
+	    // translators: error message
 	    Report::Error( _("Unable to retrieve SID for the domain!"));
 	}
     }
 
     if(Abort()) return false;
+    // translators: progress finished
     ProgressNextStage(_("Finished"));
 
     if(Abort()) return false;
@@ -647,29 +673,40 @@ global define string Summary() ``{
     summary = Summary::AddHeader(summary, _("Global configuration"));
     
     if( globals_configured ) {
-	// summary item: an option is turned on
+	// summary item: configured workgroup/domain
 	summary = Summary::AddLine(summary, sformat(_("Workgroup/Domain: %1"), Samba::workgroup ) );
 	
-	if( role == `disabled ) 
+	if( role == `disabled ) {
+	    // summary item: status of the samba service
 	    summary = Summary::AddLine(summary, _("Samba server is <i>disabled</i>") );
-	else
+	} else {
+	    // summary item: selected role for the samba server
 	    summary = Summary::AddLine(summary, sformat(_("Role: %1"), roleName(role) ) );
+	}
+	
+	// summary item: samba server description
 	summary = Summary::AddLine(summary, sformat(_("Description: %1"), server_string) );
+	// summary item: selected user information backend
 	summary = Summary::AddLine(summary, sformat( _("User information backend: %1"), 
-	    (SAM == `smbpasswd ? "smbpasswd" : "LDAP") ) );
+		(SAM == `smbpasswd ? "smbpasswd" : "LDAP") ) );
 	if( SAM == `ldap ) {
+	    // summary item
 	    summary = Summary::AddLine(summary, sformat(_("LDAP server: %1"), LDAP_server ) );
+	    // summary item
 	    summary = Summary::AddLine(summary, sformat(_("LDAP suffix: %1"), LDAP_suffix ) );
+	    // summary item
 	    summary = Summary::AddLine(summary, sformat(_("LDAP administration DN: %1"), LDAP_admin_dn ) );
 	}
     } else {
 	summary = Summary::AddLine(summary, nc );
     }
     
+    // summary heading: configured shares
     summary = Summary::AddHeader(summary, _("Shares configuration"));
     
     if( shares_configured ) {
 	if( size( shares ) == 0 ) {
+	    // summary item: no configured shares
 	    summary = Summary::AddLine(summary, _("none") );
 	} else {
 	    summary = Summary::OpenList(summary);
@@ -711,6 +748,7 @@ global define boolean enableServer( boolean on ) ``{
 	if( Runlevel::ServiceStatus( "nmb" ) != 0 ) {
 	    // the service does not run
 	    if( Runlevel::RunInitScript( "nmb", "start" ) != 0 ) {
+		// translators: error message
 		Report::Error( _("Cannot start 'nmb' service.") );
 		return false;
 	    }
@@ -718,6 +756,7 @@ global define boolean enableServer( boolean on ) ``{
 	if( Runlevel::ServiceStatus( "smb" ) != 0 ) {
 	    // the service does not run
 	    if( Runlevel::RunInitScript( "smb", "start" ) != 0 ) {
+		// translators: error message
 		Report::Error( _("Cannot start 'smb' service.") );
 		return false;
 	    }
@@ -730,6 +769,7 @@ global define boolean enableServer( boolean on ) ``{
 	// turn services off
 	if( Runlevel::ServiceStatus( "nmb" ) == 0 ) {
 	    if( Runlevel::RunInitScript( "nmb", "stop" ) != 0 ) {
+		// translators: error message
 		Report::Error( _("Cannot stop 'nmb' service.") );
 		return false;
 	    }
@@ -737,6 +777,7 @@ global define boolean enableServer( boolean on ) ``{
 
 	if( Runlevel::ServiceStatus( "smb" ) == 0 ) {
 	    if( Runlevel::RunInitScript( "smb", "stop" ) != 0 ) {
+		// translators: error message
 		Report::Error( _("Cannot stop 'smb' service.") );
 		return false;
 	    }
@@ -1100,6 +1141,7 @@ global define boolean testLDAPS( string server, string search_base ) ``{
     map result = SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
     y2debug( "LDAPS test search result: %1", result );
     if( result["exit"]:-1 != 0 ) {
+	// translators: warning message, %1 is LDAP server name/IP
 	Report::Warning( sformat( _("It seems like there is no functional
 SSL LDAP server at %1.
 
@@ -1173,6 +1215,7 @@ global define void enablePrinterNames( list enable_names ) ``{
 	    {
 		// a share with the same name, but without printable!!!
 		y2error( "Share '%1' is not printable: %2", name, shares[name]:$[] );
+		// translators: error message. There is a given share, but configured differently
 		Report::Error( sformat( _("There is already a share '%',
 but it is not configured
 as a printer.\n

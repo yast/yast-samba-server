@@ -29,10 +29,11 @@ include "samba-client/routines.ycp";
  */
 global define symbol RoleDialog () ``{
 
-    /* Samba-server configure1 dialog caption */
+    /* Samba-server role dialog caption */
     string caption = _("SAMBA Server Role");
     
     Wizard::SetContents( caption, `VBox(
+	// radio button group label
 	`Frame( _("Sharing type"), `VBox(
 	    `RadioButtonGroup( `id(`samba_role), `VBox(
         	`Left( `RadioButton( `id(`disabled), `opt(`notify), SambaServer::roleName( `disabled ) ) ),
@@ -43,9 +44,11 @@ global define symbol RoleDialog () ``{
 	    
 	    `VBox(
 		WorkgroupWidget(),
+		// text entry label
 		`TextEntry(`id(`server_description), _("Server &description:"), SambaServer::server_string )
 	     ) 
 	) ),
+	// push button label
 	`PushButton( `id( `advanced ), _("&Authentication details") ) 
 	) , 
 	HELPS["RoleDialog"]:"", false, true
@@ -104,6 +107,7 @@ the replication.") );
 	    if( SambaServer::role != `disabled ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );
 		if( res != `workgroup && SambaServer::role == `pdc ) {
+		    // translators: continue/cancel popup. Warning, that there is already a PDC present.
 		    if( ! Popup::ContinueCancel( sformat( _("You asked to set this Samba server
 to act as Primary Domain Controller.
 However, '%1' is a domain where already
@@ -142,14 +146,19 @@ global define symbol OverallSharesDialog () ``{
     
     /* Samba-server overall shares dialog contents */
     term contents = 
+	// frame label for global sharing check boxes
 	`Frame( _("Available shares"), 
 	`VBox( 
+	    // check box to share the home directories
 	    `Left(`CheckBox( `id( `homes ), _("Share &homes"), SambaServer::share_homes ) ),
 	    `HBox( 
+		// check box to share the printers
 		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share &printers"), SambaServer::share_printers ) ),
+		// push button
 		`PushButton( `id( `select_printers ), _("&Select...") ),
 		`HStretch()
 	    ),
+	// push button
     	`Left(`PushButton( `id( `other_shares ), _("&Advanced...")  ) )
 	)
     );
@@ -219,12 +228,21 @@ global define symbol ShareDirsDialog () ``{
     /* Samba-server shared directories dialog contents */
     term contents = 
     `VBox(
-	`Table(`id( `table ), `header(_("Status"), _("Name"), _("Path"), _("Comment") ), items ),
+	`Table(`id( `table ), `header(
+	    // table column header
+	    _("Status"), 
+	    // table column header
+	    _("Name"), 
+	    // table column header
+	    _("Path"), 
+	    // table column header
+	    _("Comment") ), items ),
 	`HBox(
 	    `PushButton( `id(`add), Label::AddButton() ),
 	    `PushButton( `id(`edit), Label::EditButton() ),
 	    `PushButton( `id(`delete), Label::DeleteButton() ),
 	    `HStretch(),
+	    // push button label
 	    `PushButton( `id(`toggle), _("&Toggle Status") )
 	)
     );
@@ -303,20 +321,28 @@ global define symbol AdvancedDialog () ``{
     /* Samba-server advanced dialog contents */
     term contents = 
     `VBox(
+	// radio button box label for password storing backend
 	`Frame( _("Authentication backend"), 
 	`RadioButtonGroup( `id( `backend ), `VBox(
+	    // radio button label
 	    `Left(`RadioButton( `id( `smbpasswd ), `opt(`notify), _("smbpasswd") )),
+	    // radio button label
 	    `Left(`RadioButton( `id( `ldap ), `opt(`notify), _("LDAP") )),
 	    `VBox(
+		// text entry label
 		`TextEntry( `id( `ldap_server ), _("LDAP &server:"), 
 		    SambaServer::LDAP_server != nil ? SambaServer::LDAP_server : ""),
+		// text entry label
 		`TextEntry( `id( `ldap_suffix ), _("Search &base DN:"), 
 		    SambaServer::LDAP_suffix != nil ? SambaServer::LDAP_suffix: "" ),
+		// text entry label
 		`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), 
 		    SambaServer::LDAP_admin_dn != nil ? SambaServer::LDAP_admin_dn : ""  ),
 		Mode::config ? `Empty() : 
 		`HBox(
+		    // push button label
 		    `PushButton( `id( `ldap_test ), _("&Test Connection") ),
+		    // push button label
 		    `PushButton( `id( `ldap_password ), _("Set LDAP Administration &Password") )
 		)
 	    )
@@ -372,18 +398,22 @@ global define symbol AdvancedDialog () ``{
 	    string suffix = UI::QueryWidget( `id( `ldap_suffix ), `Value );
 	    
 	    if( size(server) == 0 ) {
+		// translators: error message
 		Popup::Error( _("Please, fill the LDAP server first.") );
 		continue;
 	    }
 	    
 	    if( size(suffix) == 0 ) {
+		// translators: error message
 		Popup::Error( _("Please, fill the LDAP suffix first.") );
 		continue;
 	    }
 	    
+	    // translators: progress dialog text
 	    UI::OpenDialog(`Label( _("Testing LDAPS connection...") ) );
 	    if( SambaServer::testLDAPS( server, suffix ) )
 	    {
+		// translators: test result popup message
 		Popup::Message( _("LDAPS connection is OK.") );
 	    }
 	    UI::CloseDialog();
@@ -444,8 +474,11 @@ global define symbol EditShareDialog () ``{
 global define map AddSharePopup() ``{
     UI::OpenDialog( 
 	`VBox(
+	    // translators: text entry label
 	    `TextEntry( `id(`name), _("Share &name:") ),
+	    // translators: text entry label
 	    `TextEntry( `id(`comment), _("Share &description:") ),
+	    // translators: text entry label
 	    `TextEntry( `id(`path), _("&Path of the share:") ),
 	    `HBox( 
 		`PushButton( `id( `ok ), Label::OKButton() ),
@@ -472,9 +505,11 @@ global define map AddSharePopup() ``{
 	comment = UI::QueryWidget( `id( `comment ), `Value );
 	
 	if( size( name ) == 0 ) {
+	    // translators: error message
 	    Popup::Error( _("Name of a share cannot be empty.") );
 	    ret = nil;
 	} else if( size( pathvalue ) == 0 ) {
+	    // translators: error message
 	    Popup::Error( _("Path of a share cannot be empty.") );
 	    ret = nil;
 	}

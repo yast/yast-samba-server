@@ -40,13 +40,15 @@ global define boolean ShareHandler(map options) ``{
     if( command == nil ) return false;
 
     // validate the options
-    if( share == nil ) {
+    if( share == nil ) {	
+	// translators: error message for share command line action
 	// must provide the share name
 	Report::Error( sformat( _("You must specify the name of a share.") ) );
 	return false;
     }
     
     if( !haskey( SambaServer::shares, share ) && command != "add" ) {
+	// translators: error message for "share add" command line action
 	Report::Error( sformat( _("The share '%1' does not exist."), share ) );
 	return false;
     }
@@ -67,6 +69,7 @@ global define boolean ShareHandler(map options) ``{
     else if( command == "add" )
     {
 	if( ! haskey( options, "path" ) ) {
+	    // translators: error message for "add share" command line action
 	    Report::Error( _("You must provide the path of a directory to be shared.") );
 	    return false;
 	}
@@ -75,6 +78,7 @@ global define boolean ShareHandler(map options) ``{
 	    "path": options["path"]:"",
 	    "comment": options["comment"]:sformat( "Share for %1", options["path"]:"path" )
 	] ) ) {
+	    // translators: error message for "add share" command line action
 	    Report::Error( sformat( _("Share '%1' already exists."), share ) );
 	    return false;
 	}
@@ -127,9 +131,10 @@ global define boolean ShareHandler(map options) ``{
  */
 global define boolean ListHandler( map options ) ``{
     
-    // heading
-    CommandLine::Print( _("Status  \tType\tName"));
-    CommandLine::Print( _("=============================="));
+    // translators: heading for "list" shares command line action
+    // try to keep alignment
+    CommandLine::Print( _("Status  \tType\tName
+=============================="));
 
     map printers = $[];
     
@@ -137,15 +142,24 @@ global define boolean ListHandler( map options ) ``{
 	if( options["printable"]:false ) {
 	    printers[share] = options;
 	} else {
+	    // translators: share is a disk. %1 is the status, %2 comment
 	    CommandLine::Print( sformat( _("%1\tDisk\t%2"), 
-		options["commentout"]:false ? _("Disabled"): _("Enabled")+"  ", share ) );
+		// translators: share status
+		options["commentout"]:false ? _("Disabled")
+		// translators: share status
+		    : _("Enabled")+"  ", share ) );
 	}
     });
     
 
     foreach( string share, map options, printers, ``{
+	// translators: share is a printer. %1 is the status, %2 comment
 	CommandLine::Print( sformat( _("%1\tPrinter\t%2"), 
-	    options["commentout"]:false ? _("Disabled"): _("Enabled")+"  ", share ) );
+	    options["commentout"]:false ? 
+		// translators: share status
+		_("Disabled")
+		// translators: share status
+		: _("Enabled")+"  ", share ) );
     });
     
     return true;
@@ -168,6 +182,7 @@ global define boolean BackendHandler( map options ) ``{
     else if( command == "ldap" ) backend = `ldap;
      
     if( ! SambaServer::switchLDAPBackend( backend ) ) {
+	// translators: error message for backend command line action, %1 is the backend user wanted to switch to
 	Report::Error( sformat( _("Cannot change the backend of the Samba server to '%1'."), command ) );
 	return false;
     }
@@ -194,6 +209,7 @@ global define boolean RoleHandler( map options ) ``{
     else if( command == "standalone" ) role = `standalone;
     
     if( ! SambaServer::setRole( role ) ) {
+	// translators: error message for role command line action, %1 is the role user wanted to switch to
 	Report::Error( sformat( _("Cannot change the role of the Samba server to '%1'."), command ) );
 	return false;
     }
@@ -265,6 +281,7 @@ any ret = nil;
 
 map cmdline = $[
     "id" 		: "samba-server",
+    // translators: command line help text for samba-server module
     "help" 		: _("Samba server configuration module.
 See Samba documentation for details."),
     "guihandler" 	: ``(SambaServerSequence()),
@@ -273,116 +290,147 @@ See Samba documentation for details."),
     "actions"		: $[
 	"share"	:$[
 	    "handler"	: ``(ShareHandler()),
+	    // translators: command line help text for share action
 	    "help"	: _("Manipulate a single share")
 	],
 	"list"	:$[
 	    "handler"	: ``(ListHandler()),
+	    // translators: command line help text for list action
 	    "help"	: _("Show the list of available shares")
 	],
 	"role"	:$[
 	    "handler"	: ``(RoleHandler()),
+	    // translators: command line help text for role action
 	    "help"	: _("Set a role of the server")
 	],
 	"backend" :$[
 	    "handler"	: ``(BackendHandler()),
+	    // translators: command line help text for backend selection action
 	    "help"	: _("Set the backend for storing user information")
 	],
 	"service" :$[
 	    "handler"	: ``(SambaServerEnableHandler()),
+	    // translators: command line help text for service activation action
 	    "help"	: _("Enable or disable the Samba services (smb and nmb)")
 	],
 	"configure"	: $[
 	    "handler"	: ``(ChangeConfiguration()),
+	    // translators: command line help text for configure action
 	    "help"	: _("Change the global settings of the Samba server")
 	]
     ],
     "options"		: $[
 	"enable" 	:$[
+	    // translators: command line help text for enable option
 	    "help"	: _("Enable the share or a service")
 	],
 	"disable"	:$[
+	    // translators: command line help text for disable option
 	    "help"	: _("Disable the share or a service")
 	],
 	"delete"	:$[
+	    // translators: command line help text for delete share option
 	    "help"	: _("Remove the share from the configuration file" )
 	],
 	"name"		:$[
+	    // translators: command line help text for share name option
 	    "help"	: _("The name of a share"),
 	    "type"	: "string"
 	],
 	"add"		:$[
+	    // translators: command line help text for "share add" subaction
 	    "help"	: _("Add a new share"),
 	], 
 	"options"	:$[
+	    // translators: command line help text for "share options" subaction
 	    "help"	: _("Change options of a share"),
 	], 
 	"show"		:$[
+	    // translators: command line help text for "share show" subaction
 	    "help"	: _("Show the options of a shae"),
 	], 
 	"comment"	:$[
+	    // translators: command line help text for share comment option
 	    "help"	: _("The comment of a share"),
 	    "type"	: "string"
 	], 
 	"path"		:$[
+	    // translators: command line help text for share path option
 	    "help"	: _("The path (directory) to be shared"),
 	    "type"	: "string"
 	], 
 	"printable"	:$[
+	    // translators: command line help text for share printable option
 	    "help"	: _("Flag if the share should act as a printer"),
 	    "type"	: "boolean"
 	], 
 	"read_list"	:$[
+	    // translators: command line help text for share read_list option
 	    "help"	: _("A comma separated list of users allowed to read from the share"),
 	    "type"	: "string"
 	], 
 	"write_list"	:$[
+	    // translators: command line help text for share write_list option
 	    "help"	: _("A comma separated list of users allowed to write to the share"),
 	    "type"	: "string"
 	], 
 	"browseable"	:$[
+	    // translators: command line help text for share browseable option
 	    "help"	: _("Flag if the share should be visible by browsing LAN"),
 	    "type"	: "boolean"
 	], 
 	"guest_ok"	:$[
+	    // translators: command line help text for share guest_ok option
 	    "help"	: _("Flag if the share should allow guest access"),
 	    "type"	: "boolean"
 	], 
 	"valid_users"	:$[
+	    // translators: command line help text for share valid_users option
 	    "help"	: _("A comma separated list of users allowed to access the share"),
 	    "type"	: "string"
 	],
 	"pdc"		:$[
+	    // translators: command line help text for PDC role option
 	    "help"	: _("Server should act as a Primary Domain Controller"),
 	], 
 	"bdc"		:$[
+	    // translators: command line help text for BDC role option
 	    "help"	: _("Server should act as a Backup Domain Controller"),
 	], 
 	"standalone"	:$[
+	    // translators: command line help text for standalone server role option
 	    "help"	: _("Server should provide shares, but should not allow domain logons."),
 	],
 	"smbpasswd"	:$[
+	    // translators: command line help text for smbpasswd option
 	    "help"	: _("Use the 'smbpasswd' file to store user information"),
 	],
 	"ldap"		:$[
+	    // translators: command line help text for ldap option
 	    "help"	: _("Use the LDAP server to store user information"),
 	],
 	"workgroup"	:$[
+	    // translators: command line help text for workgroup option
 	    "help"	: _("The name of a workgroup"),
 	    "type"	: "string"
 	], 
 	"description"	:$[
+	    // translators: command line help text for description option
 	    "help"	: _("The human-readable description for the Samba server"),
 	    "type"	: "string"
 	], 
 	"ldap_server"	:$[
+	    // translators: command line help text for ldap_server option
 	    "help"	: _("The LDAP server to be used"),
 	    "type"	: "host"
 	], 
 	"ldap_suffix"	:$[
+	    // translators: command line help text for ldap_suffix option
 	    "help"	: _("The LDAP suffix DN used for manipulating the user information on LDAP server"),
 	    "type"	: "string"
 	], 
 	"ldap_admin_dn"	:$[
+	    // translators: command line help text for ldap_admin_dn option
 	    "help"	: _("The LDAP DN for modifying contents of the LDAP server (for example changing passwords)"),
 	    "type"	: "string"
 	]
@@ -401,8 +449,9 @@ See Samba documentation for details."),
 
 /* ensure samba package is installed */
 if( !Require::RequireAndConflictTarget( ["samba"], [], 
+        // notification about package needed 1/2
     _("<p>To configure the Samba server, the <b>%1</b> package must be installed.</p>") +
-        // notification 2/2
+        // notification about package needed 2/2
     _("<p>Do you want to install it now?</p>")) )
 {
     return `auto;
