@@ -38,12 +38,12 @@ use constant {
 
 
 # Samba LDAP Password
-my $Passwd;
+my $Passwd = "";
 
 # Orginaly readed password and admin dn
 # if one of this change, new password have to be writed to secret.tdb
-my $OrgPasswd;
-my $OrgAdminDN;
+my $OrgPasswd = "";
+my $OrgAdminDN = "";
 
 # Samba Default values
 my $SambaDefaultValues = {
@@ -334,7 +334,7 @@ sub tryBind {
 	$url->{port} = ($url->{scheme} eq "ldaps" || $ssl) ? 689 : 389;
     }
     
-    $passwd = $Passwd||"" unless defined $passwd;
+    $passwd = $Passwd unless defined $passwd;
     
     # initialize LDAP
     my $map = {
@@ -445,7 +445,7 @@ sub UpdateScripts {
 # read secret password
 sub readPasswd {
     $OrgAdminDN = SambaConfig->GlobalGetStr("ldap admin dn", "");
-    $Passwd = $OrgPasswd = Mode::test() ? "secret" : SambaSecrets->GetLDAPBindPw($OrgAdminDN);
+    $Passwd = $OrgPasswd = Mode::test() ? "secret" : (SambaSecrets->GetLDAPBindPw($OrgAdminDN)||"");
 }
 
 # read SUSE default values
@@ -506,7 +506,7 @@ sub writePasswd {
     my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", "");
 
     # return if no change
-    return if $admin_dn eq ($OrgAdminDN||"") and ($Passwd||"") eq ($OrgPasswd||"");
+    return if $admin_dn eq $OrgAdminDN and $Passwd eq $OrgPasswd;
     
     # write the smb.conf now, otherwise secrets.tdb would contain a wrong entry (#40866)
     return "Cannot write samba configuration." unless SambaConfig->Write();
@@ -583,7 +583,7 @@ sub SetAdminPassword {
 BEGIN{$TYPEINFO{GetAdminPassword}=["function","string"]}
 sub GetAdminPassword {
     my ($self) = @_;
-    return $Passwd || "";
+    return $Passwd;
 }
 
 # Test LDAP connection to the server using ldapsearch.

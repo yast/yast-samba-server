@@ -70,7 +70,8 @@ sub GetModified {
 	|| SambaConfig->GetModified() 
 	|| SambaService->GetModified() 
 	|| SambaBackend->GetModified()
-	|| SambaTrustDom->GetModified();
+	|| SambaTrustDom->GetModified()
+	|| SambaAccounts->GetModified();
 };
 
 # Read all samba-server settings
@@ -116,6 +117,7 @@ sub Read {
     SambaConfig->Read();
     SambaSecrets->Read();
     SambaService->Read();
+    SambaAccounts->Read();
 
     $GlobalsConfigured = $self->Configured();
 
@@ -227,6 +229,7 @@ sub Write {
     SambaBackend->Write();    
     SambaService->Write();
     SambaTrustDom->Write();
+    SambaAccounts->Write();
 
 #    if(Abort()) return false;
 
@@ -265,6 +268,7 @@ sub Import {
     SambaService->Import($settings->{"service"});
     SambaTrustDom->Import($settings->{"trustdom"});
     SambaBackend->Import($settings->{"backend"});
+    SambaAccounts->Import($settings->{"accounts"});
 }
 
 # Dump the samba-server settings to a single map
@@ -278,11 +282,12 @@ sub Export {
     $Modified = 0;
     
     return {
-	version =>	"2.10",
+	version =>	"2.11",
 	config =>	SambaConfig->Export(),
 	backend =>	SambaBackend->Export(),
 	service =>	SambaService->Export(),
 	trustdom =>	SambaTrustDom->Export(),
+	accounts =>	SambaAccounts->Export(),
     };
 }
 

@@ -50,6 +50,7 @@ sub Export {
 BEGIN{$TYPEINFO{Import}=["function", "void", "any"]}
 sub Import {
     my ($self, $any) = @_;
+    $any = "No" unless $any;
     $self->SetServiceAutoStart(($any =~ /^(1|Enabled?|True|Yes)$/i) ? 1 : 0);
 }
 

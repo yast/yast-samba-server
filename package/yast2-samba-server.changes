@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb 16 17:36:32 CET 2005 - mlazar@suse.cz
+
+- fixed bug 50736 (save samba root password to autoyast control file)
+- 2.11.7
+
+-------------------------------------------------------------------
 Mon Feb 14 13:02:57 CET 2005 - mlazar@suse.cz
 
 - 2.11.6
