@@ -19,6 +19,6 @@ Write	.etc.smb.value_type.lp.path 1 true
 Write	.etc.smb.value.lp.printable "yes" true
 Write	.etc.smb.value_type.lp.printable 1 true
 Write	.etc.smb.section_type.lp 1 true
-Write	.etc.smb.section_comment.lp "## Share disabled by YaST\n" true
+Write	.etc.smb.section_comment.lp "\n## Share disabled by YaST\n" true
 Write	.etc.smb nil true
 Return	true

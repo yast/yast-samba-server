@@ -19,9 +19,7 @@ Write	.etc.smb.value.global."encrypt passwords" nil true
 Write	.etc.smb.value.global."local master" nil true
 Write	.etc.smb.value.global."os level" nil true
 Write	.etc.smb.value.global."password server" nil true
-Write	.etc.smb.value.global."preferred master" "yes" true
-Write	.etc.smb.value_type.global."preferred master" 0 true
-Write	.etc.smb.value.global."preffered master" nil true
+Write	.etc.smb.value.global."preferred master" nil true
 Write	.etc.smb.value.global.security "user" true
 Write	.etc.smb.value_type.global.security 0 true
 Write	.etc.smb.value.global.workgroup "Test" true

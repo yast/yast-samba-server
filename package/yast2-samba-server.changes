@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar  4 10:13:59 CET 2005 - mlazar@suse.cz
+
+- SambaRole.pm: fixed typo: preffered master -> preferred master
+- updated testsuites
+
+-------------------------------------------------------------------
 Thu Mar  3 12:11:00 CET 2005 - mlazar@suse.cz
 
 - fixed bugs in SambaAccount::Write()
