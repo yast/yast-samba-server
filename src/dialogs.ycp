@@ -72,6 +72,8 @@ global define symbol RoleDialog () ``{
 	// enable widgets according to the current role
 	boolean ew = !(UI::QueryWidget( `id( `disabled ), `Value ));
 	
+	UI::ChangeWidget( `id( `enabled ), `Value, ew );
+
 	UI::ChangeWidget( `id( `pdc ), `Enabled, ew );
 	UI::ChangeWidget( `id( `bdc ), `Enabled, ew );
 	UI::ChangeWidget( `id( `standalone ), `Enabled, ew );
@@ -114,16 +116,20 @@ the replication.
 ") );		
 	    }
 
+	    // update the widgets
+	    UI::ChangeWidget( `id( role ), `Value, true );
+
 	    // store the new settings
 	    if( ! SambaServer::setRole( role ) ) {
 		// role switch was unsuccessful, continue editing
 		ret = nil;
 		continue;
 	    }
+
 	    Samba::setWorkgroup( UI::QueryWidget( `id(`workgroup ), `Value ) );
 	    SambaServer::setDescription( UI::QueryWidget( `id( `server_description ), `Value ) );
 	    
-	    if( SambaServer::role != `disabled ) {
+	    if( SambaServer::role == `next ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );
 		if( res != `workgroup && SambaServer::role == `pdc ) {
 		    // translators: continue/cancel popup. Warning, that there is already a PDC present.
@@ -139,8 +145,8 @@ Really continue?
 		}
 		
 		// save the settings
-		SambaServer::WriteSAMBackend();
-		SambaServer::ReloadSettings();
+//		SambaServer::WriteSAMBackend();
+//		SambaServer::ReloadSettings();
 		
 		// ask to join the domain
 		AskJoinDomain( Samba::workgroup, res );

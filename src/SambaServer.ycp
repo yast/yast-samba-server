@@ -1136,9 +1136,11 @@ global define string setLDAPAdminPassword( string password ) ``{
     
     // check the exit code, return nil on success
     if( result["exit"]:1 == 0 ) return nil;
-    
+
+    // translators: unknown error when setting the LDAP password    
+    string res = result["stderr"]:_("Cannot set the password.");
     // otherwise return stderr
-    return result["stderr"]:_("Unknown error");
+    return size(res)==0 ? _("Cannot set the password.") : res;
 }
 
 /**

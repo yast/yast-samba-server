@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug 25 16:21:29 CEST 2003 - visnov@suse.de
+
+- Fix dialog init (#29243)
+- Do not show empty error if not able to change LDAP password
+- Do not save settings if not needed
+- 2.8.6
+
+-------------------------------------------------------------------
 Thu Aug 21 14:59:43 CEST 2003 - visnov@suse.de
 
 - show error dialog if required packages are not installed before quit
