@@ -21,10 +21,8 @@ Write	.etc.smb.value_type.global."local master" 0 true
 Write	.etc.smb.value.global."os level" "65" true
 Write	.etc.smb.value_type.global."os level" 0 true
 Write	.etc.smb.value.global."password server" nil true
-Write	.etc.smb.value.global."preferred master" "yes" true
+Write	.etc.smb.value.global."preferred master" "Yes" true
 Write	.etc.smb.value_type.global."preferred master" 0 true
-Write	.etc.smb.value.global."preffered master" "Yes" true
-Write	.etc.smb.value_type.global."preffered master" 0 true
 Write	.etc.smb.value.global.security "user" true
 Write	.etc.smb.value_type.global.security 0 true
 Write	.etc.smb.value.global.workgroup "Test" true

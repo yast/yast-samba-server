@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar  3 12:18:41 CET 2005 - mlazar@suse.cz
+
+- 2.11.11
+- SambaRole.pm: fixed typo: preffered master -> preferred master
+- updated testsuites
+
+-------------------------------------------------------------------
 Thu Mar  3 12:08:32 CET 2005 - mlazar@suse.cz
 
 - 2.11.10

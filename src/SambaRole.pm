@@ -77,7 +77,7 @@ sub setLMB {
     SambaConfig->GlobalSetTruth("local master", $on); # default = Yes
 
     # nmbd will force an election on startup, and it will have a slight advantage in winning the election
-    SambaConfig->GlobalSetTruth("preffered master", $on); # default = Auto (Yes if LocalMaster and DomainMaster)
+    SambaConfig->GlobalSetTruth("preferred master", $on); # default = Auto (Yes if LocalMaster and DomainMaster)
 
     if ($on) {
 	# ensure high os level for LocalMaster
