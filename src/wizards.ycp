@@ -63,6 +63,7 @@ any MainSequence() {
 	"ask_join_domain": $[
 	    `cancel	: "conf_tab",
 	    `error	: "conf_tab",
+	    `skip	: `finish,
 	    `abort	: `abort,
 	    `ok		: "ensure_root_account",
 	],

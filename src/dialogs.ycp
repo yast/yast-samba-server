@@ -959,18 +959,20 @@ symbol AskJoinDomainDialog() ``{
 	`HBox( 
 	    // translators: button label to skip joining to domain
 	    `PushButton(`id(`skip), _("Do &Not Join")), 
-	    `PushButton(`id(`cancel), Label::CancelButton(),
-	    `PushButton(`id(`ok), `opt(`default), Label::OKButton())))));
+	    `PushButton(`id(`cancel), Label::CancelButton()),
+	    `PushButton(`id(`ok), `opt(`default), Label::OKButton()))));
     
     any ret = UI::UserInput();
-    if (ret != `ok) {
-	return `cancel;
-    }
     
     user = (string)UI::QueryWidget(`id(`user), `Value);
     passwd = (string)UI::QueryWidget(`id(`passwd), `Value);
 
     UI::CloseDialog();
+
+    if (ret == `skip)  return `skip;
+    if (ret != `ok) {
+	return `cancel;
+    }
     
     // try to join the domain
     string error = SambaNetJoin::Join(workgroup, tolower(role), user, passwd);
