@@ -116,8 +116,8 @@ map <string, any> check_one_synonym(map <string, any> config, string key1, strin
     
     // both master and synonym key are specified
     if (config[key1]:nil != config[key2]:nil) {
-	string val1 = is(config[key1]:nil, boolean) ? (config[key1]:false?"tRue":"faLse") : config[key1]:"";
-        string val2 = is(config[key2]:nil, boolean) ? (config[key2]:false?"tRue":"faLse") : config[key2]:"";
+	string val1 = is(config[key1]:nil, boolean) ? (config[key1]:false?"yes":"no") : config[key1]:"";
+        string val2 = is(config[key2]:nil, boolean) ? (config[key2]:false?"yes":"no") : config[key2]:"";
 	
 	if (share != nil) {
 	    // translators: error popup on conflicting options, %1 is the name of the

@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Aug 13 13:10:25 CEST 2004 - mlazar@suse.cz
+
+- used CWMTab module
+- StartUp custom widget replaced by CWMServiceStart and
+  CWMFirewallInterface widgets
+- Identity custom widget splited to BaseSettings, WinsSetting,
+  NetbiosName and AdvancedSettings custom widgets
+- help modified to respect chanes in UI
+- Instalation_Step2 dialog simplified if ui_mode is "simple"
+
+-------------------------------------------------------------------
 Wed Aug 11 16:02:02 CEST 2004 - mlazar@suse.cz
 
 - code clean-up

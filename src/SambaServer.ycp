@@ -461,7 +461,6 @@ global define boolean Read() ``{
 
 	result = check_synonym(result, local_synonym_map, share);
 	// TODO: "writable" and "read only" are inverted synonym
-y2milestone("result = %1", result);
 
 	result["commentout"] = SCR::Read( add(.etc.smb.section_type, share) ) > 0 ;
 	return $[ share: result ];

@@ -14,20 +14,27 @@ textdomain "samba-server";
 import "String";
 import "Label";
 import "Wizard";
+
 import "ProductFeatures";
-import "CWMFirewallInterfaces";
+
 import "Samba";
 import "SambaServer";
 import "SambaServerWidgets";
-import "TabWidget";
+
 import "CWM";
+import "CWMTab";
+import "CWMServiceStart";
+import "CWMFirewallInterfaces";
 
 include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
 string return_tab = "startup";
-map <string, any> firewall_widget = nil;
+
+string pdc = _("&Primary Domain Controller (PDC)");
+string bdc = _("B&ackup Domain Controller (BDC)");
+string standalone = _("No Domain &Controller");
 
 any Installation_Step1 () {
 
@@ -102,25 +109,27 @@ any Installation_Step2 () {
 	`VSquash(`Frame(_("Type Selection for SAMBA Server"), `VBox(
 	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
 		`VSpacing(1),
-		`Left(`Label(_("The available options in the configuration dialogs
-depend on the settings in this selection.
-"))),
-		`Left(`RadioButton(`id(`pdc), _("&Primary Domain Controller (PDC)"), proposal["pdc","propose"]:false)),
+		`Left(`RadioButton(`id(`pdc), pdc, proposal["pdc","propose"]:false)),
 		`HBox(
 		    `HSpacing(4),
 		    `Left(`Label(proposal["pdc","message"]:""))),
-		`Left(`RadioButton(`id(`bdc), _("B&ackup Domain Controller (BDC)"), proposal["bdc","propose"]:false)),
-		`HBox(
-		    `HSpacing(4),
-		    `Left(`Label(proposal["bdc","message"]:""))),
-		`Left(`RadioButton(`id (`standalone), _("No Domain &Controller"), proposal["standalone","propose"]:false)),
+		(ProductFeatures::ui_mode == "simple" ? `Empty() : `VBox(
+			`Left(`RadioButton(`id(`bdc), bdc, proposal["bdc","propose"]:false)),
+			`HBox(
+			    `HSpacing(4),
+			    `Left(`Label(proposal["bdc","message"]:""))))),
+		`Left(`RadioButton(`id (`standalone), standalone, proposal["standalone","propose"]:false)),
 		`VSpacing(1)))))),
 	`VStretch());
+	
+    string help = ProductFeatures::ui_mode == "simple" ? HELPS["inst_step2_no_bdc"]:"" :  HELPS["inst_step2"]:"";
 
-    Wizard::SetContents ( caption, contents, HELPS["inst_step2"]:"", true, true );
+    Wizard::SetContents ( caption, contents, help, true, true );
 	
     UI::ChangeWidget ( `id (`pdc), `Enabled, proposal["pdc","possible"]:true );
-    UI::ChangeWidget ( `id (`bdc), `Enabled, proposal["bdc","possible"]:true );
+    if (ProductFeatures::ui_mode != "simple") {
+	UI::ChangeWidget ( `id (`bdc), `Enabled, proposal["bdc","possible"]:true );
+    }
 
     any ret = nil;
     while(true) {
@@ -151,160 +160,149 @@ depend on the settings in this selection.
 
 /************************* initial wizard end **************************/
 
-void ServiceWidgetInit (map<string, any> descr, any key)
+void BaseSettingsWidgetInit(string key)
 {
-    symbol status = SambaServer::ServiceEnabled () ? `enable: `disable;
-    UI::ChangeWidget ( `id ( status ), `Value, true );
-    CWMFirewallInterfaces::OpenFirewallInit(firewall_widget, "");
+    UI::ChangeWidget(`id("workgroup_domainname"), `Value, Samba::workgroup);
+    UI::ChangeWidget(`id("domain_controller"), `Value, SambaServer::role);
 }
 
-void ServiceWidgetStore (map<string, any> descr, any key)
+void WinsSettingsWidgetInit(string key)
 {
-    SambaServer::setServiceEnabled ( 
-	UI::QueryWidget ( `id ("samba_server_type"), `CurrentButton ) == `enable 
-    );
-    CWMFirewallInterfaces::OpenFirewallStore(firewall_widget, "", $["ID":`next]);
+    boolean wins = SambaServer::global_config["wins support"]:false;
+
+    UI::ChangeWidget(`id("wins_server_support"), `Value, wins);
+    UI::ChangeWidget(`id("remote_wins_server"), `Value, ! wins);
+    UI::ChangeWidget(`id("wins_server_name"), `Enabled, ! wins);
+    UI::ChangeWidget(`id("wins_server_name"), `Value, SambaServer::global_config["wins server"]:"" );
 }
 
-symbol ServiceWidgetHandle(string key, map event_descr)
+void GlobalConfigStringWidgetInit(string key)
 {
-    CWMFirewallInterfaces::OpenFirewallHandle(firewall_widget, "", event_descr);
-//    if (CWMFirewallInterfaces::configuration_changed == true) {
-//	SambaServer::modified = true;
-//    }
+    UI::ChangeWidget(`id(key), `Value, SambaServer::global_config[key]:"" );
 }
 
-
-void IdentityWidgetInit (map<string, any> descr, any key)
+void BaseSettingsWidgetStore(string key, map event_descr)
 {
-    UI::ChangeWidget ( `id ( "workgroup_domainname" ), `Value, Samba::workgroup );
-    UI::ChangeWidget ( `id ( "domain_controller" ), `Value, SambaServer::role );
-    
-    boolean wins = normalize_boolean (SambaServer::global_config["wins support"]: (string)nil, false);
+    string sel = (string)UI::QueryWidget(`id("workgroup_domainname"), `Value);
+    y2milestone("Setting workgroup '%1'",sel);
+    Samba::setWorkgroup(sel);
+    SambaServer::global_config["workgroup"] = sel;
 
-    UI::ChangeWidget ( `id ( "wins_server_support"), `Value, wins );
-    UI::ChangeWidget ( `id ( "remote_wins_server"), `Value, ! wins );
-    UI::ChangeWidget ( `id( "wins_server_name" ), `Enabled, ! wins );
-	    
-    UI::ChangeWidget ( `id( "wins_server_name" ), `Value, SambaServer::global_config["wins server"]:"" );
-
-    UI::ChangeWidget ( `id( "netbios_hostname" ), `Value, SambaServer::global_config["netbios name"]:"" );
-}
-
-void IdentityWidgetStore (map<string, any> descr, any key)
-{
-    string sel = (string)UI::QueryWidget( `id ("workgroup_domainname"), `Value );
-    y2milestone ("Setting workgroup '%1'",sel);
-    Samba::setWorkgroup (sel);
-    SambaServer::global_config ["workgroup"] = sel;
-
-    symbol role = (symbol)UI::QueryWidget ( `id ( "domain_controller" ), `Value );
+    symbol role = (symbol)UI::QueryWidget(`id("domain_controller"), `Value);
     y2milestone ("Setting role '%1'",role);
-    SambaServer::setRole (role);
+    SambaServer::setRole(role);
     
-    if ( (boolean)UI::QueryWidget ( `id ( "wins_server_support"), `Value ) ) 
-    {
-	y2milestone ("Enabling wins support");
-	SambaServer::global_config ["wins support"] = "yes";
-    }
-    else
-    {
-	SambaServer::global_config ["wins support"] = "no";
-	SambaServer::global_config ["wins server"] = 
-	    (string)UI::QueryWidget ( `id( "wins_server_name" ), `Value );
-	y2milestone ("Disabling wins support, using server '%1'", SambaServer::global_config ["wins server"]:nil );
-    }
-
-    string value = (string)UI::QueryWidget ( `id( "netbios_hostname" ), `Value );
-    
-    // warn about the change
-    if (! Mode::config && value != SambaServer::global_config["netbios name"]:"")
-    {
-	Popup::Warning ( warnings["netbios"]:"" );
-    }
-    SambaServer::global_config["netbios name"] = value;
     SambaServer::modified = true;
 }
 
-symbol IdentityWidgetHandle (string key, map event_descr)
+void WinsSettingsWidgetStore(string key, map event_descr)
 {
-    if ( event_descr["ID"]:nil == "wins_server_support" 
-	|| event_descr["ID"]:nil == "remote_wins_server")
-    {
-	UI::ChangeWidget ( `id( "wins_server_name" ), `Enabled, event_descr["ID"]:nil == "remote_wins_server" );
+    if ( (boolean)UI::QueryWidget(`id("wins_server_support"), `Value)) {
+	y2milestone("Enabling wins support");
+	SambaServer::global_config["wins support"] = true;
+    } else {
+	SambaServer::global_config ["wins support"] = false;
+	SambaServer::global_config ["wins server"] = (string)UI::QueryWidget(`id("wins_server_name"), `Value);
+	y2milestone("Disabling wins support, using server '%1'", SambaServer::global_config["wins server"]:nil );
     }
 
-    else if( contains ( [ `ldap, `passdb, `global_settings], event_descr["ID"]:`cancel ) ) {
-	return_tab = "identity";
-	return event_descr["ID"]:`next;
+    SambaServer::modified = true;
+}
+
+void GlobalConfigStringWidgetStore(string key, map event_descr)
+{
+    string value = (string)UI::QueryWidget(`id(key), `Value);
+    
+    // warn about the netbios name change
+    if (key == "netbios name" && !Mode::config && value != SambaServer::global_config[key]:"") {
+	Popup::Warning( warnings["netbios"]:"" );
+    }
+    
+    if (value != SambaServer::global_config[key]:"") {
+	SambaServer::global_config[key] = value;
+        SambaServer::modified = true;
+    }
+}
+
+symbol WinsSettingsWidgetHandle(string key, map event_descr)
+{
+    any event = event_descr["ID"]:nil;
+    if ( event == "wins_server_support" || event == "remote_wins_server" ) {
+	UI::ChangeWidget(`id("wins_server_name"), `Enabled, event == "remote_wins_server");
     }
     return nil;
 }
 
+symbol AdvancedSettingsWidgetHandle(string key, map event)
+{
+    if (is(event["ID"]:nil, symbol) && contains([ `ldap, `passdb, `global_settings], event["ID"]:`cancel)) {
+	return_tab = "identity";
+	return event["ID"]:`next;
+    }
+    return nil;
+}
 
-void SharesWidgetInit (map<string, any> descr, any key)
+void SharesWidgetInit(string key)
 {
     list items = shares2items( SambaServer::shares );
     
-    UI::ChangeWidget ( `id( `table ), `Items, items );
+    UI::ChangeWidget( `id(`table ), `Items, items );
     UI::ChangeWidget( `id(`edit), `Enabled, size(SambaServer::shares)>0 );
     UI::ChangeWidget( `id(`delete), `Enabled, size(SambaServer::shares)>0 );
     UI::ChangeWidget( `id(`toggle), `Enabled, size(SambaServer::shares)>0 );
 }
 
-symbol SharesWidgetHandle (string key, map event_descr)
+symbol SharesWidgetHandle(string key, map event_descr)
 {
+    if (! is(event_descr["ID"]:nil, symbol)) return nil;
     symbol ret = (symbol) event_descr["ID"]:nil;
+    return_tab = "shares";
+
+    if (ret == `add || ret == `ldap || ret == `passdb ) {
+	return ret;
+    }
+    if (ret == `filter_all) {
+	list items = shares2items( SambaServer::shares );
+	UI::ChangeWidget ( `id( `table ), `Items, items );
+	return nil;
+    }
+    if (ret == `filter_non_system) {
+	list<string> system = ["homes","printers","print$"];
+	list items = shares2items(filter(string s, map value, SambaServer::shares, ``(!contains(system, s))));
+	UI::ChangeWidget(`id(`table ), `Items, items);
+	return nil;
+    }
 
     integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
-
-    if(ret == `edit && id != nil ) {
-	SambaServerWidgets::shareToEdit = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
-	return_tab = "shares";
+    if (id == nil) return nil;
+	
+    string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+    if (share == nil) return nil;
+    
+    if (ret == `edit) {
+	SambaServerWidgets::shareToEdit = share;
 	return `edit;
     }
-    else if(ret == `toggle && id != nil) {
-	string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+    if (ret == `toggle) {
 	SambaServer::enableShare( share, (SambaServer::shares[share, "commentout"]:false) );
 	UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 	UI::ChangeWidget( `id(`table), `CurrentItem, id );
 	SambaServer::modified = true;
+	return nil;
     }
-    else if(ret == `add ) {
-	return_tab = "shares";
-	return `add;
-    }
-    else if(ret == `ldap || ret == `passdb ) {
-	return_tab = "identity";
-	return ret;
-    }
-    else if(ret == `delete && id != nil)
+    if (ret == `delete)
     {
 	// confirmation dialog before deleting a share
 	if  (Popup::ContinueCancel( sformat( _("Really 
 delete share '%1'?
 
 All its settings will be lost.
-"), select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
-	    SambaServer::removeShare( (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
-	    
+"), share ) ) ) {
+	    SambaServer::removeShare( share );
 	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 	}
     }
-    else if(ret == `filter_all)
-    {
-	list items = shares2items( SambaServer::shares );
-	UI::ChangeWidget ( `id( `table ), `Items, items );
-    }
-    else if(ret == `filter_non_system)
-    {
-	list<string> system = ["homes","printers","print$"];
-	list items = shares2items( 
-	    filter (string share, map value, SambaServer::shares
-		, ``(! contains (system, share) ) )
-	);
-	UI::ChangeWidget ( `id( `table ), `Items, items );
-    }
+    
     return nil;
 }
 
@@ -359,7 +357,7 @@ and the password to access it.")),
 
 boolean autoyast_warning_done = false;
 
-void TrustedDomainsWidgetInit (map<string, any> descr, any key)
+void TrustedDomainsWidgetInit(string key)
 {
 
     if ( Mode::config && !autoyast_warning_done)
@@ -381,7 +379,7 @@ a security threat."));
 	}
     });
     
-    UI::ReplaceWidget (`id (`domains_tr), `SelectionBox( `id( "trusted_domains" ), _("&Trusted Domains List") , domains ) );
+    UI::ReplaceWidget(`id(`domains_tr), `SelectionBox(`id("trusted_domains"), _("&Trusted Domains List"), domains));
 
     // disable delete button if needed
     UI::ChangeWidget (`id (`delete_domain), `Enabled, size (domains) != 0);
@@ -395,8 +393,7 @@ symbol TrustedDomainsWidgetHandle (string key, map event_descr)
     }
     else if ( event_descr["ID"]:nil == `delete_domain )
     {
-	string to_delete = (string)UI::QueryWidget (
-	    `id ("trusted_domains"), `CurrentItem );
+	string to_delete = (string)UI::QueryWidget(`id("trusted_domains"), `CurrentItem );
 	    
 	// confirmation
 	if  (Popup::ContinueCancel( sformat( _("Really abadon trust relationship 
@@ -409,7 +406,7 @@ to trusted domain '%1'?"), to_delete ) )  )
     }
 
     // reinitialize contents
-    TrustedDomainsWidgetInit ($[], key);
+    TrustedDomainsWidgetInit (key);
 
     return nil;
 }
@@ -595,108 +592,72 @@ Really use this path?
 }
 
 boolean TabAbort () {
-
-    if (TabWidget::Modified ())
-    {
-	SambaServer::modified = true;
-    }
-    
+    SambaServer::modified = true;
     return SambaServer::AbortFunction ();
 }
 
 any Installation_Conf_Tab () {
 
-    map<string,any> firewall_settings = $[ "services" : [ "samba-server" ], "display_details" : true ];
-    firewall_widget = CWMFirewallInterfaces::CreateOpenFirewallWidget(firewall_settings);
-    string firewall_help = firewall_widget["help"]:"";
-    term firewall_layout = firewall_widget["custom_widget"]:`VBox();
-
-    term page_start_up = `HBox(
-	`VBox(
-	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
-		`Left(`RadioButton(`id(`enable), _("On -- &Enable Services Automatically and Start on Booting"))),
-		`Left(`RadioButton(`id(`disable), _("Off -- &Disable Services"))))),
-	    `VSpacing(1),
-	    firewall_layout,
-	    `VStretch()),
-	`HStretch());
-
-    term page_shares = `HBox(
+    term shares_widget = `HBox(
 	`HWeight(1, `Empty()),
 	`HWeight(100, `VBox(
-	    `VWeight(1, `HBox(
+	    `HBox(
 		`Left(`Label(_("Available shares are"))),
 	        `HStretch(),
 		`Right(`MenuButton(_("&Filter"), [
 		    `item(`id(`filter_all), "Show &All Shares" ),
-		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )])))),
-	    `VWeight(5,
-		// translators: table header texts
-		`Table ( `id ( `table ), `opt(`hvstretch), `header(_("Status"), _("Name"),  _("Path"), _("Comment")), [])),
-	    `VWeight(1, `HBox(
+		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )]))),
+	    // translators: table header texts
+	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Name"),  _("Path"), _("Comment")), []),
+	    `HBox(
 		`PushButton(`id(`add), Label::AddButton() + "..."),
 		`PushButton(`id(`edit), Label::EditButton() + "..."),
 		`PushButton(`id(`delete), Label::DeleteButton()),
 		`HStretch(),
-		`PushButton(`id(`toggle), _("&Toggle Status")))),
-	    `VStretch())),
+		`PushButton(`id(`toggle), _("&Toggle Status"))))),
 	`HWeight(1, `Empty()));
+
+    term wins_widget = `Frame(_("WINS"), `HBox(
+	`HSpacing(1),
+	`VBox(
+	    `VSpacing(0.5),
+	    `RadioButtonGroup(`id("wins_support"),`VBox(
+		`Left(`RadioButton(`id("wins_server_support"), `opt(`notify ), _("WINS Server Support"))),
+		`Left(`RadioButton(`id("remote_wins_server"), `opt(`notify ), _("Remote WINS Server"))))),
+	    `HBox(
+	        `HSpacing(3),
+		`TextEntry(`id("wins_server_name"), _("Na&me:"))),
+	    `VStretch()),
+	`HSpacing(1)));
 
     list<term> roles = [
 	// translators: combobox item
-	`item ( `id ( `standalone ), _("No DC") ),
+	`item(`id(`standalone), _("No DC")),
 	// translators: combobox item
-	`item ( `id ( `pdc ), _("Primary (PDC)") )
-	];
+	`item(`id(`pdc), _("Primary (PDC)"))
+    ];
 
     if (ProductFeatures::ui_mode != "simple") {
 	// translators: combobox item
 	roles = add( roles, `item ( `id ( `bdc ), _("Backup (BDC)") ));
     }
     
-    term page_identity_wins = `HWeight(10, `Frame(_("WINS"), `HBox(
-	`HSpacing(1),
-	`VBox(`opt(`hstretch),
-	    `RadioButtonGroup(`id("wins_support"),`VBox(
-		`Left(`RadioButton(`id("wins_server_support"), `opt(`notify ), _("WINS Server Support"))),
-		`Left(`RadioButton(`id("remote_wins_server"), `opt(`notify ), _("Remote WINS Server"))))),
-	    `HBox(
-	        `HSpacing(3),
-		`TextEntry(`id("wins_server_name"), `opt(`hstretch), _("Na&me:"))),
-	    `VStretch()),
-	`HSpacing(1))));
-
-    term page_identity_base = `HWeight(10, `Frame(_("Base Settings"), `HBox(
+    term basesettings_widget = `Frame(_("Base Settings"), `HBox(
         `HSpacing(1),
-	`VBox(`opt(`hstretch),
-	    `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch ), _("&Workgroup or Domain Name"),
+	`VBox(
+	    `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name"),
 		maplist( string key, boolean value, Samba::PreprocessAvailableWorkgroups (), ``(key))),
 	    // translators: combobox label
-	    `ComboBox(`id("domain_controller"), `opt(`hstretch ), _("Domain &Controller"),  roles),
+	    `ComboBox(`id("domain_controller"), `opt(`hstretch), _("Domain &Controller"),  roles),
 	    `VStretch()),
-	`HSpacing(1))));
+	`HSpacing(1)));
+    
+    term advanced_settings_widget = `MenuButton(_("Advanced Settings..."), [
+	`item(`id(`global_settings), _("&Expert Global Settings")),
+	`item(`id(`ldap), _("&LDAP Settings")),
+	`item(`id(`passdb), _("&User Authentication Sources")) ] );
 	
-    term page_identity = `HBox(
-	`HWeight(1, `Empty()),
-	`HWeight(30, `VBox(`opt(`hstretch),
-	    `HStretch(),
-	    `Top(`HBox(
-			page_identity_base,
-			`HSpacing(1),
-			(ProductFeatures::ui_mode == "simple") ? `VSpacing(0) : page_identity_wins,
-			`HStretch ())),
-	    `VBox(
-		`VSpacing(1),
-		`TextEntry(`id("netbios_hostname"), `opt(`hstretch ), _("NetBIOS &Host Name")),
-		`MenuButton(_("Advanced Settings..."), [
-			`item(`id(`global_settings), _("&Expert Global Settings")),
-			`item(`id(`ldap), _("&LDAP Settings")),
-			`item(`id(`passdb), _("&User Authentication Sources")) ] )),
-	    `VStretch())),
-	`HWeight(1, `Empty()),
-	`HStretch());
-
-    term page_trusted_domains = `HBox(
+    term trusted_domains_widget = `HBox(
 	`HWeight(1, `Empty()),
 	`HWeight(100, `VBox(
 	    `VWeight(7, `ReplacePoint(`id(`domains_tr),
@@ -710,67 +671,144 @@ any Installation_Conf_Tab () {
 
     string caption = _("Samba Configuration");
 
-    list tab_list = [
-	CWM::prepareWidget($[
-    	    "id" : "startup",
+    map tabs_descr = $[
+	"startup": $[
             "header" : _("Start &Up"),
-	    "widget" : `custom,
-	    "custom_widget" : page_start_up,
-	    "init" : ServiceWidgetInit,
-	    "store" : ServiceWidgetStore,
-	    "handle" : ServiceWidgetHandle,
-	    "help": HELPS["smb_conf_tab_startup"]:"" + firewall_help
-	]),
-        CWM::prepareWidget($[
-            "id" : "shares",
+	    "contents": `HBox(
+		`HWeight(2, `Empty()),
+		`HWeight(100, `VBox(
+		    `VSpacing(1),
+		    "SERVICE START",
+		    `VSpacing(1),
+		    `Frame(_("Firewall Settings"), "FIREWALL"),
+		    `VStretch())),
+		`HWeight(2, `Empty())),
+	    "widget_names": ["SERVICE START", "FIREWALL"]
+	],
+	"shares": $[
             "header" : _("&Shares"),
-	    "widget" : `custom,
-	    "custom_widget" : page_shares,
-	    "init" : SharesWidgetInit,
-	    "handle" : SharesWidgetHandle,
-	    "help": HELPS["smb_conf_tab_shares"]:""
-	]),
-        CWM::prepareWidget($[
-            "id" : "identity",
+	    "contents": `VBox("SHARES"),
+	    "widget_names": ["SHARES"]
+	],
+	"identity": $[
             "header" : _("I&dentity"),
-	    "widget" : `custom,
-	    "custom_widget" : page_identity,
-	    "init" : IdentityWidgetInit,
-	    "handle" : IdentityWidgetHandle,
-	    "store" : IdentityWidgetStore,
-	    "help": HELPS["smb_conf_tab_identity"]:""
-	])
+	    "contents": `HBox( "IDENTITY COMMON HELP",
+		`HWeight(1, `Empty()),
+		`HWeight(100, `VBox(
+		    `VSpacing(0.5),
+		    (ProductFeatures::ui_mode == "simple" ? 
+			`HBox(
+			    `HWeight(25, `Empty()),
+			    `HWeight(50, `VBox(
+				"BASE SETTINGS",
+				`VSpacing(0.5),
+				"netbios name",
+				"ADVANCED SETTINGS")),
+			    `HWeight(25, `Empty())) :
+			`VBox(
+			    `HBox(
+				`HWeight(1, "BASE SETTINGS"),
+				`HSpacing(0.5),
+				`HWeight(1, "WINS SETTINGS")),
+			    `VSpacing(0.5),
+			    "netbios name",
+			    "ADVANCED SETTINGS")),
+		    `VStretch())),
+		`HWeight(1, `Empty())),
+	    "widget_names": ["IDENTITY COMMON HELP", "BASE SETTINGS", "WINS SETTINGS", "netbios name", "ADVANCED SETTINGS"]
+	]
     ];
     
     if (ProductFeatures::ui_mode != "simple") {
-	tab_list = add(tab_list, CWM::prepareWidget($[
-            "id": "trusted_domains",
-            "header": _("&Trusted Domains"),
+	tabs_descr = union(tabs_descr, $[
+	    "trusted_domains_tab": $[
+		"header": _("&Trusted Domains"),
+		"contents": `VBox("TRUSTED DOMAINS"),
+		"widget_names": ["TRUSTED DOMAINS"]
+	    ]
+	]);
+    }
+    
+    map tabs_widget_descr = $[
+	"SERVICE START": CWMServiceStart::CreateAutoStartWidget($[
+	    "get_service_auto_start": SambaServer::ServiceEnabled,
+	    "set_service_auto_start": SambaServer::setServiceEnabled,
+	]),
+	"FIREWALL": CWMFirewallInterfaces::CreateOpenFirewallWidget($[
+	    "services": [ "samba-server" ],
+	    "display_details": true
+	]),
+	"SHARES": $[
+	    "widget" : `custom,
+	    "custom_widget" : shares_widget,
+	    "init" : SharesWidgetInit,
+	    "handle" : SharesWidgetHandle,
+	    "help": HELPS["smb_conf_tab_shares"]:""
+	],
+	"IDENTITY COMMON HELP": $[
+	    "widget" : `custom,
+	    "custom_widget" : `Empty(),
+	    "help": HELPS["smb_conf_tab_identity"]:""
+	],
+	"BASE SETTINGS": $[
+	    "widget" : `custom,
+	    "custom_widget" : basesettings_widget,
+	    "help": ProductFeatures::ui_mode == "simple" ? HELPS["smb_conf_tab_base_settings_no_bdc"]:"" : HELPS["smb_conf_tab_base_settings"]:"",
+	    "init": BaseSettingsWidgetInit,
+	    "store": BaseSettingsWidgetStore,
+	],
+	"WINS SETTINGS": $[
+	    "widget" : `custom,
+	    "custom_widget" : wins_widget,
+	    "help": HELPS["smb_conf_tab_wins_settings"]:"",
+	    "init": WinsSettingsWidgetInit,
+	    "store": WinsSettingsWidgetStore,
+	    "handle": WinsSettingsWidgetHandle,
+	],
+	"netbios name": $[
+	    "widget": `textentry,
+	    "label": _("NetBIOS &Host Name"),
+	    "help": HELPS["smb_conf_tab_netbios_name"]:"",
+	    "init": GlobalConfigStringWidgetInit,
+	    "store": GlobalConfigStringWidgetStore,
+	],
+	"ADVANCED SETTINGS": $[
+	    "widget" : `custom,
+	    "custom_widget" : advanced_settings_widget,
+	    "help": HELPS["smb_conf_tab_advanced_settings"]:"",
+	    "handle": AdvancedSettingsWidgetHandle,
+	],
+	"TRUSTED DOMAINS": $[
 	    "widget": `custom,
-	    "custom_widget": page_trusted_domains,
+	    "custom_widget": trusted_domains_widget,
 	    "init": TrustedDomainsWidgetInit,
 	    "handle": TrustedDomainsWidgetHandle,
-	    "help": HELPS["smb_conf_tab_trusted_domains"]:""
-	]));
-    }
-
-    map widgets =  $[
-	"overview":TabWidget::CreateTabWidgetDescr($[], $["tabs":tab_list, "start_tab":return_tab])
+	    "help": HELPS["smb_conf_tab_trusted_domains"]:"",
+	]
     ];
+
+    map widget_descr = $[
+	"tab": CWMTab::CreateWidget($[
+	    "tab_order": ProductFeatures::ui_mode != "simple" ?
+		["startup", "shares", "identity", "trusted_domains_tab"] :
+		["startup", "shares", "identity"],
+	    "tabs": tabs_descr,
+	    "widget_descr": tabs_widget_descr,
+	    "initial_tab" : return_tab,
+	    "tab_help" : "",
+	]),
+    ];
+
+    term contents = `VBox( "tab", `VStretch ());
+
+    list<map <string, any> > w = CWM::CreateWidgets (["tab"], (map <string, map <string, any> >)widget_descr);
+    string help = CWM::MergeHelps(w);
+    contents = CWM::PrepareDialog(contents, w);
+
+    Wizard::SetContentsButtons(caption, contents, help, Label::NextButton (), Label::FinishButton ());
+    Wizard::HideBackButton();
     
-    return_tab = "startup";
-
-    term contents = `VBox( "overview", `VStretch ());
-
-    list<map <string, any> > w = CWM::CreateWidgets (["overview"], (map <string, map <string, any> >)widgets);
-    string help = CWM::MergeHelps (w);
-    contents = CWM::PrepareDialog (contents, w);
-
-    Wizard::SetContentsButtons (caption, contents, help,
-        Label::NextButton (), Label::FinishButton ());
-    Wizard::HideBackButton ();
-    
-    any ret = CWM::Run (w, $[`abort: TabAbort ]);
+    any ret = CWM::Run(w, $[`abort: TabAbort ]);
     
     Wizard::RestoreBackButton ();
     

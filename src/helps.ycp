@@ -51,12 +51,16 @@ _("Select one of them or type your own new name and click <b>Next</b>.</p>"),
 A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>
 <p>The backup controller uses another domain controller for validation.
 The primary controller uses its own information about users and their passwords.</p>
-"),
+") + "<p>" + _("The available options in the configuration dialogs 
+depend on the settings in this selection. 
+") + "</p>",
 
-    "smb_conf_tab_startup" : _("<p><b><big>Start Up</big></b><br>
-Here, choose if the server services should be started
-on system boot.</p>
-"),
+    /* Samba select Samba Server type - Installation step 2 */
+    "inst_step2_no_bdc" : _("<p><b><big>Samba Server Type</big></b><br>
+A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>
+") + "<p>" + _("The available options in the configuration dialogs 
+depend on the settings in this selection. 
+") + "</p>",
 
     /* Share list dialog help 1/4 */
     "smb_conf_tab_shares" : _("<p><b><big>Shares</big></b><br>
@@ -90,33 +94,40 @@ remove the information about a share.</p>
     "smb_conf_tab_identity" : _("<p><b><big>Identity</big></b><br>
 These options allow setup of the identity of the server and its
 primary role in the network.</p>
-")+
+"),
 
     /* Samba role dialog help 2/5 */
-    _("<p>The base settings set up the domain and the
+    "smb_conf_tab_base_settings": _("<p>The base settings set up the domain and the
 server role. <b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> allow
 login of Windows clients into a Windows domain. The backup controller 
 uses another domain controller for validation. The primary controller
 uses its own information about users and their passwords.
 If the server should not participate as a domain controller, choose the
 <b>No DC</b> value.</p>
-") +
+"),
+
+    /* Samba role dialog help 2/5 */
+    "smb_conf_tab_base_settings_no_bdc": _("<p>The <b>Base Settings</b> set up the domain and the
+server role. <b>Primary Domain Controller</b> allow login of Windows
+clients into a Windows domain. If the server should not participate
+as a domain controller, choose the <b>No DC</b> value.</p>
+"),
 
     /* Samba role dialog help 3/5 */
-_("<p><b>WINS</b> is a network protocol to map low-level
+    "smb_conf_tab_wins_settings": _("<p><b>WINS</b> is a network protocol to map low-level
 network identification of a host (for example, IP address) to
 a NetBIOS name. The Samba server can be a 
 <b>WINS server</b> or can use another server for its
 queries. In the latter case, choose <b>Remote WINS server</b>
 and enter the IP address of the WINS server.</p>
-") +
+"),
 
     /* Samba role dialog help 4/5 */
-_("<p>Optionally, set a <b>Server NetBIOS Name</b>. The
-NetBIOS name is the name the server uses in the SMB networks.</p>") +
+    "smb_conf_tab_netbios_name": _("<p>Optionally, set a <b>Server NetBIOS Name</b>. The
+NetBIOS name is the name the server uses in the SMB networks.</p>"),
 
     /* Samba role dialog help 5/5 */
-_("<p><b>Advanced Settings</b> provides access to 
+    "smb_conf_tab_advanced_settings": _("<p><b>Advanced Settings</b> provides access to 
 details about <b>LDAP Settings</b>, <b>User Authentication Sources</b> to configure 
 how the Samba server should store the authentication information, and
 <b>Expert Global Settings</b> for direct configuration of the
