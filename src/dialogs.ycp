@@ -47,9 +47,9 @@ symbol RoleDialog () ``{
 	    // radio button group label
 	    `Frame( _("Sharing Type"), `VBox(
 		`RadioButtonGroup( `id(`samba_role), `VBox(
-		    `Left( `RadioButton( `id(`standalone), `opt(`notify), SambaServer::roleName( `standalone ), true ) ),
-		    `Left( `RadioButton( `id(`bdc), `opt(`notify), SambaServer::roleName( `bdc ) ) ),
-		    `Left( `RadioButton( `id(`pdc), `opt(`notify), SambaServer::roleName( `pdc ) ) )
+		    `Left( `RadioButton( `id(`standalone), `opt(`notify), _("File and Printer Sharing"), true ) ),
+		    `Left( `RadioButton( `id(`bdc), `opt(`notify), dgettext ("samba-server", SambaServer::roleName( `bdc )) ) ),
+		    `Left( `RadioButton( `id(`pdc), `opt(`notify), dgettext ("samba-server", SambaServer::roleName( `pdc )) ) )
 	        ) ),
 	    
 		`VBox(
@@ -67,6 +67,8 @@ symbol RoleDialog () ``{
 	) , 
 	HELPS["RoleDialog"]:"", false, true
     );
+    
+    y2milestone ("Workgroup: %1", Samba::workgroup);
     
     UI::ChangeWidget( `id( SambaServer::role ), `Value, true );
     if( SambaServer::role == `disabled ) 
@@ -143,7 +145,13 @@ controller must be a Samba server.
 
 	    Samba::setWorkgroup( (string) UI::QueryWidget( `id(`workgroup ), `Value ) );
 	    SambaServer::setDescription( (string) UI::QueryWidget( `id( `server_description ), `Value ) );
-	    SambaServer::netbios_name = (string) UI::QueryWidget( `id( `netbios_name ), `Value );
+	    string nb  = (string) UI::QueryWidget( `id( `netbios_name ), `Value );
+	    
+	    if (nb != SambaServer::netbios_name)
+	    {
+		SambaServer::netbios_name = nb;
+		SambaServer::modified = true;
+	    }
 	    
 	    if( SambaServer::role == `next ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );

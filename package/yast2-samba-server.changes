@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  2 14:42:00 CEST 2004 - visnov@suse.cz
+
+- properly detect enabled shares (#37941) 
+
+-------------------------------------------------------------------
 Thu Apr  1 19:22:44 CEST 2004 - visnov@suse.cz
 
 - fix CWM-related warnings

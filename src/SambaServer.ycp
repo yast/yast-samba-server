@@ -407,7 +407,7 @@ Remove one of the options to resolve this conflict.
     
     y2debug( "Shares read: %1", shares );
 
-    share_homes = shareEnabled( shares["homes"]:$[] );
+    share_homes = shareEnabled( shares["homes"]:$["commentout":true] );
 
     // read printer settings
     Progress::NextStage();
@@ -417,7 +417,9 @@ Remove one of the options to resolve this conflict.
     Progress::off();
     import "Spooler";
     
-    Spooler::Set (Spooler::checkSpoolSystemNoDialog());
+    string spooler = Spooler::checkSpoolSystemNoDialog();
+    y2milestone ("Spooler: %1", spooler );
+    Spooler::Set (spooler);
     system_printers = Spooler::GetAvailableQueues();
     Progress::on();
 
@@ -426,7 +428,7 @@ Remove one of the options to resolve this conflict.
 	// load the system printers
 	
 	// setup system printer status
-	boolean on = shareEnabled( shares["printers"]:$[] ) && load_printers;
+	boolean on = shareEnabled( shares["printers"]:$["commentout":true] ) && load_printers;
 	
 	foreach(  string printer, system_printers , ``{
 	    printer_status[ printer ] = on;
