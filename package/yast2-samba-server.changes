@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 17 15:30:19 CEST 2004 - jsuchome@suse.cz
+
+- plugin for users and groups only available in expert mode
+
+-------------------------------------------------------------------
 Mon Aug 16 17:49:11 CEST 2004 - mlazar@suse.cz
 
 - fixed testsuite

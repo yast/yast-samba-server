@@ -21,6 +21,7 @@ use POSIX ();
 use Data::Dumper;
 use Crypt::SmbHash;
 
+YaST::YCP::Import ("ProductFeatures");
 YaST::YCP::Import ("SCR");
 
 POSIX::setlocale(LC_MESSAGES, "");
@@ -115,6 +116,10 @@ BEGIN { $TYPEINFO{Restriction} = ["function",
 sub Restriction {
 
     my $self	= shift;
+    # plugin only available in expert mode
+    if (ProductFeatures->ui_mode () ne "expert") {
+	return {};
+    }
     # this plugin applies only for LDAP users and groups
     return { "ldap"	=> 1,
              "group"     => 1 };

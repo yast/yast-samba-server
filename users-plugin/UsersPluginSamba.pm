@@ -20,6 +20,7 @@ our %TYPEINFO;
 use Data::Dumper;
 use Crypt::SmbHash;
 
+YaST::YCP::Import ("ProductFeatures");
 YaST::YCP::Import ("SCR");
 
 textdomain("samba-users");	# TODO own textdomain for new plugins
@@ -111,6 +112,10 @@ BEGIN { $TYPEINFO{Restriction} = ["function",
     ["map", "string", "any"], "any", "any"];}
 sub Restriction {
     my $self	= shift;
+    # plugin only available in expert mode
+    if (ProductFeatures->ui_mode () ne "expert") {
+	return {};
+    }
     # this plugin applies only for LDAP users and groups
     return { "ldap"	=> 1,
              "user"     => 1 };
