@@ -25,7 +25,7 @@
 
     global define list ShareEditContents (map descr);
     global define void ShareEditPopupInit (any opt_id, string opt_key);
-    global define void ShareEditPopupStore (any opt_id, string opt_key);
+    global define void ShareEditPopupStore (any opt_id, string opt_key, map event);
     global define string ShareEditSummary (any opt_id, string opt_key);
     global define boolean ShareEditEntryDelete (any opt_id, string opt_key);
 
@@ -35,7 +35,7 @@
     global define string PassdbId2Key (map desc, any id);
     global define boolean PassdbEntryDelete (any opt_id, any opt_key);
     global define void PassdbEditOptionInit (any opt_id, any opt_key);
-    global define void PassdbEditOptionStore (any opt_id, any opt_key);
+    global define void PassdbEditOptionStore (any opt_id, any opt_key, map event);
 
 /**
  * A share name do be editted in the Edit share dialog
@@ -86,7 +86,7 @@ global define boolean initFun(any key);
 global define symbol handleFun(any key, map event_descr);
 global define boolean initPassdb(any key);
 global define symbol handlePassdb(any key, map event_descr);
-global define void storePassdb(any key);
+global define void storePassdb(any key, map event);
 global define void AddPassdbBackend ();
 
 global map shareswidget =  TablePopup::CreateTableDescr (
@@ -236,7 +236,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_id any option id
       * @param opt_key any option key
       */
-    global define void ShareEditPopupStore (any opt_id, string opt_key) ``{
+    global define void ShareEditPopupStore (any opt_id, string opt_key, map event) ``{
 	SambaServer::shares[shareToEdit, opt_key] = UI::QueryWidget (`id (opt_key), `Value);
 	SambaServer::modified = true;
     }
@@ -290,7 +290,7 @@ global define symbol handleFun(any key, map event_descr) ``{
 	UI::SetFocus (`id (opt_key));
     }
 
-    global define void PassdbEditOptionStore (any opt_id, any opt_key) ``{
+    global define void PassdbEditOptionStore (any opt_id, any opt_key, map event) ``{
 	string details = (string) UI::QueryWidget (`id (opt_key), `Value);
 	// TODO: handle empty details
 	
@@ -490,7 +490,7 @@ further information.
 	return TablePopup::TableHandle(SambaServerWidgets::widgets["passdb_edit"]:$[], key, event_descr);
     }
 
-    global define void storePassdb(any key) ``{
+    global define void storePassdb(any key, map event) ``{
 	list<string> res = maplist (string id, passdb_order, ``{
 	    return passdb_backends[id]:"";
 	});
