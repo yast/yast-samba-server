@@ -1,13 +1,2 @@
 Read	.etc.smb.all $["comment":"", "file":-1, "kind":"section", "name":"", "type":-1, "value":[$["comment":nil, "kind":"section", "name":"global", "type":nil, "value":[$["kind":"value", "name":"workgroup", "type":nil, "value":"Test"], $["kind":"value", "name":"domain master", "type":nil, "value":"no"], $["kind":"value", "name":"security", "type":nil, "value":"user"], $["kind":"value", "name":"preferred master", "type":nil, "value":"yes"], $["kind":"value", "name":"passdb backend", "type":nil, "value":"smbpasswd ldapsam:ldap://localhost"], $["kind":"value", "name":"local master", "type":nil, "value":"no"], $["kind":"value", "name":"domain logons", "type":nil, "value":"no"]]], $["comment":nil, "kind":"section", "name":"lp", "type":nil, "value":[$["kind":"value", "name":"comment", "type":nil, "value":"testing printer"], $["kind":"value", "name":"printable", "type":nil, "value":"yes"], $["kind":"value", "name":"path", "type":nil, "value":"/var/spool/lp"]]]]]
-Read	.target.tmpdir "/tmp"
-Read	.product.features.UI_MODE "expert"
-Read	.product.features.ENABLE_AUTOLOGIN "no"
-Read	.product.features.EVMS_CONFIG "no"
-Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
-Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
-Read	.product.features.UI_MODE "expert"
-Read	.product.features.ENABLE_AUTOLOGIN "no"
-Read	.product.features.EVMS_CONFIG "no"
-Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
-Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
 Return	nil

@@ -1,43 +1,9 @@
 Read	.etc.smb.all $["comment":"", "file":-1, "kind":"section", "name":"", "type":-1, "value":[$["comment":nil, "kind":"section", "name":"global", "type":nil, "value":[$["kind":"value", "name":"workgroup", "type":nil, "value":"Test"], $["kind":"value", "name":"domain master", "type":nil, "value":"no"], $["kind":"value", "name":"security", "type":nil, "value":"user"], $["kind":"value", "name":"preferred master", "type":nil, "value":"yes"], $["kind":"value", "name":"passdb backend", "type":nil, "value":"smbpasswd ldapsam:ldap://localhost"], $["kind":"value", "name":"local master", "type":nil, "value":"no"], $["kind":"value", "name":"domain logons", "type":nil, "value":"no"]]], $["comment":nil, "kind":"section", "name":"lp", "type":nil, "value":[$["kind":"value", "name":"comment", "type":nil, "value":"testing printer"], $["kind":"value", "name":"printable", "type":nil, "value":"yes"], $["kind":"value", "name":"path", "type":nil, "value":"/var/spool/lp"]]]]]
-Read	.target.tmpdir "/tmp"
-Read	.product.features.UI_MODE "expert"
-Read	.product.features.ENABLE_AUTOLOGIN "no"
-Read	.product.features.EVMS_CONFIG "no"
-Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
-Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
-Read	.product.features.UI_MODE "expert"
-Read	.product.features.ENABLE_AUTOLOGIN "no"
-Read	.product.features.EVMS_CONFIG "no"
-Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
-Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
+Log	Unknown or unsupported backend 'ldapsam'
 Write	.etc.smb.value.global."domain logons" "no" true
 Write	.etc.smb.value_type.global."domain logons" 0 true
 Write	.etc.smb.value.global."domain master" "no" true
 Write	.etc.smb.value_type.global."domain master" 0 true
-Write	.etc.smb.value.global."ldap admin dn" "" true
-Write	.etc.smb.value_type.global."ldap admin dn" 0 true
-Write	.etc.smb.value.global."ldap delete dn" "No" true
-Write	.etc.smb.value_type.global."ldap delete dn" 0 true
-Write	.etc.smb.value.global."ldap filter" "(uid=%u)" true
-Write	.etc.smb.value_type.global."ldap filter" 0 true
-Write	.etc.smb.value.global."ldap group suffix" "" true
-Write	.etc.smb.value_type.global."ldap group suffix" 0 true
-Write	.etc.smb.value.global."ldap idmap suffix" "" true
-Write	.etc.smb.value_type.global."ldap idmap suffix" 0 true
-Write	.etc.smb.value.global."ldap machine suffix" "" true
-Write	.etc.smb.value_type.global."ldap machine suffix" 0 true
-Write	.etc.smb.value.global."ldap passwd sync" "No" true
-Write	.etc.smb.value_type.global."ldap passwd sync" 0 true
-Write	.etc.smb.value.global."ldap replication sleep" "1000" true
-Write	.etc.smb.value_type.global."ldap replication sleep" 0 true
-Write	.etc.smb.value.global."ldap ssl" "Start_tls" true
-Write	.etc.smb.value_type.global."ldap ssl" 0 true
-Write	.etc.smb.value.global."ldap suffix" "" true
-Write	.etc.smb.value_type.global."ldap suffix" 0 true
-Write	.etc.smb.value.global."ldap timeout" "5" true
-Write	.etc.smb.value_type.global."ldap timeout" 0 true
-Write	.etc.smb.value.global."ldap user suffix" "" true
-Write	.etc.smb.value_type.global."ldap user suffix" 0 true
 Write	.etc.smb.value.global."local master" "no" true
 Write	.etc.smb.value_type.global."local master" 0 true
 Write	.etc.smb.value.global."passdb backend" "ldapsam:ldap://localhost" true
