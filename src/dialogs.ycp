@@ -23,6 +23,8 @@ include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
+global define map AddSharePopup();
+
 /**
  * SAMBA role dialog
  * @return dialog result
@@ -75,7 +77,7 @@ global define symbol RoleDialog () ``{
     while(true) {
 
 	// enable widgets according to the current role
-	boolean ew = !(UI::QueryWidget( `id( `disabled ), `Value ));
+	boolean ew = !((boolean) UI::QueryWidget( `id( `disabled ), `Value ));
 	
 	UI::ChangeWidget( `id( `enabled ), `Value, ew );
 
@@ -108,7 +110,7 @@ global define symbol RoleDialog () ``{
 
 	    // if not disabled, choose the role
 	    if( ew ) {
-		role = UI::QueryWidget( `id( `samba_role ), `CurrentButton ) ;
+		role = (symbol) UI::QueryWidget( `id( `samba_role ), `CurrentButton ) ;
 	    }
 	    
 	    // warning about replication for BDC
@@ -136,8 +138,8 @@ controller must be a Samba server.
 		continue;
 	    }
 
-	    Samba::setWorkgroup( UI::QueryWidget( `id(`workgroup ), `Value ) );
-	    SambaServer::setDescription( UI::QueryWidget( `id( `server_description ), `Value ) );
+	    Samba::setWorkgroup( (string) UI::QueryWidget( `id(`workgroup ), `Value ) );
+	    SambaServer::setDescription( (string) UI::QueryWidget( `id( `server_description ), `Value ) );
 	    
 	    if( SambaServer::role == `next ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );
@@ -166,7 +168,7 @@ Really continue?
         }
     }
     
-    return ret;
+    return (symbol) ret;
 }
 
 /**
@@ -217,8 +219,8 @@ global define symbol OverallSharesDialog () ``{
 	    else continue;
 	}
         else if(ret == `next || ret == `back || ret == `other_shares ) {
-	    SambaServer::enableHomes( UI::QueryWidget( `id( `homes ), `Value ) );
-	    SambaServer::enablePrinters( UI::QueryWidget( `id( `printers ), `Value ) );
+	    SambaServer::enableHomes( (boolean) UI::QueryWidget( `id( `homes ), `Value ) );
+	    SambaServer::enablePrinters( (boolean) UI::QueryWidget( `id( `printers ), `Value ) );
             break;
         }
 	else if(ret == `select_printers ) {
@@ -238,7 +240,7 @@ global define symbol OverallSharesDialog () ``{
 	    if( ret == `ok ) {
 		// update the list of selected printers
 		SambaServer::enablePrinterNames( 
-		    UI::QueryWidget( `id( `printer_list ), `SelectedItems )
+		    (list) UI::QueryWidget( `id( `printer_list ), `SelectedItems )
 		);
 	    }
 	    
@@ -249,7 +251,7 @@ global define symbol OverallSharesDialog () ``{
     
     Wizard::RestoreNextButton();
 
-    return ret;
+    return (symbol) ret;
 }
 
 /**
@@ -296,7 +298,7 @@ global define symbol ShareDirsDialog () ``{
 	UI::ChangeWidget( `id(`toggle), `Enabled, size(SambaServer::shares)>0 );
 
 	ret = UI::UserInput();
-        integer id = UI::QueryWidget(`id(`table), `CurrentItem);
+        integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
 
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
@@ -304,14 +306,14 @@ global define symbol ShareDirsDialog () ``{
 	    else continue;
 	}
 	else if(ret == `edit ) {
-	    SambaServerWidgets::shareToEdit = select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	    SambaServerWidgets::shareToEdit = (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
 	    break;
 	}
         else if(ret == `next || ret == `back) {
             break;
         }
 	else if(ret == `toggle ) {
-	    string share = select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	    string share = (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
 	    SambaServer::enableShare( share, (SambaServer::shares[share, "commentout"]:false) );
 	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 	    UI::ChangeWidget( `id(`table), `CurrentItem, id );
@@ -334,8 +336,8 @@ global define symbol ShareDirsDialog () ``{
 delete share '%1'?
 
 All its settings will be lost.
-"), select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
-		SambaServer::removeShare( select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
+"), select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
+		SambaServer::removeShare( (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
 	    
 		UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 		continue;
@@ -349,7 +351,7 @@ All its settings will be lost.
     
     Wizard::RestoreNextButton();
 
-    return ret;
+    return (symbol) ret;
 }
 
 /**
@@ -437,8 +439,8 @@ global define symbol AdvancedDialog () ``{
 	}
 	else if(ret == `ldap_test ) {
 	    // test the LDAP over SSL connection
-	    string server = UI::QueryWidget( `id( `ldap_server ), `Value );
-	    string suffix = UI::QueryWidget( `id( `ldap_suffix ), `Value );
+	    string server = (string) UI::QueryWidget( `id( `ldap_server ), `Value );
+	    string suffix = (string) UI::QueryWidget( `id( `ldap_suffix ), `Value );
 	    
 	    if( size(server) == 0 ) {
 		// translators: error message
@@ -462,18 +464,18 @@ global define symbol AdvancedDialog () ``{
 	    UI::CloseDialog();
 	}
         else if(ret == `next ) {
-	    SambaServer::setLDAPServer( UI::QueryWidget( `id( `ldap_server ), `Value ) );
-	    SambaServer::setLDAPAdminDN( UI::QueryWidget( `id( `ldap_admin_dn ), `Value ) );
-	    SambaServer::setLDAPSuffix( UI::QueryWidget( `id( `ldap_suffix ), `Value ) );
+	    SambaServer::setLDAPServer( (string) UI::QueryWidget( `id( `ldap_server ), `Value ) );
+	    SambaServer::setLDAPAdminDN( (string) UI::QueryWidget( `id( `ldap_admin_dn ), `Value ) );
+	    SambaServer::setLDAPSuffix( (string) UI::QueryWidget( `id( `ldap_suffix ), `Value ) );
 		if (!Mode::config) {
-	    if( ! (SambaServer::switchSAMBackend( UI::QueryWidget( `id( `backend ), `CurrentButton ) ) ) ) {
+	    if( ! (SambaServer::switchSAMBackend( (symbol) UI::QueryWidget( `id( `backend ), `CurrentButton ) ) ) ) {
 		// Translators: error message if it is not possible to switch between smbpasswd and LDAP backends
 		Popup::Error( sformat( _("It is not possible to switch to %1 back-end."), 
 		    UI::QueryWidget( `id( `backend ), `CurrentButton ) == `ldap ? "LDAP" : "smbpasswd" ));
 	    }
 		}
 		else {
-			SambaServer::SAM = UI::QueryWidget( `id( `backend ), `CurrentButton );
+			SambaServer::SAM = (symbol) UI::QueryWidget( `id( `backend ), `CurrentButton );
 		}
 
             break;
@@ -489,7 +491,7 @@ global define symbol AdvancedDialog () ``{
     
     Wizard::RestoreNextButton();
 
-    return ret;
+    return (symbol) ret;
 }
 
 /**
@@ -544,8 +546,9 @@ global define map AddSharePopup() ``{
     string pathvalue = "";
     string comment = "";
     
+    any ret = nil;
     do {
-	symbol ret = UI::UserInput();
+	ret = UI::UserInput();
 	
 	// user cancelled the dialog
 	if( ret == `cancel ) {
@@ -560,9 +563,9 @@ global define map AddSharePopup() ``{
 	} else {
 	    // OK was pressed
 	
-	    name = UI::QueryWidget( `id( `name ), `Value );
-	    pathvalue = UI::QueryWidget( `id( `path ), `Value );
-	    comment = UI::QueryWidget( `id( `comment ), `Value );
+	    name = (string) UI::QueryWidget( `id( `name ), `Value );
+	    pathvalue = (string) UI::QueryWidget( `id( `path ), `Value );
+	    comment = (string) UI::QueryWidget( `id( `comment ), `Value );
 	
 	    if( size( name ) == 0 ) {
 		// translators: error message

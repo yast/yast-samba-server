@@ -22,6 +22,13 @@
     include "samba-server/routines.ycp";
     include "samba-server/helps.ycp";
 
+    global define list ShareEditContents (map descr);
+    global define void ShareEditPopupInit (any opt_id, any opt_key);
+    global define void ShareEditPopupStore (any opt_id, any opt_key);
+    global define string ShareEditSummary (any opt_id, any opt_key);
+    global define boolean ShareEditEntryDelete (any opt_id, any opt_key);
+
+
 /**
  * A share name do be editted in the Edit share dialog
  */
@@ -67,24 +74,24 @@ global map smbconf_popups = $[
    ]
 ];
 
+global define byteblock initFun(any key);
+global define symbol handleFun(any key, map event_descr);
 
 global map defaulthostwidget =  TablePopup::CreateTableDescr (
 	    $["add_delete" : true, 
 	      "up_down" : false, 
 	      "unique_keys" : true]
 	  , $[
-	    "init" : ``(TablePopup::TableInit (
-		SambaServerWidgets::widgets["share_edit"]:$[])),
-	    "handle" : ``(TablePopup::TableHandle (
-		SambaServerWidgets::widgets["share_edit"]:$[])),
+	    "init" : initFun,
+	    "handle" : handleFun,
 	    "options" : smbconf_popups,
-	    "ids" : ``(SambaServerWidgets::ShareEditContents ()),
+	    "ids" : SambaServerWidgets::ShareEditContents,
 	    "fallback" : $[
-		"init" : ``(SambaServerWidgets::ShareEditPopupInit ()),
-		"store" : ``(SambaServerWidgets::ShareEditPopupStore ()),
-		"summary" : ``(SambaServerWidgets::ShareEditSummary ()),
+		"init" : SambaServerWidgets::ShareEditPopupInit,
+		"store" : SambaServerWidgets::ShareEditPopupStore,
+		"summary" : SambaServerWidgets::ShareEditSummary,
 	    ],
-	    "option_delete" : ``(SambaServerWidgets::ShareEditEntryDelete ()),
+	    "option_delete" : SambaServerWidgets::ShareEditEntryDelete,
 	    "add_items" : maplist( string key, map values, SambaServerWidgets::smbconf_popups, 
 		``( key ) ),
 	    "help" : HELPS["share_edit"]:"",
@@ -97,6 +104,14 @@ global map defaulthostwidget =  TablePopup::CreateTableDescr (
 global map widgets = $[
 	"share_edit" : defaulthostwidget,
 ];
+
+global define byteblock initFun(any key) ``{
+    return TablePopup::TableInit(SambaServerWidgets::widgets["share_edit"]:$[], key);
+}
+
+global define symbol handleFun(any key, map event_descr) ``{
+    return TablePopup::TableHandle(SambaServerWidgets::widgets["share_edit"]:$[], key, event_descr);
+}
 
 // ************************************ default host table ********************
 

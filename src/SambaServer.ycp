@@ -27,17 +27,38 @@ import "Ldap";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
+global define symbol DetermineRole();
+global define void ReadLDAPSettings();
+global define boolean WriteSettings();
+global define void WriteLDAPSettings();
+global define boolean WriteSAMBackend();
+global define boolean enableServer( boolean on );
+global define string roleName( symbol role );
+global define boolean ReloadSettings();
+global define void disableAllPrinters();
+global define boolean enableShare( string name, boolean on );
+global define void enableAllSystemPrinters();
 
 /**
  * list of required packages
  */
-global list required_packages = ["samba"];
+global list<string> required_packages = ["samba"];
 
 /**
  * Abort function
  * return boolean return true if abort
  */
-global block AbortFunction = nil;
+global block<boolean> AbortFunction = nil;
+
+/**
+ * Abort function
+ * @return blah blah lahjk
+ */
+global define boolean Abort() ``{
+    if(AbortFunction != nil)
+	return eval(AbortFunction) == true;
+    return false;
+}
 
 /**
  * Data was modified?
@@ -270,24 +291,24 @@ global define boolean Read() ``{
     
     string value = "";
     
-    value = SCR::Read( .sysconfig.samba.SAMBA_SAM );
+    value = (string) SCR::Read( .sysconfig.samba.SAMBA_SAM );
     if( value == "ldap" ) SAM = `ldap;
     else SAM = `smbpasswd;
     
-    value = SCR::Read( .etc.smb.value.global."server string" );
+    value = (string) SCR::Read( .etc.smb.value.global."server string" );
     if( value != nil ) server_string = value;
-    value = SCR::Read( .etc.smb.value.global."add user script" );
+    value = (string) SCR::Read( .etc.smb.value.global."add user script" );
     if( value != nil ) add_user_script = value;
-    value = SCR::Read( .etc.smb.value.global."domain master" );
+    value = (string) SCR::Read( .etc.smb.value.global."domain master" );
     if( value != nil ) domain_master = value;
-    value = SCR::Read( .etc.smb.value.global."domain logons" );
+    value = (string) SCR::Read( .etc.smb.value.global."domain logons" );
     if( value != nil ) domain_logons = normalize_boolean( value, false );
-    value = SCR::Read( .etc.smb.value.global."local master" ) ;
+    value = (string) SCR::Read( .etc.smb.value.global."local master" ) ;
     if( value != nil ) local_master = normalize_boolean( value, true );
     // synonym: "prefered master"
-    value = SCR::Read( .etc.smb.value.global."preferred master" );
+    value = (string) SCR::Read( .etc.smb.value.global."preferred master" );
     if( value != nil ) preferred_master = value;
-    value = SCR::Read( .etc.smb.value.global."prefered master" );
+    value = (string) SCR::Read( .etc.smb.value.global."prefered master" );
     if( value != nil && value != preferred_master ) {
 	// translators: error popup on conflicting options, %1 is the name of the
 	// option which will be used, %2 is its value, %3 is the name of the
@@ -334,7 +355,7 @@ Remove one of the options to resolve this conflict.
 	// synonym: "directory"
 	result["path"] = SCR::Read( add(p, "path") );
 	
-	value = SCR::Read( add( p, "directory" ) );
+	value = (string) SCR::Read( add( p, "directory" ) );
 	if( value != nil && value != result["path"]:nil ) {
 	    // translators: error popup on conflicting options, %1 is the name of the
 	    // option which will be used, %2 is its value, %3 is the name of the
@@ -353,14 +374,14 @@ Remove one of the options to resolve this conflict.
 	}
 	
 	result["read list"] = SCR::Read( add(p, "read list") );
-	result["write list"] = SCR::Read( add(p, "write list") );
-	result["browseable"] = normalize_boolean( SCR::Read( add(p, "browseable") ), true);
-	result["guest ok"] = normalize_boolean( SCR::Read( add(p, "guest ok") ), false);
+	result["write list"] = SCR::Read( add(p, "w338Grite list") );
+	result["browseable"] = normalize_boolean( (string) SCR::Read( add(p, "browseable") ), true);
+	result["guest ok"] = normalize_boolean( (string) SCR::Read( add(p, "guest ok") ), false);
 	result["valid users"] = SCR::Read( add(p, "valid users") );
 	// synonym: "print ok"
-	result["printable"] = normalize_boolean( SCR::Read( add(p, "printable") ), false );
+	result["printable"] = normalize_boolean( (string) SCR::Read( add(p, "printable") ), false );
 
-	value = SCR::Read( add( p, "print ok" ) );
+	value = (string) SCR::Read( add( p, "print ok" ) );
 	if( value != nil && value != result["printable"]:nil ) {
 	    // translators: error popup on conflicting options, %1 is the name of the
 	    // option which will be used, %2 is its value, %3 is the name of the
@@ -380,7 +401,7 @@ Remove one of the options to resolve this conflict.
 
 	result["commentout"] = SCR::Read( add(.etc.smb.section_type, share) ) > 0 ;
 	
-	return [ share, result ];
+	return $[ share: result ];
     });
     
     y2debug( "Shares read: %1", shares );
@@ -515,7 +536,7 @@ global define boolean Write() ``{
     enableServer( role != `disabled );
     if( role == `bdc ) {
 	// Retrieve the domain SID for DOMAIN
-	map result = SCR::Execute( .target.bash_output, "smbpasswd -S" );
+	map result = (map) SCR::Execute( .target.bash_output, "smbpasswd -S" );
 	if( result["exit"]:1 != 0 ) {
 	    y2debug( "Error retrieving SID: %1", result );
 	    // translators: error message
@@ -553,7 +574,7 @@ global define boolean WriteSettings() ``{
     
     // ensure high os level for PDC
     if( role == `pdc ) {
-	string val = SCR::Read( .etc.smb.value.global."os level" );
+	string val = (string) SCR::Read( .etc.smb.value.global."os level" );
 	if( val == nil || tointeger(val) < 65 ) {
 	    SCR::Write( .etc.smb.value.global."os level", 65 );
 	}
@@ -586,7 +607,7 @@ global define boolean WriteSettings() ``{
 		    SCR::Write( add(sectionpath, opt), value );
 		} else {
 		    // it must be boolean
-		    SCR::Write( add(sectionpath, opt), value ? "yes": "no" );
+		    SCR::Write( add(sectionpath, opt), (boolean) value ? "yes": "no" );
 		}
 		if( value != nil ) SCR::Write( add(sectiontypepath, opt), type );
 	    }
@@ -613,11 +634,11 @@ global define boolean Import (map settings) ``{
     // read global settings
     Samba::setWorkgroup( settings["global","workgroup"]:Samba::workgroup );
     server_string = settings["global","server_string"]:server_string;
-    role = name2role[ settings["global", "role" ]: "Standalone server" ]:nil;
+    role = (symbol) (name2role[ settings["global", "role" ]: "Standalone server" ]:nil);
     share_homes = settings["global","share_homes"]: share_homes;
     share_printers = settings["global","share_printers"]: share_printers;
 
-    string value = settings["global","backend"]: nil;
+    string value = (string) (settings["global","backend"]: nil);
     if( value == "LDAP" ) SAM = `ldap ;
     else SAM = `smbpasswd;
 
@@ -629,15 +650,15 @@ global define boolean Import (map settings) ``{
 
     // read shares
     shares = listmap( map key, settings["shares"]:[], ``{
-	return( [ key["share"]:"unknown", 
+	return( $[ key["share"]:"unknown": 
 	    listmap( map opts, key["options"]: [], ``{
-		return [ opts["key"]:"unknown", opts["value"]: nil ];
+		return $[ opts["key"]:"unknown": opts["value"]: nil ];
 	    } ) ] );
     });
     
     // read printers
     printer_status = listmap( map key, settings["printers"]:[], ``{
-	return( [ key["printer"]:"unknown", key["status"]: true ] );
+	return( $[ key["printer"]:"unknown": key["status"]: true ] );
     });
     
     shares_configured = true;
@@ -681,7 +702,7 @@ global define map Export () ``{
     
     map result = $[ "global" : globals ];
     if( size(r_shares) > 0 ) result ["shares"] = r_shares;
-    if( size(printers) > 0 ) reuslt ["printers"] = printers; 
+    if( size(printers) > 0 ) result ["printers"] = printers; 
 
     return result;
 }
@@ -1049,7 +1070,7 @@ global define boolean WriteSAMBackend() ``{
     
     if( write_only ) return true;
 
-    integer ret = SCR::Execute( .target.bash, "/sbin/SuSEconfig --module samba" );
+    integer ret = (integer) SCR::Execute( .target.bash, "/sbin/SuSEconfig --module samba" );
     
     if( ret != 0 ) {
 	y2error( "SuSEconfig --module samba failed: %1", ret );
@@ -1066,7 +1087,7 @@ global define boolean WriteSAMBackend() ``{
  * @return boolean	true on success
  */
 global define boolean ReloadSettings() ``{
-    integer ret = SCR::Execute( .target.bash, "/usr/sbin/rcsmb restart" );
+    integer ret = (integer) SCR::Execute( .target.bash, "/usr/sbin/rcsmb restart" );
     
     if( ret != 0 ) {
 	y2error( "/usr/sbin/rcsmb restart failed: %1", ret );
@@ -1074,7 +1095,7 @@ global define boolean ReloadSettings() ``{
     
     boolean result = ret == 0;
     
-    ret = SCR::Execute( .target.bash, "/usr/sbin/rcnmb restart" );
+    ret = (integer) SCR::Execute( .target.bash, "/usr/sbin/rcnmb restart" );
     
     if( ret != 0 ) {
 	y2error( "/usr/sbin/rcnmb restart failed: %1", ret );
@@ -1087,9 +1108,9 @@ global define boolean ReloadSettings() ``{
  * Read LDAP-related settings.
  */
 global define void ReadLDAPSettings() ``{
-    LDAP_server = SCR::Read( .etc.smb.value.global."ldap server" );
-    LDAP_admin_dn = SCR::Read( .etc.smb.value.global."ldap admin dn" );
-    LDAP_suffix = SCR::Read( .etc.smb.value.global."ldap suffix" );
+    LDAP_server = (string) SCR::Read( .etc.smb.value.global."ldap server" );
+    LDAP_admin_dn = (string) SCR::Read( .etc.smb.value.global."ldap admin dn" );
+    LDAP_suffix = (string) SCR::Read( .etc.smb.value.global."ldap suffix" );
 
     if( LDAP_server == nil || LDAP_admin_dn == nil ) {
 	// we miss some information, ask LDAP for defaults
@@ -1146,7 +1167,7 @@ global define string setLDAPAdminPassword( string password ) ``{
     
     // TODO: this will not work for passwords containing "
     string cmd = "smbpasswd -w \""+password+"\"";
-    map result = SCR::Execute( .target.bash_output, cmd );
+    map result = (map) SCR::Execute( .target.bash_output, cmd );
     
     // check the exit code, return nil on success
     if( result["exit"]:1 == 0 ) return nil;
@@ -1166,7 +1187,7 @@ global define string setLDAPAdminPassword( string password ) ``{
  * @return boolean	true on success
  */
 global define boolean testLDAPS( string server, string search_base ) ``{
-    map result = SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
+    map result = (map) SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
     y2debug( "LDAPS test search result: %1", result );
     if( result["exit"]:-1 != 0 ) {
 	// translators: warning message, %1 is LDAP server name/IP
@@ -1369,7 +1390,7 @@ global define boolean updateShare( string name, map options ) ``{
  */
 global define string roleName( symbol role ) ``{
     locale s = role2name[role]:"";
-    return eval(s);
+    return (string) eval(s);
 }
 
 /**

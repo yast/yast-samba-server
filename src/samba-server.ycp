@@ -25,6 +25,7 @@ import "Samba";
 import "SambaServer";
 
 include "commandline/commandline.ycp";
+include "samba-server/routines.ycp";
 
 /**
  * Command line "share" commands handler.
@@ -33,7 +34,7 @@ include "commandline/commandline.ycp";
  * @return boolean	true on success
  */
 global define boolean ShareHandler(map options) ``{
-    string share = options["name"]:nil;
+    string share = (string) (options["name"]:nil);
     
     // check the "command" to be present exactly once
     string command = CommandLine::UniqueOption( options, 
@@ -95,27 +96,27 @@ global define boolean ShareHandler(map options) ``{
     }
     else if( command == "options" )
     {
-	map opts = eval(SambaServer::shares[share]:$[]);
+	map opts = (map) eval(SambaServer::shares[share]:$[]);
 	
-	string value = options["comment"]:nil;
+	string value = (string) (options["comment"]:nil);
 	if( value != nil ) opts["comment"] = value;
 	
-	value = options["path"]:nil;
+	value = (string) (options["path"]:nil);
 	if( value != nil ) opts["path"] = value;
 
-	value = options["printable"]:nil;
+	value = (string) (options["printable"]:nil);
 	if( value != nil ) opts["printable"] = normalize_boolean(value, false);
 
-	value = options["write list"]:nil;
+	value = (string) (options["write list"]:nil);
 	if( value != nil ) opts["write list"] = value;
 
-	value = options["browseable"]:nil;
+	value = (string) (options["browseable"]:nil);
 	if( value != nil ) opts["browseable"] = normalize_boolean(value, true);
 
-	value = options["guest_ok"]:nil;
+	value = (string) (options["guest_ok"]:nil);
 	if( value != nil ) opts["guest ok"] = normalize_boolean(value, false);
 
-	value = options["valid_users"]:nil;
+	value = (string) (options["valid_users"]:nil);
 	if( value != nil ) opts["valid users"] = value;
 	
 	SambaServer::updateShare( share, opts );
@@ -182,7 +183,7 @@ global define boolean BackendHandler( map options ) ``{
     if( command == "smbpasswd" ) backend = `smbpasswd;
     else if( command == "ldap" ) backend = `ldap;
      
-    if( ! SambaServer::switchLDAPBackend( backend ) ) {
+    if( ! SambaServer::switchSAMBackend( backend ) ) {
 	// translators: error message for backend command line action, %1 is the backend user wanted to switch to
 	Report::Error( sformat( _("Cannot change the back-end of the Samba server to '%1'."), command ) );
 	return false;
@@ -253,19 +254,19 @@ global define boolean SambaServerEnableHandler( map options ) ``{
  */
 global define boolean ChangeConfiguration( map options ) ``{
 	
-    string value = options["workgroup"]:nil;
+    string value = (string) (options["workgroup"]:nil);
     if( value != nil ) Samba::setWorkgroup(value);
 
-    string value = options["description"]:nil;
+    value = (string) (options["description"]:nil);
     if( value != nil ) SambaServer::setDescription(value);
 
-    string value = options["ldap_server"]:nil;
+    value = (string) (options["ldap_server"]:nil);
     if( value != nil ) SambaServer::setLDAPServer(value);
 
-    string value = options["ldap_suffix"]:nil;
+    value = (string) (options["ldap_suffix"]:nil);
     if( value != nil ) SambaServer::setLDAPSuffix(value);
 
-    string value = options["ldap_admin_dn"]:nil;
+    value = (string) (options["ldap_admin_dn"]:nil);
     if( value != nil ) SambaServer::setLDAPAdminDN(value);
 
     return true;
@@ -278,7 +279,7 @@ y2milestone ("Samba-server module started");
 include "samba-server/wizards.ycp";
 
 /* main ui function */
-any ret = nil;
+boolean ret = nil;
 
 map cmdline = $[
     "id" 		: "samba-server",
@@ -290,32 +291,32 @@ See Samba documentation for details."),
     "finish"		: ``(SambaServer::Write()),
     "actions"		: $[
 	"share"	:$[
-	    "handler"	: ``(ShareHandler()),
+	    "handler"	: ShareHandler,
 	    // translators: command line help text for share action
 	    "help"	: _("Manipulate a single share")
 	],
 	"list"	:$[
-	    "handler"	: ``(ListHandler()),
+	    "handler"	: ListHandler,
 	    // translators: command line help text for list action
 	    "help"	: _("Show the list of available shares")
 	],
 	"role"	:$[
-	    "handler"	: ``(RoleHandler()),
+	    "handler"	: RoleHandler,
 	    // translators: command line help text for role action
 	    "help"	: _("Set a role of the server")
 	],
 	"backend" :$[
-	    "handler"	: ``(BackendHandler()),
+	    "handler"	: BackendHandler,
 	    // translators: command line help text for backend selection action
 	    "help"	: _("Set the back-end for storing user information")
 	],
 	"service" :$[
-	    "handler"	: ``(SambaServerEnableHandler()),
+	    "handler"	: SambaServerEnableHandler,
 	    // translators: command line help text for service activation action
 	    "help"	: _("Enable or disable the Samba services (smb and nmb)")
 	],
 	"configure"	: $[
-	    "handler"	: ``(ChangeConfiguration()),
+	    "handler"	: ChangeConfiguration,
 	    // translators: command line help text for configure action
 	    "help"	: _("Change the global settings of the Samba server")
 	]
