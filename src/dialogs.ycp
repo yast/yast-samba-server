@@ -548,6 +548,7 @@ global define map AddSharePopup() ``{
 	    if( dir != nil ) {
 		UI::ChangeWidget( `id (`path), `Value, dir );
 	    }
+	    ret = nil;
 	} else {
 	    // OK was pressed
 	
