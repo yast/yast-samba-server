@@ -153,6 +153,7 @@ sub Read {
     # Read finished
     Progress->NextStage();
     $Modified = 0;
+y2milestone("Read finished");
     
     return 1;
 }

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 11 11:14:30 CET 2004 - mlazar@suse.cz
+
+- avoid select()
+- avoid computed arguments in sprintf()
+
+-------------------------------------------------------------------
 Wed Nov 10 09:19:01 CET 2004 - mlazar@suse.cz
 
 - fixed YaPI

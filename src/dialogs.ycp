@@ -297,7 +297,7 @@ symbol SharesWidgetHandle(string key, map event_descr)
     integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
     if (id == nil) return nil;
 	
-    string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+    string share = (string)argsof((term)UI::QueryWidget(`id(`table), `Item(id)))[2]:nil;
     if (share == nil) return nil;
     
     if (ret == `edit) {
@@ -313,11 +313,9 @@ symbol SharesWidgetHandle(string key, map event_descr)
     if (ret == `delete)
     {
 	// confirmation dialog before deleting a share
-	if  (Popup::ContinueCancel( sformat( _("Really 
-delete share '%1'?
-
-All its settings will be lost.
-"), share ) ) ) {
+	if  (Popup::ContinueCancel( sformat( _("Really \ndelete share '%1'?"), share) + "\n"
+	    + _("All its settings will be lost.") + "\n"))
+	{
 	    SambaConfig::ShareRemove(share);
 	    UI::ChangeWidget( `id(`table), `Items, sharesItems(false));
 	}
@@ -409,8 +407,7 @@ symbol TrustedDomainsWidgetHandle (string key, map event_descr)
 	string to_delete = (string)UI::QueryWidget(`id("trusted_domains"), `CurrentItem );
 	    
 	// confirmation
-	if  (Popup::ContinueCancel( sformat( _("Really abadon trust relationship 
-to trusted domain '%1'?"), to_delete ) )  )
+	if (Popup::ContinueCancel(sformat(_("Really abadon trust relationship\nto trusted domain '%1'?"), to_delete)))
 	{
 	    SambaTrustDom::Revoke(to_delete);
 	}
@@ -567,9 +564,9 @@ symbol AddShareDialog () ``{
 	    } else if( !printable && ! Mode::config() && SCR::Read( .target.stat, pathvalue ) == $[] ) {
 		// translators: question popup. A user entered non-existent path
 		// for a share
-		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.
-Really use this path?
-"), pathvalue ) ) ) {
+		if (!Popup::ContinueCancel(sformat( _("The path '%1' does not exist."), pathvalue) + "\n"
+		    + _("Really use this path?") + "\n"))
+		{
 		    ret = nil;
 		    continue;
 		}
@@ -1050,8 +1047,8 @@ symbol AskJoinDomainDialog() ``{
     string passwd = "";
     UI::OpenDialog(`VBox( 
 	// translators: popup to fill in the domain joining info; %1 is the domain name
-	`Label(sformat(_("Enter the user and the password\nfor joining the domain '%1'.") + "\n\n"
-	    + _("To join the domain anonymously, leave the\ntext entries empty.") + "\n", workgroup)),
+	`Label(sformat(_("Enter the user and the password\nfor joining the domain '%1'."), workgroup) + "\n\n"
+	    + _("To join the domain anonymously, leave the\ntext entries empty.") + "\n"),
 	// text entry label
 	`TextEntry(`id(`user), _("&User name:"), user),
 	// text entry label
