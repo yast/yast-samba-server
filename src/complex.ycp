@@ -12,22 +12,11 @@
 textdomain "samba-server";
 
 import "Wizard";
-import "Wizard_hw";
+//import "Wizard_hw";
 
 import "SambaServer";
-import "SambaServerPassdb";
 
 include "samba-server/helps.ycp";
-include "samba-server/routines.ycp";
-include "samba-client/routines.ycp";
-
-/**
- * Return a modification status
- * @return true if data was modified
- */
-boolean Modified() ``{
-    return SambaServer::Modified () || SambaServerPassdb::Modified ();
-}
 
 /**
  * Read settings dialog
@@ -35,7 +24,7 @@ boolean Modified() ``{
  */
 symbol ReadDialog() ``{
     Wizard::RestoreHelp(HELPS["read"]:"");
-    SambaServer::AbortFunction = PollAbort;
+//    SambaServer::AbortFunction = PollAbort;
     boolean ret = SambaServer::Read();
     return ret ? `next : `abort;
 }
@@ -46,8 +35,8 @@ symbol ReadDialog() ``{
  */
 symbol WriteDialog() ``{
     Wizard::RestoreHelp(HELPS["write"]:"");
-    SambaServer::AbortFunction = PollAbort;
-    boolean ret = SambaServer::Write();
+//    SambaServer::AbortFunction = PollAbort;
+    boolean ret = SambaServer::Write(false);
     return ret ? `next : `abort;
 }
 

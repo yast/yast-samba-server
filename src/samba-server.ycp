@@ -8,6 +8,12 @@
  *
  * Main file for samba-server configuration. Uses all other files.
  */
+ 
+/* TODO:
+ *  - Read/Write only needed modules (if command line is used)
+ *  - allow set more options on command line (ldap server, ...)
+ */
+ 
 
 {
 
@@ -20,10 +26,13 @@ textdomain "samba-server";
 import "CommandLine";
 import "Popup";
 import "Report";
-import "SambaServer";
-import "SambaServerPassdb";
 
-include "samba-server/routines.ycp";
+import "SambaRole";
+import "SambaServer";
+import "SambaConfig";
+import "SambaService";
+import "SambaBackend";
+
 
 /**
  * Command line "share" commands handler.
@@ -47,77 +56,47 @@ boolean ShareHandler(map<string,string> options) {
 	return false;
     }
     
-    if( !haskey( SambaServer::shares, share ) && command != "add" ) {
+    if( !SambaConfig::ShareExists(share) && command != "add" ) {
 	// translators: error message for "share add" command line action
 	Report::Error( sformat( _("The share '%1' does not exist."), share ) );
 	return false;
     }
     
     // process the commands
-    if( command == "enable" )
-    {
-	SambaServer::enableShare( share, true );
-    }
-    else if( command == "disable" )
-    {
-	SambaServer::enableShare( share, false );
-    }
-    else if( command == "delete" )
-    {
-	SambaServer::removeShare( share );
-    }
-    else if( command == "add" )
-    {
+    if( command == "enable" ) {
+	SambaConfig::ShareEnable(share);
+    } else if( command == "disable" ) {
+	SambaConfig::ShareDisable(share);
+    } else if( command == "delete" ) {
+	SambaConfig::ShareRemove(share);
+    } else if( command == "add" )  {
 	if( ! haskey( options, "path" ) ) {
 	    // translators: error message for "add share" command line action
 	    Report::Error( _("Provide the path of a directory to share.") );
 	    return false;
 	}
 	
-	if( !SambaServer::addShare( share, $[
-	    "path": options["path"]:"",
-	    "comment": options["comment"]:sformat( "Share for %1", options["path"]:"path" )
-	] ) ) {
+	if (SambaConfig::ShareExists(share)) {
 	    // translators: error message for "add share" command line action
 	    Report::Error( sformat( _("Share '%1' already exists."), share ) );
 	    return false;
 	}
-    }
-    else if( command == "show" )
-    {
+	SambaConfig::ShareSetStr(share, "path", options["path"]:"");
+	SambaConfig::ShareSetStr(share, "comment", options["comment"]:sformat("Share for %1", options["path"]:"path"));
+    } else if( command == "show" ) {
 	CommandLine::Print( sformat("[%1]", share) );
 	
-	foreach( string option, any value, SambaServer::shares[share]:$[], ``{
-	    if( value != nil )
-		CommandLine::Print( sformat( "\t%1 = %2", option, value ) );
+	foreach(string key, string val, SambaConfig::ShareGetMap(share), {
+	    if (val != nil)
+		CommandLine::Print( sformat( "\t%1 = %2", key, val ) );
 	});
-    }
-    else if( command == "options" )
-    {
-	map<string, any> opts = (map<string, any>) eval(SambaServer::shares[share]:$[]);
-	
-	string value = (string) (options["comment"]:nil);
-	if( value != nil ) opts["comment"] = value;
-	
-	value = (string) (options["path"]:nil);
-	if( value != nil ) opts["path"] = value;
-
-	value = (string) (options["printable"]:nil);
-	if( value != nil ) opts["printable"] = normalize_boolean(value, false);
-
-	value = (string) (options["write list"]:nil);
-	if( value != nil ) opts["write list"] = value;
-
-	value = (string) (options["browseable"]:nil);
-	if( value != nil ) opts["browseable"] = normalize_boolean(value, true);
-
-	value = (string) (options["guest_ok"]:nil);
-	if( value != nil ) opts["guest ok"] = normalize_boolean(value, false);
-
-	value = (string) (options["valid_users"]:nil);
-	if( value != nil ) opts["valid users"] = value;
-	
-	SambaServer::updateShare( share, opts );
+    } else if( command == "options" ) {
+	foreach(string key, ["comment", "path", "printable", "write list", "browseable", "guest ok", "valid users"], {
+	    string value = (string) (options[key]:nil);
+	    if (value != nil) {
+		SambaConfig::ShareSetStr(share, key, value);
+	    }
+	});
     }
     
     return true;
@@ -130,7 +109,7 @@ boolean ShareHandler(map<string,string> options) {
  * @return boolean	true on success
  */
 boolean ListHandler( map <string,string>options ) {
-    
+
     // translators: heading for "list" shares command line action
     // try to keep alignment
     CommandLine::Print( _("Status  \tType\tName
@@ -138,28 +117,28 @@ boolean ListHandler( map <string,string>options ) {
 
     map<string, map<string,any> > printers = $[];
     
-    foreach( string share, map<string,any> options, SambaServer::shares, ``{
-	if( options["printable"]:false ) {
-	    printers[share] = options;
-	} else {
+    foreach( string share, SambaConfig::GetShares(), ``{
+	if (!SambaConfig::ShareGetTruth(share, "printable", false)) {
 	    // translators: share is a disk. %1 is the status, %2 comment
 	    CommandLine::Print( sformat( _("%1\tDisk\t%2"), 
 		// translators: share status
-		options["commentout"]:false ? _("Disabled")
+		SambaConfig::ShareEnabled(share) ? _("Disabled")
 		// translators: share status
 		    : _("Enabled")+"  ", share ) );
 	}
     });
     
 
-    foreach( string share, map<string,any> options, printers, ``{
-	// translators: share is a printer. %1 is the status, %2 comment
-	CommandLine::Print( sformat( _("%1\tPrinter\t%2"), 
-	    options["commentout"]:false ? 
-		// translators: share status
-		_("Disabled")
-		// translators: share status
-		: _("Enabled")+"  ", share ) );
+    foreach( string share, SambaConfig::GetShares(), ``{
+	if (SambaConfig::ShareGetTruth(share, "printable", false)) {
+	    // translators: share is a printer. %1 is the status, %2 comment
+	    CommandLine::Print( sformat( _("%1\tPrinter\t%2"), 
+		SambaConfig::ShareEnabled(share) ? 
+		    // translators: share status
+		    _("Disabled")
+		    // translators: share status
+		    : _("Enabled")+"  ", share ) );
+	}
     });
     
     return true;
@@ -173,17 +152,9 @@ boolean ListHandler( map <string,string>options ) {
  */
 boolean BackendHandler( map<string,string> options )
 {
-    string command = CommandLine::UniqueOption(options, ["smbpasswd", "ldap"]);
+    string command = CommandLine::UniqueOption(options, ["smbpasswd", "tdbsam", "ldapsam"]);
     if (command == nil) return false;
-    
-    if (command == "smbpasswd") {
-	SambaServerPassdb::SetBackends(["smbpasswd"]);
-    } else {
-	string url = options["ldap"]:"ldap://127.0.0.1";
-	string backend = SambaServerPassdb::BackendString("ldap", url);
-	SambaServerPassdb::SetBackends([backend]);
-    }
-    
+    SambaBackend::SetPassdbBackends([command]);
     return true;
 }
 
@@ -195,22 +166,9 @@ boolean BackendHandler( map<string,string> options )
  */
 boolean RoleHandler( map<string,string> options ) {
     // check the role to be present exactly once
-    string command = CommandLine::UniqueOption( options, 
-	["pdc", "bdc", "standalone" ] );
+    string command = CommandLine::UniqueOption( options,  ["pdc", "bdc", "standalone", "member" ]);
     if( command == nil ) return false;
-    
-    symbol role = nil;
-    
-    if( command == "pdc" ) role = `pdc;
-    else if( command == "bdc" ) role = `bdc;
-    else if( command == "standalone" ) role = `standalone;
-    
-    if( ! SambaServer::setRole( role ) ) {
-	// translators: error message for role command line action, %1 is the role user wanted to switch to
-	Report::Error( sformat( _("Cannot change the role of the Samba server to '%1'."), command ) );
-	return false;
-    }
-    
+    SambaRole::SetRole(command);
     return true;
 }
 
@@ -222,23 +180,10 @@ boolean RoleHandler( map<string,string> options ) {
  */
 boolean SambaServerEnableHandler( map<string,string> options ) {
     // check the "command" to be present exactly once
-    string command = CommandLine::UniqueOption( options, 
-	["enable", "disable" ] );
+    string command = CommandLine::UniqueOption( options, ["enable", "disable" ] );
     if( command == nil ) return false;
-
-    if( command == "enable" ) {
-	// TODO: maybe we should switch back to the original role (use the heuristics again)
-	if( SambaServer::role == `disabled ) SambaServer::setRole( `standalone );
-	return SambaServer::enableServer( true );
-    }
-
-    if( command == "disable" ) {
-	SambaServer::setRole( `disabled );
-	return SambaServer::enableServer( false );
-    }
-    
-    // should not happen
-    return false;
+    SambaService::SetServiceAutoStart(command == "enable");
+    return true;
 }
 
 /**
@@ -248,19 +193,18 @@ boolean SambaServerEnableHandler( map<string,string> options ) {
  * @return boolean	true on success
  */
 boolean ChangeConfiguration( map<string,string> options ) {
-    import "Samba";
 	
     string value = (string) (options["workgroup"]:nil);
-    if( value != nil ) Samba::setWorkgroup(value);
+    if( value != nil ) SambaConfig::GlobalSetStr("workgroup", value);
 
     value = (string) (options["description"]:nil);
-    if( value != nil ) SambaServer::setDescription(value);
+    if( value != nil ) SambaConfig::GlobalSetStr("server string", value);
 
     value = (string) (options["ldap_suffix"]:nil);
-    if( value != nil ) SambaServer::setLDAPSuffix(value);
+    if( value != nil ) SambaConfig::GlobalSetStr("ldap suffix", value);
 
     value = (string) (options["ldap_admin_dn"]:nil);
-    if( value != nil ) SambaServer::setLDAPAdminDN(value);
+    if( value != nil ) SambaConfig::GlobalSetStr("ldap admin dn", value);
 
     return true;
 }
@@ -277,8 +221,7 @@ any ret = nil;
 map cmdline = $[
     "id" 		: "samba-server",
     // translators: command line help text for samba-server module
-    "help" 		: _("Samba server configuration module.
-See Samba documentation for details."),
+    "help" 		: _("Samba server configuration module.\nSee Samba documentation for details."),
     "guihandler" 	: SambaServerSequence,
     "initialize"	: SambaServer::Read,
     "finish"		: SambaServer::Write,
@@ -392,6 +335,10 @@ See Samba documentation for details."),
 	    // translators: command line help text for BDC role option
 	    "help"	: _("Server should act as a Backup Domain Controller"),
 	], 
+	"member"	:$[
+	    // translators: command line help text for Domain Member role option
+	    "help"	: _("Server should act as a Domain Member"),
+	], 
 	"standalone"	:$[
 	    // translators: command line help text for standalone server role option
 	    // logon is the Windows synonym for login
@@ -401,10 +348,17 @@ See Samba documentation for details."),
 	    // translators: command line help text for smbpasswd option
 	    "help"	: _("Use the 'smbpasswd' file to store user information"),
 	],
-	"ldap"		:$[
-	    // translators: command line help text for ldap option
+	"tdbsam"	:$[
+	    // translators: command line help text for tdbsam option
+	    "help"	: _("Use the 'passdb.tdb' file to store user information"),
+	],
+	"ldapsam"		:$[
+	    // translators: command line help text for ldapsam option
 	    "help"	: _("Use the LDAP server to store user information"),
-	    "type"	: "string"
+	],
+	"password"		:$[
+	    // translators: command line help text for password option
+	    "help"	: _("Password for the LDAP server"),
 	],
 	"workgroup"	:$[
 	    // translators: command line help text for workgroup option
@@ -432,8 +386,8 @@ See Samba documentation for details."),
 	    "name", "comment", "path", 
 	    "printable", "read_list", "write_list", "browseable", "guest_ok", "valid_users" ],
 	"list"		: [ ],
-	"role"		: [ "pdc", "bdc", "standalone" ],
-	"backend" 	: [ "smbpasswd", "ldap" ],
+	"role"		: [ "pdc", "bdc", "standalone", "member" ],
+	"backend" 	: [ "smbpasswd", "tdbsam", "ldapsam" ],
 	"service" 	: [ "enable", "disable" ],
 	"configure"	: [ "workgroup", "description", "ldap_suffix", "ldap_admin_dn" ]
     ]

@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Nov  8 18:32:55 CET 2004 - mlazar@suse.cz
+
+- 2.11.0
+- SambaServer.ycp transformed to peral and splited to
+  SambaAccounts.pm, SambaBackend.pm, SambaBackendLDAP.pm, 
+  SambaBackendSimple.pm, SambaPrinters.pm, SambaRole.pm,
+  SambaSecrets.pm, SambaServices.pm and SambaTrustDom.pm
+
+-------------------------------------------------------------------
 Mon Oct  4 15:31:21 CEST 2004 - mlazar@suse.cz
 
 - fixed #45588 - Samba Server Configuration not shown in Summary in autoyast

@@ -9,23 +9,28 @@ client_DATA =			\
 	samba-server_auto.ycp	
 
 ynclude_DATA =			\
-	samba-synonym-map.ycp		\
 	samba-options-global.ycp	\
 	samba-options-local.ycp		\
 	helps.ycp		\
 	wizards.ycp		\
 	dialogs.ycp		\
-	complex.ycp		\
-	routines.ycp
+	dialogs-items.ycp	\
+	complex.ycp
 
 desktop_DATA =			\
 	samba-server.desktop
 
 module_DATA =			\
-	SambaServer.ycp		\
-	SambaServerWidgets.ycp	\
-	SambaServerPassdb.pm	\
-	SambaSecrets.pm
+	SambaRole.pm		\
+	SambaServer.pm		\
+	SambaService.pm		\
+	SambaSecrets.pm		\
+	SambaPrinters.pm	\
+	SambaTrustDom.pm	\
+	SambaAccounts.pm	\
+	SambaBackend.pm		\
+	SambaBackendLDAP.pm	\
+	SambaBackendSimple.pm
 
 YaPI_perldir = @moduledir@/YaPI
 

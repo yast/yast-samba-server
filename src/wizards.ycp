@@ -14,7 +14,8 @@ textdomain "samba-server";
 import "Sequencer";
 import "Wizard";
 import "Mode";
-import "Directory";
+
+import "SambaServer";
 
 include "samba-server/complex.ycp";
 include "samba-server/dialogs.ycp";
@@ -35,7 +36,9 @@ any MainSequence() {
         "ldap_edit"     : ``( LDAPDialog() ),
 	// another call of the same dialog (cause of handling the dialogs continuity)
 	"ldap_edit_uas"	: ``( LDAPDialog() ),
-        "global_settings"     :   ``( GlobalSettingsDialog() ),
+        "global_settings":``( GlobalSettingsDialog() ),
+	"ensure_root_account": ``( EnsureRootAccountDialog() ),
+	"ask_join_domain": ``( AskJoinDomainDialog() ),
     ];
 
     map sequence = $[
@@ -59,7 +62,19 @@ any MainSequence() {
             `ldap   	: "ldap_edit",
             `passdb   	: "passdb_edit",
             `global_settings  	: "global_settings",
-	    `next	: `finish,
+	    `next	: "ask_join_domain",
+	],
+	"ask_join_domain": $[
+	    `cancel	: "conf_tab",
+	    `error	: "conf_tab",
+	    `abort	: `abort,
+	    `ok		: "ensure_root_account",
+	],
+	"ensure_root_account": $[
+	    `cancel	: "conf_tab",
+	    `back	: "conf_tab",
+	    `abort	: `abort,
+	    `ok		: `finish,
 	],
 	"global_settings" : $[
 	    `cancel	: `cancel,
@@ -100,26 +115,13 @@ any MainSequence() {
     ];
     
     // setup the abort function
-    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
-    
-    // check if the main config file is modified already
-    map res = (map)SCR::Execute (.target.bash_output, "rpm -V samba-client | grep '/etc/samba/smb\.conf'" );
-    boolean config_changed = false;
-    
-    if (res["exit"]:0 == 0 && size( res["stdout"]:"" ) > 0 )
-    {
-	config_changed = true;
-	y2milestone ("Config file has beed changed already" );
-    }
+//    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
     
     // run wizard only first time and not in autoyast
-    if (SCR::Read( .target.stat, Directory::vardir + "/samba_server_done_once" ) != $[]
-	|| Mode::config || config_changed
-    )
-    {
+    if (Mode::config() || SambaServer::Configured()) {
 	sequence["ws_start"] = "conf_tab";
 	
-	if (!Mode::config)
+	if (!Mode::config())
 	{
 	    return_tab = "shares";	
 	}
