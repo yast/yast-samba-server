@@ -84,6 +84,24 @@ else if (func == "Write") {
     ret = SambaServer::Write();
     Progress::on();
 }
+
+/**
+ * Return if configuration  was changed
+ * return boolean
+ */
+else if (func == "GetModified") {
+    ret = SambaServer::Modified();
+}
+
+/**
+ * Set modified flag
+ * return boolean
+ */
+else if (func == "SetModified") {
+    SambaServer::modified = true;
+    ret = true;
+}
+
 /* Unknown function */
 else {
     y2error("Unknown function: %1", func);

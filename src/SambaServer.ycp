@@ -85,7 +85,7 @@ global boolean shares_configured = false;
 global boolean write_only = false;
 
 global boolean ServerReallyAbort () {
-    return !(modified || Samba::modified || SambaServerPassdb::Modified ()) || Popup::ReallyAbort (true);
+    return !Modified() || Popup::ReallyAbort (true);
 }
 
 /** ================================ global data =============================*/
@@ -248,8 +248,9 @@ map<string,boolean> GetTrustedDomains () {
  * @return true if modified
  */
 global define boolean Modified() ``{
-    y2debug("modified=%1",modified);
-    return modified;
+    y2debug("SambaServer::modified=%1, Samba::modified=%2, SambaServerPassdb::modified=%3",
+	modified, Samba::Modified(), SambaServerPassdb::Modified());
+    return modified || Samba::Modified() || SambaServerPassdb::Modified();
 };
 
 void InstallSchema () {
