@@ -28,6 +28,7 @@ YaST::YCP::Import("SambaSecrets");
 YaST::YCP::Import("URL");
 YaST::YCP::Import("DNS");
 YaST::YCP::Import("Ldap");
+YaST::YCP::Import("Mode");
 YaST::YCP::Import("Service");
 YaST::YCP::Import("LdapServerAccess");
 }
@@ -84,7 +85,7 @@ sub installSchema {
 
     my $url = getServerUrl();
     unless ($url) {
-	y2error("No ldapsam backend found");
+	y2warning("No ldapsam backend found");
 	return;
     }
     return unless DNS->IsHostLocal($url->{host});
@@ -215,6 +216,8 @@ sub getLdapEntry {
 sub addLdapDn { 
     my $dn = shift;
     
+    return if Mode->test();
+    
     # check existence
     my $res = getLdapEntry($dn);
     unless (defined $res) {
@@ -245,6 +248,8 @@ sub addLdapDn {
 
 sub tryBind { 
     my ($url, $passwd) = @_;
+
+    return 1 if Mode->test();
     
     # initialize LDAP
     my $map = {
@@ -285,7 +290,7 @@ sub createSuffixes {
     # create "ldap idmap suffix" on ldap server if "idmap backend" is "ldap"
     my $idmap_backend = SambaConfig->GlobalGetStr("idmap backend", "");
     if ($idmap_backend =~ /^ldap(?::(.*))?$/) {
-	tryBind(URL->Parse($1), $Passwd) or return;
+	tryBind(URL->Parse(String($1)), $Passwd) or return;
 	my $mysuffix = SambaConfig->GlobalGetStr("ldap idmap suffix", "");
 	my $dn = ($mysuffix||"") . ($suffix && $mysuffix ? "," : "") . ($suffix||"");
 	addLdapDn($dn) or return;
@@ -368,7 +373,7 @@ sub writePasswd {
     my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", "");
 
     # return if no change
-    return if $admin_dn eq $OrgAdminDN and $Passwd eq $OrgPasswd;
+    return if $admin_dn eq ($OrgAdminDN||"") and ($Passwd||"") eq ($OrgPasswd||"");
     
     # write the smb.conf now, otherwise secrets.tdb would contain a wrong entry (#40866)
     return "Cannot write samba configuration." unless SambaConfig->Write();

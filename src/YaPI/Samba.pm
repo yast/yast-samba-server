@@ -128,9 +128,10 @@ $result = EnablePrinters($printerList,$enable)
 package YaPI::Samba;
 use YaST::YCP qw(:DATA :LOGGING);
 
-YaST::YCP::Import ("SambaServer");
-YaST::YCP::Import ("SambaServerPassdb");
-YaST::YCP::Import ("Service");
+YaST::YCP::Import ("SambaConfig");
+YaST::YCP::Import ("SambaRole");
+YaST::YCP::Import ("SambaService");
+YaST::YCP::Import ("SambaBackend");
 
 use Data::Dumper;
 
@@ -161,8 +162,9 @@ to get the error hash.
 
 BEGIN { $TYPEINFO{GetServiceStatus} = ["function", "string" ]; }
 sub GetServiceStatus {
-    my $self = shift;    
-    return Service->Enabled ("smbd") && Service->Enabled ("nmbd");
+    my $self = shift;
+    SambaService->read();
+    return SambaService->GetServiceAutostart();
 }
 
 =item *
@@ -178,8 +180,10 @@ to get the error hash.
 BEGIN { $TYPEINFO{DetermineRole} = ["function", "string" ]; }
 sub DetermineRole {
     my $self = shift;
-    SambaServer->Read ();
-    return SambaServer->DetermineRole ()->value ();
+    SambaConfig->Read();
+    my $role = SambaRole->GetRole();
+    $role = "STANDALONE" if $role == "MEMBER";
+    return lc $role;
 }
 
 =item *
@@ -198,32 +202,11 @@ BEGIN { $TYPEINFO{EditService} = ["function", "boolean", "boolean" ]; }
 sub EditService {
     my $self = shift;    
     my $enable = shift;
+
+    SambaService->Read();
+    SambaService->SetServiceAutostart($enable);
+    SambaService->Write() or return undef;
     
-    if ($enable)
-    {
-	unless (Service->Enable ("smbd"))
-	{
-	    return undef;
-	}
-
-	unless (Service->Enable ("nmbd"))
-	{
-	    return undef;
-	}
-    }
-    else
-    {
-	unless (Service->Disable ("smbd"))
-	{
-	    return undef;
-	}
-
-	unless (Service->Disable ("nmbd"))
-	{
-	    return undef;
-	}
-    }
-
     return 1;
 }
 
@@ -242,18 +225,14 @@ sub EditServerAsBDC {
     my $self = shift;   
     my $pdc = shift; 
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
+    SambaConfig->Read();
+    SambaBackend->Read();
 
     # FIXME: PDC host setup???
-    SambaServer->setAsBDC ();
+    SambaRole->SetAsBDC();
 
-    unless ( SambaServer->WriteSettings () )
-    {
-	return undef;
-    }
+    SambaConfig->Write() or return undef;
+    SambaBackend->Write() or return undef;
 
     return 1;
 }
@@ -271,17 +250,13 @@ BEGIN { $TYPEINFO{EditServerAsPDC} = ["function", "boolean" ]; }
 sub EditServerAsPDC {
     my $self = shift;
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
+    SambaConfig->Read();
+    SambaBackend->Read();
 
-    SambaServer->setAsPDC ();
+    SambaRole->SetAsPDC();
 
-    unless ( SambaServer->WriteSettings () )
-    {
-	return undef;
-    }
+    SambaConfig->Write() or return undef;
+    SambaBackend->Write() or return undef;
 
     return 1;
 }
@@ -300,17 +275,13 @@ BEGIN { $TYPEINFO{EditServerAsStandalone} = ["function", "boolean" ]; }
 sub EditServerAsStandalone {
     my $self = shift;    
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
+    SambaConfig->Read();
+    SambaBackend->Read();
 
-    SambaServer->setAsStandalone ();
+    SambaRole->SetAsStandalone();
 
-    unless ( SambaServer->WriteSettings () )
-    {
-	return undef;
-    }
+    SambaConfig->Write() or return undef;
+    SambaBackend->Write() or return undef;
 
     return 1;
 }
@@ -328,12 +299,8 @@ BEGIN { $TYPEINFO{GetServerDescription} = ["function", "string" ]; }
 sub GetServerDescription {
     my $self = shift;    
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    return SambaServer->getDescription ();
+    SambaConfig->Read();
+    return SambaConfig->GlobalGetStr("server string", "");
 }
 
 =item *
@@ -350,9 +317,9 @@ sub EditServerDescription {
     my $self = shift;    
     my $description = shift;
 
-    SambaServer->Read ();
-    SambaServer->setDescription ($description);
-    SambaServer->Write ();
+    SambaConfig->Read ();
+    SambaConfig->GlobalSetStr("server string", $description);
+    SambaConfig->Write() or return undef;
 
     return 1;
 }
@@ -370,12 +337,8 @@ BEGIN { $TYPEINFO{GetSAMBackends} = ["function", [ "list", "string" ] ]; }
 sub GetSAMBackends {
     my $self = shift;
     
-    unless (SambaServerPassdb->Read ())
-    {
-	return undef;
-    }
-    
-    return SambaServerPassdb->GetBackends ();
+    SambaConfig->Read();
+    return split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
 }
 
 =item *
@@ -400,10 +363,11 @@ sub GetSAMConfiguration {
     # we support LDAP only
     if ( $sam =~ /^ldap(sam)?:/ )
     {
-	SambaServer->ReadLDAPSettings ();
+	SambaConfig->Read();
 	
-	$res { "ldap suffix" } = SambaServer->LDAP_suffix ();
-	$res { "ldap admin dn" } = SambaServer->LDAP_admin_dn ();
+	foreach("ldap suffix", "ldap admin dn") {
+	    $res{$_} = SambaConfig->GlobalGetStr($_, "");
+	}
     }
     
     return \%res;
@@ -428,24 +392,13 @@ sub EditSAMConfiguration {
     # we support LDAP only
     if ( $sam =~ /^ldap(sam)?:/ )
     {
-	SambaServer->ReadLDAPSettings ();
+	SambaConfig->Read();
 	
-	my $val = $options { "ldap suffix" };	
-	if ( defined $val )
-	{
-	    SambaServer->setLDAPSuffix ( $val )
-	}
-
-	$val = $options { "ldap admin dn" };
-	if ( defined $val )
-	{
-	    SambaServer->setLDAPAdminDN ( $val )
+	foreach("ldap suffix", "ldap admin dn") {
+	    SambaConfig->GlobalSetStr($_, $options{$_}) if defined $options{$_};
 	}
 	
-	unless (SambaServer->WriteLDAPSettings ())
-	{
-	    return undef;
-	}
+	SambaConfig->Write() or return undef;
     }
     
     return 1;
@@ -465,7 +418,10 @@ sub EditDefaultSAM {
     my $self = shift;
     my $sam = shift;
     
-    my @current = @{ $self->GetSAMBackends () };
+    SambaConfig->Read();
+    SambaBackend->Read();
+    
+    my @current = split " ", SambaConfig->GlobalGetStr("passdb backend", "");
 
     unless( grep( /^$sam$/, @current ) ) {
         # not there, error
@@ -473,17 +429,14 @@ sub EditDefaultSAM {
     }
 
     # filter out the sam
-    my $item = undef;
     my @new = grep (!/^$sam$/, @current);
     
     unshift ( @new, $sam );
     
-    SambaServerPassdb->SetBackends (\@new);
-    
-    unless (SambaServerPassdb->Write ())
-    {
-	return undef;
-    }
+    SambaBackend->SetPassdbBackends(\@new);
+
+    SambaBackend->Write() or return undef;
+    SambaConfig->Write() or return undef;
     
     return 1;
 }
@@ -503,30 +456,28 @@ sub AddSAM {
     my $self = shift;
     my $sam = shift;
     my $default = shift;
+
+    SambaConfig->Read();
+    SambaBackend->Read();
     
-    my @current = @{ $self->GetSAMBackends () };
+    my @current = split " ", SambaConfig->GlobalGetStr("passdb backend", "");
     
     if( grep( /^$sam$/, @current ) ) {
         # already there, error
 	return undef;
     }
     
-    if( $default )
-    {
+    if ($default) {
 	unshift @current, $sam;
-    }
-    else
-    {
+    } else  {
 	push @current, $sam;
     }
     
-    SambaServerPassdb->SetBackends (\@current);
-    
-    unless (SambaServerPassdb->Write ())
-    {
-	return undef;
-    }
-    
+    SambaBackend->SetPassdbBackends(\@current);
+
+    SambaBackend->Write() or return undef;
+    SambaConfig->Write() or return undef;
+
     return 1;
 }
 
@@ -544,7 +495,7 @@ sub DeleteSAM {
     my $self = shift;
     my $sam = shift;
     
-    my @current = @{ $self->GetSAMBackends () };
+    my @current = split " ", SambaConfig->GlobalGetStr("passdb backend", "");
     
     unless( grep( /^$sam$/, @current ) ) {
         # not there, error
@@ -552,15 +503,12 @@ sub DeleteSAM {
     }
 
     # filter out the sam
-    my $item = undef;
     my @new = grep (!/^$sam$/, @current);
     
-    SambaServerPassdb->SetBackends (\@new);
+    SambaBackend->SetPassdbBackends(\@new);
     
-    unless (SambaServerPassdb->Write ())
-    {
-	return undef;
-    }
+    SambaBackend->Write() or return undef;
+    SambaConfig->Write() or return undef;
     
     return 1;
 }
@@ -580,20 +528,9 @@ sub EnableShare {
     my $name = shift;
     my $on = shift;
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    unless (SambaServer->enableShare ($name, Boolean($on) ))
-    {
-	return undef;
-    }
-
-    unless (SambaServer->Write () )
-    {
-	return undef;
-    }
+    SambaConfig->Read();
+    SambaConfig->AdjustShare($on);
+    Sambaconfig->Write() or return undef;
 
     return 1;
 }
@@ -612,22 +549,8 @@ sub GetShareEnabled {
     my $self = shift;
     my $name = shift;
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-    
-    my $foo = $self->GetShare ($name);
-    unless (defined $foo)
-    {
-	return undef;
-    }
-    
-    my %descr = %{ $foo };
-    
-    $descr { "commentout" } = Boolean ($descr { "commentout" });
-
-    return SambaServer->shareEnabled ( \%descr );
+    SambaConfig->Read();
+    return SambaConfig->ShareEnabled($name);
 }
 
 =item *
@@ -644,21 +567,10 @@ sub AddShare {
     my $self = shift;
     my $name = shift;
     my $options = shift;
-    
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
 
-    unless (SambaServer->addShare ($name, $options ))
-    {
-	return undef;
-    }
-
-    unless ( SambaServer->Write () )
-    {
-	return undef;
-    }
+    SambaConfig->Read();    
+    SambaConfig->ShareSetMap($name, $options);
+    SambaConfig->Write() or return undef;
 
     return 1;
 }
@@ -677,21 +589,10 @@ sub DeleteShare {
     my $self = shift;
     my $name = shift;
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    unless (SambaServer->removeShare ($name))
-    {
-	return undef;
-    }
-
-    unless ( SambaServer->Write () )
-    {
-	return undef;
-    }
-
+    SambaConfig->Read();    
+    SambaConfig->ShareRemove($name);
+    SambaConfig->Write() or return undef;
+    
     return 1;
 }
 
@@ -709,27 +610,11 @@ sub EditShare {
 
     my $self = shift;
     my $name = shift;
-    my %options = %{ +shift };
+    my $options = shift;
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-    
-    # fix the types passed back to ycp :-((
-    
-    # add commentout if missing and ensure the type
-    $options { "commentout" } = Boolean ( $options { "commentout" } || 0 );
-
-    unless (SambaServer->updateShare ($name, \%options ))
-    {
-	return undef;
-    }
-
-    unless ( SambaServer->Write () )
-    {
-	return undef;
-    }
+    SambaConfig->Read();    
+    SambaConfig->ShareUpdateMap($name, $options);
+    SambaConfig->Write() or return undef;
 
     return 1;
 }
@@ -748,12 +633,8 @@ sub GetShare {
     my $self = shift;
     my $name = shift;
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    return SambaServer->getShare ($name);
+    SambaConfig->Read();    
+    return SambaConfig->ShareGetMap($name);
 }
 
 =item *
@@ -771,23 +652,14 @@ sub GetAllDirectories {
 
     my $self = shift;
 
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    my @res = ();
-    my %shares = %{ SambaServer->shares () };
+    SambaConfig->Read();
+    
+    my $shares = SambaConfig->GetShares();
+    my @res;
     
     # filter out the printers
-    foreach my $key (keys %shares) 
-    {
-	my %vals = %{ $shares { $key } };
-	
-	if (! $vals {"printable"})
-	{
-	    push @res, $key;
-	}
+    foreach my $key (@$shares) {
+	push @res, $key unless SambaConfig->ShareGetTruth($key, "printable", 0);
     }
     
     return \@res;
@@ -807,19 +679,11 @@ BEGIN { $TYPEINFO{EnableHomes} = ["function", "void",  "boolean"] ; }
 sub EnableHomes {
     my $self = shift;
     my $on = shift;
+
+    SambaConfig->Read();
+    SambaConfig->HomesAdjust($on);
+    SambaConfig->Write() or return undef;
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    SambaServer->enableHomes (Boolean($on));
-
-    unless (SambaServer->Write () )
-    {
-	return undef;
-    }
-
     return 1;
 }
 
@@ -838,17 +702,9 @@ sub EnableNetlogon {
     my $self = shift;
     my $on = shift;
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
-
-    SambaServer->enableNetlogon (Boolean($on));
-
-    unless (SambaServer->Write () )
-    {
-	return undef;
-    }
+    SambaConfig->Read();
+    SambaConfig->ShareAdjust("netlogon", $on);
+    SambaConfig->Write() or return undef;
 
     return 1;
 }
@@ -865,28 +721,20 @@ to get the error hash.
 BEGIN { $TYPEINFO{GetAllPrinters} = ["function", [ "list", "string" ] ]; }
 sub GetAllPrinters {
     my $self = shift;
-    
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
 
-    my @res = ();
-    my %shares = %{ SambaServer->shares () };
+    SambaConfig->Read();
+    
+    my $shares = SambaConfig->GetShares();
+    my @res;
     
     # filter out the printers
-    foreach my $key (keys %shares) 
-    {
-	my %vals = %{ $shares { $key } };
-	
-	if ($vals {"printable"})
-	{
-	    push @res, $key;
-	}
+    foreach my $key (@$shares) {
+	push @res, $key if SambaConfig->ShareGetTruth($key, "printable", 0);
     }
-
+    
     return \@res;
 }
+
 
 =item *
 C<$result = EnablePrinters($printerList,$enable);>
@@ -904,26 +752,11 @@ sub EnablePrinters {
     
     my $enable = shift;
     
-    unless (SambaServer->Read ())
-    {
-	return undef;
-    }
+    SambaConfig->Read();
 
-    my %shares = %{SambaServer->shares ()};
-    
-    while (my $share = pop @printer_names)
-    {
-	# get the share hash or empty one, if the share is not defined
-	my %conf = %{ $shares{ $share } || {} };
-	
-	unless (defined $conf {"printable"})
-	{
-	    return undef;
-	}
-	
-	$conf {"enabled"} = $enable;
-
-	$self->EditShare ($share, \%conf);
+    while (my $share = pop @printer_names) {
+	return undef unless SambaConfig->ShareGetTruth($share, "printable", 0);
+	SambaConfig->ShareAdjust($enable);
     }
     
     return 1;
@@ -938,4 +771,4 @@ sub EnablePrinters {
 
 =cut
 
-42;
+9;

@@ -51,7 +51,7 @@ sub Read {
     # if the secrets file does not exist at all, return empty map
     my $res = SCR->Read(".target.stat", secret_tdb);
     unless (defined $res and keys %$res) {
-	y2error(secret_tdb." not found");
+	y2warning(secret_tdb." not found");
 	return 0;
     }
     
