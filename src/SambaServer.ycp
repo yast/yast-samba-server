@@ -551,6 +551,14 @@ global define boolean WriteSettings() ``{
     // ensure "encrypt passwords = yes";
     SCR::Write( .etc.smb.value.global."encrypt passwords" , "yes" );
     
+    // ensure high os level for PDC
+    if( role == `pdc ) {
+	string val = SCR::Read( .etc.smb.value.global."os level" );
+	if( val == nil || tointeger(val) < 65 ) {
+	    SCR::Write( .etc.smb.value.global."os level", 65 );
+	}
+    }
+    
     // remove removed shares first
     foreach( string share, map options, removed_shares, ``{
 	SCR::Write( add( .etc.smb.section, share ), nil );
