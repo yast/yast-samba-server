@@ -1,3 +1,5 @@
 - Needs package Crypt::SmbHash (not yet created)
-- Edit Users does not work yet
-- Much bugfixing
+- Bugfixing
+- password expiration Attributes
+- How to get the user's cleartext password when adding Samba Account to an
+  existing user

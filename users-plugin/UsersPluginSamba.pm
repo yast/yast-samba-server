@@ -206,13 +206,119 @@ sub Add {
     my $self	= shift;
     my $config	= $_[0];
     my $data	= $_[1];
-    my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
     y2internal ("Add Samba called");
     
+    $self->update_attributes ($config, $data);
+
+    y2internal ( Data::Dumper->Dump( [ $data ] ) );
+    return $data;
+}
+
+BEGIN { $TYPEINFO{EditBefore} = ["function",
+    ["map", "string", "any"],
+    "any", "any"];
+}
+sub EditBefore {
+    my $self	= shift;
+    my $config	= $_[0];
+    my $data	= $_[1];
+    # First time call to Edit() 
+    if( ! $data->{'sambainternal'} ) {
+        $data->{'sambainternal'} = {};
+        $self->init_samba_sid( $config, $data );
+    }
+    return $data;
+}
+
+# this will be called at the beggining of Users::Edit
+BEGIN { $TYPEINFO{Edit} = ["function",
+    ["map", "string", "any"],
+    "any", "any"];
+}
+sub Edit {
+    my $self	= shift;
+    my $config	= $_[0];
+    my $data	= $_[1];
+
+    y2internal ("Edit Samba called");
+    y2internal ( Data::Dumper->Dump( [ $data ] ) );
+    
+    if( ! $data->{'sambainternal'}->{'initialized'} ) {
+        $self->init_internal_keys( $config,  $data );
+        $data->{'sambainternal'}->{'initialized'} = 1;
+    }
+
+    # If user doesn't have a Samba Account yet some initialization
+    # has to take place now.
+    if ( ! $self->PluginPresent( $config, $data ) ) {
+        $self->update_object_classes( $config, $data );
+    }
+
+    $self->update_attributes ($config, $data);
+    if ( (! $data->{'sambalmpassword'})  ) {
+        y2internal ("no samba password hashes present yet");
+    }
+
+    y2internal ( Data::Dumper->Dump( [ $data ] ) );
+    return $data;
+}
+
+# this will be called at the beggining of Users::Edit
+BEGIN { $TYPEINFO{InternalAttributes} = ["function",
+    ["map", "string", "any"],
+    "any", "any"];
+}
+sub InternalAttributes {
+    return [ "sambainternal", "sambanoexpire", "sambadisabled"];
+}
+
+sub update_object_classes {
+    my ($self, $config, $data) = @_;
+
+    my $oc = "sambaSamAccount";
+
+    # define the object class for new user/groupa
+    if (defined $data->{"objectclass"} && ref $data->{"objectclass"} eq "ARRAY")
+    {
+        if ( ! grep /^$oc$/i, @{$data->{'objectclass'}} ) {
+	    push @{$data->{'objectclass'}}, $oc;
+            y2milestone("added ObjectClass $oc");
+        }
+    }
+    return undef;
+}
+
+sub init_internal_keys {
+    my ($self, $config, $data) = @_;
+    y2internal("UsersPluginSamba::init_internal_keys");
+    if ( $data->{'sambaacctflags'} ) {
+        if ( ! defined( $data->{'sambadisabled'} ) ) {
+            y2internal("    UsersPluginSamba::init_internal_keys sambadisabled undefined ");
+            if ( $data->{'sambaacctflags'} =~ /^\[.*D.*\]/ ) {
+                $data->{'sambadisabled'} = "1";
+            } else {
+                $data->{'sambadisabled'} = "0";
+            }
+        }
+        if ( ! defined( $data->{'sambanoexpire'} ) ) {
+            y2internal("    UsersPluginSamba::init_internal_keys sambanoexpire undefined ");
+            if ( $data->{'sambaacctflags'} =~ /^\[.*X.*\]/ ) {
+                $data->{'sambanoexpire'} = "1";
+            } else {
+                $data->{'sambanoexpire'} = "0";
+            }
+        }
+    }
+    return undef;
+}
+
+sub update_attributes {
+    my ( $self, $config, $data ) = @_;
+
+    my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
     my $uidNumber = $data->{'uidnumber'};
     if ( $uidNumber ) {
         $data->{'sambasid'} = $SID."-". ( 2 * $uidNumber + 1000 );
-        $data->{'sambaacctflags'} = "[U          ]"
     }
     my $gidNumber = $data->{'gidnumber'};
     if ( $gidNumber ) {
@@ -229,73 +335,6 @@ sub Add {
         return $ret;
     }
 
-    y2internal ( Data::Dumper->Dump( [ $data ] ) );
-    return $data;
-}
-
-# this will be called at the beggining of Users::Edit
-BEGIN { $TYPEINFO{EditBefore} = ["function",
-    ["map", "string", "any"],
-    "any", "any"];
-}
-sub EditBefore {
-    my $self	= shift;
-    my $config	= $_[0];
-    my $data	= $_[1];
-    y2internal("UsersPluginSamba::EditBefore");
-    y2internal( Data::Dumper->Dump( [$data] ) );
-    return $data;
-}
-
-
-# this will be called at the beggining of Users::Edit
-BEGIN { $TYPEINFO{Edit} = ["function",
-    ["map", "string", "any"],
-    "any", "any"];
-}
-
-sub Edit {
-
-    my $self	= shift;
-    my $config	= $_[0];
-    my $data	= $_[1];
-
-    y2internal ("Edit Samba called");
-    $data = $self->update_samba_acctflags ($config, $data);
-    if ( (! $data->{'sambalmpassword'}) || (! $data->{'sambantpassword'}) ) {
-        y2internal ("no samba password hashes present yet");
-    }
-
-    $data = $self->update_samba_pwhash( $config, $data );
-
-#    y2internal ( Data::Dumper->Dump( [ $data ] ) );
-    return $data;
-}
-
-# this will be called at the beggining of Users::Edit
-BEGIN { $TYPEINFO{InternalAttributes} = ["function",
-    ["map", "string", "any"],
-    "any", "any"];
-}
-sub InternalAttributes {
-    return [ "sambainternal" ];
-}
-
-sub update_object_classes {
-
-    my ($self, $config, $data) = @_;
-
-    my $oc = "sambaSamAccount";
-
-    # define the object class for new user/groupa
-    if (defined $data->{"objectclass"} && ref $data->{"objectclass"} eq "ARRAY")
-    {
-        if ( ! grep /^$oc$/i, @{$data->{'objectclass'}} ) {
-	    push @{$data->{'objectclass'}}, $oc;
-            y2milestone("added ObjectClass $oc");
-        }
-    }
-    return undef;
 }
 
 sub update_samba_acctflags {
@@ -306,22 +345,22 @@ sub update_samba_acctflags {
 
     $acctflags =~ s/^\[(\w+)\s*\]$/$1/g;
     y2milestone("    acctflags: $acctflags");
-    if( defined( $data->{'sambainternal'}->{'sambadisabled'} ) && 
-            $data->{'sambainternal'}->{'sambadisabled'} eq "1" ) {
+    if( defined( $data->{'sambadisabled'} ) && 
+            $data->{'sambadisabled'} eq "1" ) {
         if ( $acctflags !~ /D/ ) {
             $acctflags .= "D";
         }
-    } elsif ( (! defined( $data->{'sambainternal'}->{'sambadisabled'})) 
-                || $data->{'sambainternal'}->{'sambadisabled'} eq "0" ) {
+    } elsif ( (! defined( $data->{'sambadisabled'})) 
+                || $data->{'sambadisabled'} eq "0" ) {
         $acctflags =~ s/^(.*)D(.*)$/$1$2/g;
     }
-    if( defined( $data->{'sambainternal'}->{'sambanoexpire'} ) 
-                && $data->{'sambainternal'}->{'sambanoexpire'} eq "1" ) {
+    if( defined( $data->{'sambanoexpire'} ) 
+                && $data->{'sambanoexpire'} eq "1" ) {
         if ( $acctflags !~ /X/ ) {
             $acctflags .= "X";
         }
-    } elsif ( (! defined( $data->{'sambainternal'}->{'sambanoexipre'})) 
-                || $data->{'sambainternal'}->{'sambanoexpire'} eq "0" ) {
+    } elsif ( (! defined( $data->{'sambanoexipre'})) 
+                || $data->{'sambanoexpire'} eq "0" ) {
         $acctflags =~ s/^(.*)X(.*)$/$1$2/g;
     }
     y2milestone("    length:" .length($acctflags) );
@@ -329,6 +368,7 @@ sub update_samba_acctflags {
     for( my $i=0; $i < ( 11 - $len ); $i++ ) {
         $acctflags .= " ";
     }
+    y2milestone("    updated acctflags: $acctflags");
     $data->{'sambaacctflags'} = "[". $acctflags ."]";
     return undef;
 }
@@ -338,13 +378,22 @@ sub update_samba_pwhash {
     
     if ( $data->{'sambainternal'}->{'sambacleartextpw'} ) {
         y2milestone("update_samba_pwhash");
+        my $update_timestamp = 0;
         my ($lmHash, $ntHash) = ntlmgen($data->{'sambainternal'}->{'sambacleartextpw'});
         y2internal ("   LMHASH: ". $lmHash );
         y2internal ("   NTHASH: ". $ntHash );
-        $data->{'sambalmpassword'} = $lmHash;
-        $data->{'sambantpassword'} = $ntHash;
-        $data->{'sambapwdlastset'} = time ();
-        $data->{'sambapwdcanchange'} = $data->{'sambapwdlastset'};
+        if ( $lmHash ne $data->{'sambalmpassword'} ) {
+            $data->{'sambalmpassword'} = $lmHash;
+            $update_timestamp = 1;
+        }
+        if ( $ntHash ne $data->{'sambantpassword'} ) {
+            $data->{'sambantpassword'} = $ntHash;
+            $update_timestamp = 1;
+        }
+        if ( $update_timestamp ) {
+            $data->{'sambapwdlastset'} = time ();
+            $data->{'sambapwdcanchange'} = $data->{'sambapwdlastset'};
+        }
         $data->{'sambapwdmustchange'} = ( 1 << 31 ) - 1;
     }
     return undef;

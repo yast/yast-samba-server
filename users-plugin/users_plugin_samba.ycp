@@ -86,14 +86,19 @@ could be required, as defined in the user template in the <b>LDAP Client Module<
         list new_attributes		= [];
         boolean modified		= false;
         term contents = `Empty();
+        boolean disabled = false;
+        boolean noExpire = false;
+
+        noExpire = ( data["sambanoexpire"]:"0" == "1" )? true : false;
+        disabled = ( data["sambadisabled"]:"0" == "1" )? true : false;
         contents = `HBox(`HSpacing (1.5), `VBox(
             `VSpacing(0.5),
             `TextEntry(`id(`homeDrive), _("Homedrive (leave empty to use defaults)"), data["sambahomedrive"]:"" ),
             `TextEntry(`id(`homePath), _("Homepath (leave empty to use defaults)"), data["sambahomepath"]:"" ),
             `TextEntry(`id(`profilePath), _("Profile path (leave empty to use defaults)"), data["sambaprofilepath"]:"" ),
             `TextEntry(`id(`logonScript), _("Logon script (leave empty to use defaults)"), data["sambalogonscript"]:"" ),
-            `CheckBox(`id(`disable), _("Disabled"), ((map<string,any>)data["sambainternal"]:$[])["sambadisable"]:false ),
-            `CheckBox(`id(`noExpire), _("No password expiration"), ((map<string,any>)data["sambainternal"]:$[])["sambanoexpire"]:false ),
+            `CheckBox(`id(`disable), _("Disabled"), disabled ),
+            `CheckBox(`id(`noExpire), _("No password expiration"), noExpire ),
             `VSpacing (0.5)
             ),
             `HSpacing (1.5)
@@ -137,14 +142,8 @@ could be required, as defined in the user template in the <b>LDAP Client Module<
                 data["sambahomepath"] = UI::QueryWidget(`id(`homePath), `Value );
                 data["sambaprofilepath"] = UI::QueryWidget(`id(`profilePath), `Value );
                 data["sambalogonscript"] = UI::QueryWidget(`id(`logonScript), `Value );
-                data["sambainternal"] = add ( data["sambainternal"]:$[], 
-                                              "sambanoexpire",
-                                              UI::QueryWidget(`id(`noExpire), `Value )
-                                              );
-                data["sambainternal"] = add ( data["sambainternal"]:$[], 
-                                              "sambadisabled",
-                                              UI::QueryWidget(`id(`disable), `Value )
-                                              );
+                data["sambanoexpire"] = ( UI::QueryWidget(`id(`noExpire), `Value ) == true ) ? "1" : "0";
+                data["sambadisabled"] = ( UI::QueryWidget(`id(`disable), `Value ) == true ) ? "1" : "0";
 		if (err != "")
 		{
 		    Report::Error (err);
