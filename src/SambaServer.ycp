@@ -21,7 +21,7 @@ import "Progress";
 import "Report";
 import "Summary";
 import "Runlevel";
-import "Printer";
+import "Spooler";
 import "Ldap";
 
 include "samba-server/routines.ycp";
@@ -393,8 +393,8 @@ Remove one of the options to resolve this conflict.
     printer_status = $[];
     
     Progress::off();
-    Printer::checkSpooler();
-    system_printers = Printer::GetAvailableQueues();
+    Spooler::Set (Spooler::checkSpoolSystemNoDialog());
+    system_printers = Spooler::GetAvailableQueues();
     Progress::on();
 
     // setup correctly the printer status

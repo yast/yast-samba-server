@@ -16,7 +16,7 @@
     import "Label";
     import "Popup";
     import "LogView";
-    import "CWM";
+    import "TablePopup";
     import "SambaServer";
     
     include "samba-server/routines.ycp";
@@ -68,14 +68,14 @@ global map smbconf_popups = $[
 ];
 
 
-global map defaulthostwidget =  CWM::CreateTableDescr (
+global map defaulthostwidget =  TablePopup::CreateTableDescr (
 	    $["add_delete" : true, 
 	      "up_down" : false, 
 	      "unique_keys" : true]
 	  , $[
-	    "init" : ``(CWM::TableInit (
+	    "init" : ``(TablePopup::TableInit (
 		SambaServerWidgets::widgets["share_edit"]:$[])),
-	    "handle" : ``(CWM::TableHandle (
+	    "handle" : ``(TablePopup::TableHandle (
 		SambaServerWidgets::widgets["share_edit"]:$[])),
 	    "options" : smbconf_popups,
 	    "ids" : ``(SambaServerWidgets::ShareEditContents ()),

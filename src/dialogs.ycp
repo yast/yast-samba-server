@@ -328,15 +328,18 @@ global define symbol ShareDirsDialog () ``{
 	    continue;
 	}
 	// translators: confirmation popup
-	else if(ret == `delete && Popup::ContinueCancel( sformat( _("Really 
+	else if(ret == `delete)
+	{
+	    if  (Popup::ContinueCancel( sformat( _("Really 
 delete share '%1'?
 
 All its settings will be lost.
 "), select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
-	    SambaServer::removeShare( select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
+		SambaServer::removeShare( select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
 	    
-	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
-	    continue;
+		UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
+		continue;
+	    }
 	}
         else {
             y2error("unexpected retcode: %1", ret);
