@@ -27,6 +27,8 @@ Summary:	Configuration of samba-server
 @clientdir@/samba-server_*.ycp
 @moduledir@/SambaServer.ycp
 @moduledir@/SambaServerWidgets.ycp
+@moduledir@/SambaServer.ybc
+@moduledir@/SambaServerWidgets.ybc
 @configdir@/samba-server.y2cc
 @desktopdir@/samba-server.desktop
 %doc @docdir@

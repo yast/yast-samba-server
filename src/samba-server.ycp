@@ -33,7 +33,7 @@ include "samba-server/routines.ycp";
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean ShareHandler(map options) ``{
+boolean ShareHandler(map options) {
     string share = (string) (options["name"]:nil);
     
     // check the "command" to be present exactly once
@@ -131,7 +131,7 @@ global define boolean ShareHandler(map options) ``{
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean ListHandler( map options ) ``{
+boolean ListHandler( map options ) {
     
     // translators: heading for "list" shares command line action
     // try to keep alignment
@@ -173,7 +173,7 @@ global define boolean ListHandler( map options ) ``{
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean BackendHandler( map options ) ``{
+boolean BackendHandler( map options ) {
     // check the backend to be present exactly once
     string command = CommandLine::UniqueOption( options, 
 	["smbpasswd", "ldap" ] );
@@ -198,7 +198,7 @@ global define boolean BackendHandler( map options ) ``{
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean RoleHandler( map options ) ``{
+boolean RoleHandler( map options ) {
     // check the role to be present exactly once
     string command = CommandLine::UniqueOption( options, 
 	["pdc", "bdc", "standalone" ] );
@@ -225,7 +225,7 @@ global define boolean RoleHandler( map options ) ``{
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean SambaServerEnableHandler( map options ) ``{
+boolean SambaServerEnableHandler( map options ) {
     // check the "command" to be present exactly once
     string command = CommandLine::UniqueOption( options, 
 	["enable", "disable" ] );
@@ -252,7 +252,7 @@ global define boolean SambaServerEnableHandler( map options ) ``{
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-global define boolean ChangeConfiguration( map options ) ``{
+boolean ChangeConfiguration( map options ) {
 	
     string value = (string) (options["workgroup"]:nil);
     if( value != nil ) Samba::setWorkgroup(value);
@@ -286,9 +286,9 @@ map cmdline = $[
     // translators: command line help text for samba-server module
     "help" 		: _("Samba server configuration module.
 See Samba documentation for details."),
-    "guihandler" 	: ``(SambaServerSequence()),
-    "initialize"	: ``(SambaServer::Read()),
-    "finish"		: ``(SambaServer::Write()),
+    "guihandler" 	: SambaServerSequence,
+    "initialize"	: SambaServer::Read,
+    "finish"		: SambaServer::Write,
     "actions"		: $[
 	"share"	:$[
 	    "handler"	: ShareHandler,
