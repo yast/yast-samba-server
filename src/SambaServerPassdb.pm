@@ -72,8 +72,6 @@ sub Read {
 
     my $ret = SCR::Read (".etc.smb.value.global.passdb backend");
     
-    y2debug ("Read value: $ret");
-    
     if ( defined $ret )
     {
 	@backends = split (/[\s,]+/, $ret);
