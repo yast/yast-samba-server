@@ -29,6 +29,11 @@ import "SuSEFirewall";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
+void ValidateSharePath = nil; // fake variable to be able to include local options
+include "samba-server/samba-options-local.ycp";
+include "samba-server/samba-options-global.ycp";
+include "samba-server/samba-synonym-map.ycp";
+
 global define symbol DetermineRole();
 global define void ReadLDAPSettings();
 global define boolean WriteSettings();
@@ -96,21 +101,6 @@ global symbol role = `standalone;
 boolean service = false;
 
 /**
- * domain master
- */
-global string domain_master = "auto";
-
-/**
- * preferred master
- */
-global string preferred_master = "auto";
-
-/**
- * add machine script
- */
-global string add_machine_script = "";
-
-/**
  * Should be [homes] section present
  */
 global boolean share_homes = false;
@@ -119,11 +109,6 @@ global boolean share_homes = false;
  * Should be [printers] section present
  */
 global boolean share_printers = false;
-
-/**
- * load printers
- */
-global boolean load_printers = true;
 
 /**
  * LDAP admin dn
@@ -165,7 +150,6 @@ global map<string, symbol> name2role = $[
     "Primary Domain Controller" : `pdc
 ];
 
-global string netbios_name = "";
 
 global map<string,any> global_config = $[];
 
@@ -386,11 +370,8 @@ global define boolean Read() ``{
     /* Samba-server read dialog caption */
     string caption = _("Initializing Samba Server Configuration");
 
-    
-    integer steps = 5;
-
     // We do not set help text here, because it was set outside
-    Progress::New( caption, " ", steps, [
+    Progress::New( caption, " ", 5, [
 	    // translators: progress stage 1/5
 	    _("Read global Samba settings"),
 	    // translators: progress stage 2/5
@@ -418,6 +399,7 @@ global define boolean Read() ``{
 	""
     );
 
+
     // read global settings
     Progress::NextStage();
 
@@ -425,49 +407,24 @@ global define boolean Read() ``{
     Samba::Read();
     Progress::on ();
     
-    string value = "";
-    
     SambaServerPassdb::Read ();
     
     // read the complete global section
     list<string> options = (list<string>)SCR::Dir( .etc.smb.value.global );
     foreach( string option, options, ``{
-	global_config[option] = SCR::Read( add(.etc.smb.value.global, option) );
+	string value = (string)SCR::Read(add(.etc.smb.value.global, option));
+	if (value != nil) {
+	    if (global_option_widgets[option, "popup", "widget"]:nil == `checkbox) {
+		global_config[option] = normalize_boolean( value, false);
+	    } else {
+		global_config[option] = value;
+	    }
+	}
     });
     
-    // fix the value of some options
-    global_config["domain logons"] = normalize_boolean ( global_config ["domain logons"]:"no", false );
-    global_config["local master"] = normalize_boolean ( global_config ["local master"]:"yes", true );
-
-    // read some settings in a special way    
-    value = (string) SCR::Read( .etc.smb.value.global."add machine script" );
-    if( value != nil ) add_machine_script = value;
-    value = (string) SCR::Read( .etc.smb.value.global."domain master" );
-    if( value != nil ) domain_master = value;
-    value = (string) SCR::Read( .etc.smb.value.global."netbios name" );
-    if( value != nil ) netbios_name = value;
-    // synonym: "prefered master"
-    value = (string) SCR::Read( .etc.smb.value.global."preferred master" );
-    if( value != nil ) preferred_master = value;
-    value = (string) SCR::Read( .etc.smb.value.global."prefered master" );
-    if( value != nil && value != preferred_master ) {
-	// translators: error popup on conflicting options, %1 is the name of the
-	// option which will be used, %2 is its value, %3 is the name of the
-	// other option, %4 is the %3's value
-	Report::Warning( sformat( _("The configuration file contains conflicting
-options:
-
-%1: %2
-%3: %4
-
-YaST2 will use the value of '%1' for now.
-
-Remove one of the options to resolve this conflict.
-"), "preferred master", 
-	preferred_master, "prefered master", value ) );
-    }
-
-    service = Service::Enabled( "smb" );
+    global_config = check_synonym(global_config, global_synonym_map, nil);
+    
+    service = Service::Enabled("smb");
 
     role = DetermineRole();
     
@@ -479,79 +436,41 @@ Remove one of the options to resolve this conflict.
 
     globals_configured = true;
     
+
     // read shares settings
     Progress::NextStage();
 
     // read the list of shares, skip "global" section        
     list<string> sl = (list<string>)SCR::Dir( .etc.smb.section );
     sl = filter(string s, sl, ``(s != "global" ) );
-    
+
     shares = (map<string, map<string,any> >)listmap( string share, sl, ``{
 	path p = add( .etc.smb.value, share );
+	map <string, any> result = $[];
 	
-	map result = $[];
-	list<string> options = (list<string>)SCR::Dir( p );
-	foreach( string option, options, ``{
-	    result[option] = SCR::Read( add(p, option) );
+	foreach( string option, (list<string>)SCR::Dir(p), ``{
+	    string value = (string) SCR::Read( add(p, option) );
+	    if (value != nil) {
+		if (local_option_widgets[option, "popup", "widget"]:nil == `checkbox) {
+		    result[option] = normalize_boolean( value, false);
+		} else {
+		    result[option] = value;
+		}
+	    }
 	});
 
-	// ensure the needed settings are read (slower than really needed)
-	result["comment"] = SCR::Read( add(p, "comment") );
-	// synonym: "directory"
-	result["path"] = SCR::Read( add(p, "path") );
-	
-	value = (string) SCR::Read( add( p, "directory" ) );
-	if( value != nil && value != result["path"]:nil ) {
-	    // translators: error popup on conflicting options, %1 is the name of the
-	    // option which will be used, %2 is its value, %3 is the name of the
-	    // other option, %4 is the %3's value. %5 is the name of a share
-	    Report::Warning( sformat( _("The configuration file contains conflicting
-options for share '%5':
-
-%1: %2
-%3: %4
-
-YaST2 will use the value of '%1' for now.
-
-Remove one of the options to resolve this conflict.
-"), "path", 
-	    result["path"]:"", "directory", value, share ) );
-	}
-	
-	result["read list"] = SCR::Read( add(p, "read list") );
-	result["write list"] = SCR::Read( add(p, "write list") );
-	result["browseable"] = normalize_boolean( (string) SCR::Read( add(p, "browseable") ), true);
-	result["guest ok"] = normalize_boolean( (string) SCR::Read( add(p, "guest ok") ), false);
-	result["valid users"] = SCR::Read( add(p, "valid users") );
-	// synonym: "print ok"
-	result["printable"] = normalize_boolean( (string) SCR::Read( add(p, "printable") ), false );
-
-	value = (string) SCR::Read( add( p, "print ok" ) );
-	if( value != nil && value != result["printable"]:nil ) {
-	    // translators: error popup on conflicting options, %1 is the name of the
-	    // option which will be used, %2 is its value, %3 is the name of the
-	    // other option, %4 is the %3's value. %5 is the name of a share
-	    Report::Warning( sformat( _("The configuration file contains conflicting
-options for share '%5':
-
-%1: %2
-%3: %4
-
-YaST2 will use the value of '%1' for now.
-
-Remove one of the options to resolve this conflict.
-"), "printable", 
-	    result["printable"]:"", "print ok", value, share ) );
-	}
+	result = check_synonym(result, local_synonym_map, share);
+	// TODO: "writable" and "read only" are inverted synonym
+y2milestone("result = %1", result);
 
 	result["commentout"] = SCR::Read( add(.etc.smb.section_type, share) ) > 0 ;
-	
 	return $[ share: result ];
     });
     
     y2debug( "Shares read: %1", shares );
 
     share_homes = shareEnabled( shares["homes"]:$["commentout":true] );
+
 
     // read printer settings
     Progress::NextStage();
@@ -572,12 +491,14 @@ Remove one of the options to resolve this conflict.
 	// load the system printers
 	
 	// setup system printer status
-	boolean on = shareEnabled( shares["printers"]:$["commentout":true] ) && load_printers;
-	
-	foreach(  string printer, system_printers , ``{
-	    printer_status[ printer ] = on;
-	    share_printers = on;
-	});
+	boolean on = shareEnabled( shares["printers"]:$["commentout":true] ) && global_config["load printers"]:true;
+
+	if (system_printers != nil) {
+	    foreach(  string printer, system_printers , ``{
+		printer_status[ printer ] = on;
+		share_printers = on;
+	    });
+	}
     }
     
     // update printer_status for printable shares
@@ -639,10 +560,8 @@ global define boolean Write() ``{
 	}
     }
     
-    integer steps = 4;
-
     // We do not set help text here, because it was set outside
-    Progress::New(caption, " ", steps, [
+    Progress::New(caption, " ", 4, [
 	    // translators: write progress stage
 	    _("Write the settings"),
 	    // translators: write progress stage
@@ -888,24 +807,6 @@ global define boolean WriteSettings() ``{
 	}
     });    
     
-    // write global settings
-    if (netbios_name == "")
-    {
-	// if not set, try to delete
-	SCR::Write( .etc.smb.value.global."netbios name", nil);
-    }
-    else
-    {
-	SCR::Write( .etc.smb.value.global."netbios name", netbios_name);
-    }
-
-    SCR::Write( .etc.smb.value.global."add machine script", add_machine_script );
-    if( domain_master != "auto" ) 
-	SCR::Write( .etc.smb.value.global."domain master" , domain_master );
-    SCR::Write( .etc.smb.value.global."preferred master" , preferred_master );
-    if( !load_printers )
-        SCR::Write( .etc.smb.value.global."load printers", load_printers ? "yes" : "no" );
-    
     // ensure "encrypt passwords = yes";
     SCR::Write( .etc.smb.value.global."encrypt passwords" , "yes" );
     
@@ -981,17 +882,12 @@ global define boolean Import (map settings) ``{
 	role = `standalone;
 	service = false;
 
-	domain_master = "auto";
-	preferred_master = "auto";
-	add_machine_script = "";
 	share_homes = false;
 	share_printers = false;
-	load_printers = true;
 	LDAP_admin_dn = nil;
 	LDAP_suffix = nil;
 	shares = $[];
 	printer_status = $[];
-	netbios_name = "";
 	
 	SambaServerPassdb::SetBackends ([]);
 	
@@ -1016,7 +912,6 @@ global define boolean Import (map settings) ``{
     role = (symbol) (name2role[ settings["role" ]: "File and printer sharing" ]:`standalone);
     share_homes = global_config["share_homes"]: share_homes;
     share_printers = global_config["share_printers"]: share_printers;
-    netbios_name = global_config["netbios name"]: "";
     
     if (haskey (global_config, "workgroup") )
     {
@@ -1071,11 +966,6 @@ global define map Export () ``{
     if ( size(passdb) > 0 )
     {
 	global_config[ "passdb backend" ] = passdb;
-    }
-    
-    if ( size(netbios_name) > 0 )
-    {
-	global_config[ "netbios name" ] = netbios_name;
     }
     
     list r_shares =  maplist( string share, map<string,any> options, shares, ``{
@@ -1296,10 +1186,12 @@ global  define void enablePrinters( boolean on ) ``{
  * Turn on all system printers. Will enable [printers] as well.
  */
 global define void enableAllSystemPrinters() ``{
-    foreach(  string printer, system_printers, ``{
-	printer_status[ printer ] = true;
-	share_printers = true;
-    });
+    if (system_printers != nil) {	
+	foreach(  string printer, system_printers, ``{
+	    printer_status[ printer ] = true;
+	    share_printers = true;
+	});
+    }
 }
 
 /** 
@@ -1353,14 +1245,12 @@ global define void enableNetlogon( boolean on ) ``{
 global void AdaptMachineScript () {
     if ( SambaServerPassdb::LDAPDefault () )
     {
-	add_machine_script = "/sbin/yast /usr/share/YaST2/data/add_machine.ycp %m$";
+	global_config["add machine script"] = "/sbin/yast /usr/share/YaST2/data/add_machine.ycp %m$";
     }
     else
     {
-	add_machine_script = "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$";
+	global_config["add machine script"] = "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$";
     }
-    
-    global_config ["add machine script"] = add_machine_script;
 }
 
 /** 
@@ -1371,8 +1261,8 @@ global void AdaptMachineScript () {
 global define boolean setAsPDC() ``{
     Samba::security = "user";
     global_config[ "domain logons"] = true;
-    preferred_master = "yes";
-    domain_master = "yes";
+    global_config[ "preferred master"] = "yes";
+    global_config[ "domain master"] = "auto";
     global_config[ "local master"] = true;
     
     AdaptMachineScript ();
@@ -1389,7 +1279,7 @@ global define boolean setAsPDC() ``{
  * @return boolean	true on success
  */
 global define boolean setAsBDC() ``{
-    domain_master = "false";
+    global_config ["domain master"] = "false";
     global_config ["domain logons"] = true;
     Samba::security = "user";
     Samba::setDomainMembershipLevel( "bdc");
@@ -1405,7 +1295,7 @@ global define boolean setAsBDC() ``{
  * @return boolean	true on success
  */
 global define boolean setAsStandalone() ``{
-    domain_master = "false";
+    global_config ["domain master"] = "false";
     global_config ["domain logons"] = false;
     Samba::setDomainMembershipLevel( "member");
     
@@ -1766,13 +1656,15 @@ global define void enablePrinterNames( list<string> enable_names ) ``{
     
     // first, check, if we can use [printers]
     boolean printers = true;
-    foreach( string name, system_printers, ``{
-	// each system printer must be enabled and not disabled
-	if( (printer_status[name]:false) && !contains( enable_names, name ) ) {
-	    printers = false;
-	    y2debug( "[printers] can't be used, because of %1", name );
-	}
-    });
+    if (system_printers != nil) {	
+	foreach( string name, system_printers, ``{
+	    // each system printer must be enabled and not disabled
+	    if( (printer_status[name]:false) && !contains( enable_names, name ) ) {
+		printers = false;
+		y2debug( "[printers] can't be used, because of %1", name );
+	    }
+	});
+    }
     
     enableShare( "printers", printers );
     // if we can use [printers]
@@ -1784,13 +1676,15 @@ global define void enablePrinterNames( list<string> enable_names ) ``{
     }
     
     // update the status of these printers
-    foreach( string name, system_printers, ``{
-	printer_status[ name ] = printers;
-	// if printers are used, do not use the shares themselves
-	if( printers ) {
-	    enableShare( name, false );
-	}
-    });
+    if (system_printers != nil) {
+	foreach( string name, system_printers, ``{
+	    printer_status[ name ] = printers;
+	    // if printers are used, do not use the shares themselves
+	    if( printers ) {
+		enableShare( name, false );
+	    }
+	});
+    }
     
     // work on enable_names
     y2debug( "Now need to work on %1", enable_names );
@@ -1832,9 +1726,11 @@ YaST2 will not modify this share."), name ) );
  */
 global define boolean SystemPrintersEnabled() ``{
     boolean result = false;
-    foreach( string printer, system_printers, ``{
-	if( printer_status[ printer ]:false ) result = true;
-    });
+    if (system_printers != nil) {
+	foreach( string printer, system_printers, ``{
+	    if( printer_status[ printer ]:false ) result = true;
+        });
+    }
     
     return result;
 }
@@ -1902,7 +1798,8 @@ global define boolean enableShare( string name, boolean on ) ``{
     if( !haskey( shares, name ) ) return false;
     
     // [printers] is coupled with "load printers"
-    if( name == "printers" ) load_printers = on;
+    if( name == "printers" ) 
+	global_config["load printers"] = on;
     
     shares[ name, "commentout" ] = !on;
     
@@ -1949,18 +1846,18 @@ global define string roleName( symbol role ) ``{
 global define symbol DetermineRole() ``{
     if( Samba::security == "user" )
     {
-	if( global_config["domain logons"]:false 
-	    && yes_or_auto( domain_master ) 
-	    && yes_or_auto( preferred_master ) 
+	if( global_config["domain logons"]:false
+	    && yes_or_auto(global_config["domain master"]:"auto")
+	    && yes_or_auto(global_config["preferred master"]:"auto")
 	    && global_config["local master"]:true ) {
 	    return `pdc;
 	}
-	else if( ! yes_or_auto(domain_master) 
+	else if( !yes_or_auto( global_config["domain master"]:"auto")
 	    && global_config["domain logons"]:false )
 	{
 	    return `bdc;
 	}
-	else 
+	else
 	{
 	    return `standalone;
 	}

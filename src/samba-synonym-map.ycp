@@ -1,0 +1,39 @@
+{
+
+textdomain "samba-server";
+
+map <string, list <string> > global_synonym_map = $[
+"debug timestamp": ["timestamp logs"],
+"default service": ["default"],
+"idmap gid": ["winbind gid"],
+"idmap uid": ["winbind uid"],
+"lock directory": ["lock dir"],
+"log level": ["debuglevel"],
+"max protocol": ["protocol"],
+"min password length": ["min password len"],
+"preferred master": ["prefered master"],
+"preload": ["auto services"],
+"root directory": ["root", "root dir"]
+];
+
+map <string, list <string> > local_synonym_map = $[
+"browseable": ["browsable"],
+"case sensitive": ["casesignames"],
+"create mask": ["create mode"],
+"directory mask": ["directory mode"],
+"force group": ["group"],
+"guest ok": ["public"],
+"guest only": ["only guest"],
+"hosts allow": ["allow hosts"],
+"hosts deny": ["deny hosts"],
+"path": ["directory"],
+"preexec": ["exec"],
+"printable": ["print ok"],
+"printcap name": ["printcap"],
+"printer name": ["printer"],
+"username": ["user", "users"],
+"vfs objects": ["vfs object"],
+"writeable": ["writable"]
+];
+
+}

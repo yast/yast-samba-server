@@ -186,10 +186,9 @@ void IdentityWidgetInit (map<string, any> descr, any key)
     UI::ChangeWidget ( `id ( "remote_wins_server"), `Value, ! wins );
     UI::ChangeWidget ( `id( "wins_server_name" ), `Enabled, ! wins );
 	    
-    UI::ChangeWidget ( `id( "wins_server_name" ), `Value
-	, SambaServer::global_config ["wins server"]:"" );
+    UI::ChangeWidget ( `id( "wins_server_name" ), `Value, SambaServer::global_config["wins server"]:"" );
 
-    UI::ChangeWidget ( `id( "netbios_hostname" ), `Value, SambaServer::netbios_name );
+    UI::ChangeWidget ( `id( "netbios_hostname" ), `Value, SambaServer::global_config["netbios name"]:"" );
 }
 
 void IdentityWidgetStore (map<string, any> descr, any key)
@@ -219,11 +218,11 @@ void IdentityWidgetStore (map<string, any> descr, any key)
     string value = (string)UI::QueryWidget ( `id( "netbios_hostname" ), `Value );
     
     // warn about the change
-    if (! Mode::config && size(SambaServer::netbios_name)>0 && value != SambaServer::netbios_name)
+    if (! Mode::config && value != SambaServer::global_config["netbios name"]:"")
     {
 	Popup::Warning ( warnings["netbios"]:"" );
     }
-    SambaServer::netbios_name = value;
+    SambaServer::global_config["netbios name"] = value;
     SambaServer::modified = true;
 }
 
@@ -461,20 +460,10 @@ symbol GlobalSettingsDialog () ``{
 	"fallback_functions" : $[`abort: SambaServer::AbortFunction]
     ]);
 
-    if (res == `next)
-    {
+    if (res == `next) {
 	// update the rest of the settings using the entered ones
-	
 	Samba::setWorkgroup ( SambaServer::global_config["workgroup"]: (Samba::workgroup) );	
-	SambaServer::add_machine_script = SambaServer::global_config["add machine script"]: (SambaServer::add_machine_script);
-	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
-	SambaServer::preferred_master = SambaServer::global_config["preferred master"]: (SambaServer::preferred_master);
-	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
-	SambaServer::netbios_name = SambaServer::global_config["netbios name"]: (SambaServer::netbios_name);
-	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
-	
 	SambaServerPassdb::SetBackends ( splitstring( SambaServer::global_config["passdb backend"]:"", " ") );
-	
 	SambaServer::role = SambaServer::DetermineRole();
     }
     

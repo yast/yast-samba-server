@@ -1,3 +1,6 @@
+{
+textdomain "samba-server";
+
 map<string, map<string, any> > local_option_widgets = $[
 "comment" : $[
 	"table" : $[
@@ -828,3 +831,4 @@ map<string, map<string, any> > local_option_widgets = $[
 	],
 ],
 ];
+}

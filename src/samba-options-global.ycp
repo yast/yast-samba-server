@@ -1,3 +1,6 @@
+{
+textdomain "samba-server";
+
 map<string, map<string, any> > global_option_widgets = $[
 "dos charset" : $[
 	"table" : $[
@@ -1194,3 +1197,4 @@ map<string, map<string, any> > global_option_widgets = $[
 	],
 ],
 ];
+}

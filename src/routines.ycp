@@ -11,6 +11,8 @@
 
 textdomain "samba-server";
 
+import "Report";
+
 /********************************** non UI routines ************************/
 
 /**
@@ -85,6 +87,95 @@ list printers2items( map<string,boolean> printers ) ``{
     return maplist( string name, boolean value, printers, ``{
 	return `item( `id( name ), name , value );
     });
+}
+
+/**
+ * Check map for synonym keys. If only synonym key is used, then it is
+ * replaced by preferred key. If both preferred and synonym are used then warning
+ * is displayed.
+ *
+ * @param config	key:value configuration map
+ * @param key1		prefereed key
+ * @param key2		synonym key for preferref key
+ * @param share		name of share or nil (for warning message)
+ * @return list 	list of box items
+ */
+map <string, any> check_one_synonym(map <string, any> config, string key1, string key2, string share)
+{
+    if (config[key1]:nil == nil) {
+	if (config[key2]:nil != nil) {
+	    config[key1] = config[key2]:nil;
+	    config = remove(config, key2);
+	}
+	return config;
+    }
+    
+    if (config[key2]:nil == nil) {
+        return config;
+    }
+    
+    // both master and synonym key are specified
+    if (config[key1]:nil != config[key2]:nil) {
+	string val1 = is(config[key1]:nil, boolean) ? (config[key1]:false?"tRue":"faLse") : config[key1]:"";
+        string val2 = is(config[key2]:nil, boolean) ? (config[key2]:false?"tRue":"faLse") : config[key2]:"";
+	
+	if (share != nil) {
+	    // translators: error popup on conflicting options, %1 is the name of the
+	    // option which will be used, %2 is its value, %3 is the name of the
+	    // other option, %4 is the %3's value. %5 is the name of a share
+	    Report::Warning( sformat( _("The configuration file contains conflicting
+options for share '%5':
+
+
+%1: %2
+%3: %4
+
+YaST2 will use the value of '%1' for now.
+
+Remove one of the options to resolve this conflict.
+"), key1, val1 , key2, val2, share));
+	} else {
+	    // translators: error popup on conflicting options, %1 is the name of the
+	    // option which will be used, %2 is its value, %3 is the name of the
+	    // other option, %4 is the %3's value
+	    Report::Warning( sformat( _("The configuration file contains conflicting
+options:
+
+
+%1: %2
+%3: %4
+
+YaST2 will use the value of '%1' for now.
+
+Remove one of the options to resolve this conflict.
+"), key1, val1, key2, val2));
+	}
+    } else {
+	config[key2] = nil;
+    }
+    
+    return config;
+}
+
+/**
+ * Check map for synonym keys. If only synonym key is used, then it is
+ * replaced by preferred key. If both preferred and synonym are used then warning
+ * is displayed.
+ *
+ * @param config	key:value configuration map
+ * @param synonyms	synonyms map
+ * @param share		name of share or nil (for warning message)
+ * @return list 	list of box items
+ */
+map <string, any> check_synonym(map <string, any> config, map <string, list <string> > synonyms_map, string share)
+{
+    foreach(string preferred, list < string > synonyms, synonyms_map, ``{
+	foreach(string synonym, synonyms, ``{
+	    config = check_one_synonym(config, preferred, synonym, share);
+	});
+    });
+    
+    return config;
 }
 
 /* EOF */
