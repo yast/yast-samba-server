@@ -194,7 +194,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @return list of items for the table
       */
     global define list ShareEditContents (map descr) ``{
-	return filter( string key, maplist ( `k, `v, SambaServer::shares[shareToEdit]:$[], ``(v == nil ? nil : k )),
+	return filter( string key, maplist ( string k, any v, SambaServer::shares[shareToEdit]:$[], ``(v == nil ? nil : k )),
 	    ``( key != nil ) );
     }
     
@@ -209,7 +209,7 @@ global define symbol handleFun(any key, map event_descr) ``{
 	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
 	SambaServer::shares[shareToEdit]
-	    = filter (string k, `v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
+	    = filter (string k, any v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
 	return true;
     }
 

@@ -62,8 +62,9 @@ network.</p>
 ") +
 
     /* Samba role dialog help 4/5 */
-_("<p>Optionally, set a <b>Server Description</b>. This
-text is shown to users on the clients.</p>
+_("<p>Optionally, set a <b>Server Description</b> and <b>Server NetBIOS Name</b>. The
+description is shown to users on the clients and the NetBIOS name is the name
+the server will use in the SMB networks.</p>
 ")+
     /* Samba role dialog help 5/5 */
 _("<p>Use <b>Authentication Details</b> to configure 

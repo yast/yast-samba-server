@@ -55,7 +55,9 @@ symbol RoleDialog () ``{
 		`VBox(
 		    WorkgroupWidget(),
 		    // text entry label
-		    `TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string )
+		    `TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string ),
+		    // text entry label
+		    `TextEntry(`id(`netbios_name), _("Server &NetBIOS Name:"), SambaServer::netbios_name )
 	        ) 
 	    ) ),
 	    `HSpacing(3)
@@ -88,6 +90,7 @@ symbol RoleDialog () ``{
 	UI::ChangeWidget( `id( `server_description ), `Enabled, ew );
 	UI::ChangeWidget( `id( `advanced ), `Enabled, ew );
 	UI::ChangeWidget( `id( `browse ), `Enabled, ew );
+	UI::ChangeWidget( `id( `netbios_name ), `Enabled, ew );
 	
 	ret = UI::UserInput();
 	
@@ -140,6 +143,7 @@ controller must be a Samba server.
 
 	    Samba::setWorkgroup( (string) UI::QueryWidget( `id(`workgroup ), `Value ) );
 	    SambaServer::setDescription( (string) UI::QueryWidget( `id( `server_description ), `Value ) );
+	    SambaServer::netbios_name = (string) UI::QueryWidget( `id( `netbios_name ), `Value );
 	    
 	    if( SambaServer::role == `next ) {
 		symbol res = CheckWorkgroup( Samba::workgroup );

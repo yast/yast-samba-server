@@ -164,6 +164,8 @@ global map name2role = $[
     "Primary Domain Controller" : `pdc
 ];
 
+global string netbios_name = "";
+
 /** ============================= end of global data ==========================*/
 
 /**
@@ -293,6 +295,8 @@ global define boolean Read() ``{
     if( value != nil ) domain_logons = normalize_boolean( value, false );
     value = (string) SCR::Read( .etc.smb.value.global."local master" ) ;
     if( value != nil ) local_master = normalize_boolean( value, true );
+    value = (string) SCR::Read( .etc.smb.value.global."netbios name" );
+    if( value != nil ) netbios_name = value;
     // synonym: "prefered master"
     value = (string) SCR::Read( .etc.smb.value.global."preferred master" );
     if( value != nil ) preferred_master = value;
@@ -547,6 +551,18 @@ global define boolean Write() ``{
 global define boolean WriteSettings() ``{
 
     // write global settings
+    SCR::Write( .etc.smb.value.global."server string", server_string );
+    
+    if (netbios_name == "")
+    {
+	// if not set, try to delete
+	SCR::Write( .etc.smb.value.global."netbios name", nil);
+    }
+    else
+    {
+	SCR::Write( .etc.smb.value.global."netbios name", netbios_name);
+    }
+
     SCR::Write( .etc.smb.value.global."server string", server_string );
     SCR::Write( .etc.smb.value.global."add machine script", add_machine_script );
     if( domain_master != "auto" ) 
