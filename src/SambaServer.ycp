@@ -333,6 +333,7 @@ Remove one of the options to resolve this conflict.
     // read the list of shares, skip "global" section        
     list<string> sl = (list<string>)SCR::Dir( .etc.smb.section );
     sl = filter(string s, sl, ``(s != "global" ) );
+    
     shares = (map<string, map<string,any> >)listmap( string share, sl, ``{
 	path p = add( .etc.smb.value, share );
 	
@@ -514,11 +515,6 @@ global define boolean Write() ``{
 	Report::Error (sformat(_("Cannot write settings to %1."), "/etc/samba/smb.conf") );
     }
     
-    if( !SCR::Write( .sysconfig.samba, nil ) ) {
-	// translators: error message
-	Report::Error(sformat(_("Cannot write settings to %1."), "/etc/sysconfig/samba") );
-    }
-
     // run SuSEconfig for samba
     Progress::NextStage();
 
@@ -603,8 +599,8 @@ global define boolean WriteSettings() ``{
 	path sectionpath = add( .etc.smb.value, share );
 	path sectiontypepath = add( .etc.smb.value_type, share );
 	foreach( string opt, any value, options, ``{
-	    // skip our internal option
-	    if( opt != "commentout" && opt != "yast" ) {
+	    // skip our internal options
+	    if( value != nil && opt != "commentout" && opt != "yast" ) {
 
 		if( is( value, string ) )
 		{

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar  8 17:18:26 CET 2004 - visnov@suse.cz
+
+- pass correct values to share read/write (#35234)
+- do not show internal values in share edit
+- 2.9.7 
+ 
+-------------------------------------------------------------------
 Sun Mar  7 22:56:31 CET 2004 - kkaempf@suse.de
 
 - fix typing
