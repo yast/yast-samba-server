@@ -118,7 +118,7 @@ global map widgets = $[
       */
     global define boolean ShareEditEntryDelete (any opt_id, any opt_key) ``{
 	// message popup
-	if (! Popup::YesNo (_("Delete selected entry?")))
+	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
 	SambaServer::shares[shareToEdit]
 	    = filter (`k, `v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));

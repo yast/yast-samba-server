@@ -34,7 +34,7 @@ global define symbol RoleDialog () ``{
     
     Wizard::SetContents( caption, `VBox(
 	// radio button group label
-	`Frame( _("Sharing type"), `VBox(
+	`Frame( _("Sharing Type"), `VBox(
 	    `RadioButtonGroup( `id(`samba_role), `VBox(
         	`Left( `RadioButton( `id(`disabled), `opt(`notify), SambaServer::roleName( `disabled ) ) ),
 		`Left( `RadioButton( `id(`standalone), `opt(`notify), SambaServer::roleName( `standalone ) ) ),
@@ -45,11 +45,11 @@ global define symbol RoleDialog () ``{
 	    `VBox(
 		WorkgroupWidget(),
 		// text entry label
-		`TextEntry(`id(`server_description), _("Server &description:"), SambaServer::server_string )
+		`TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string )
 	     ) 
 	) ),
 	// push button label
-	`PushButton( `id( `advanced ), _("&Authentication details") ) 
+	`PushButton( `id( `advanced ), _("&Authentication Details") ) 
 	) , 
 	HELPS["RoleDialog"]:"", false, true
     );
@@ -89,10 +89,11 @@ global define symbol RoleDialog () ``{
 	    // warning about replication for BDC
 	    if( role == `bdc ) {
 		// translators: BDC requires replication of important data but YaST does not support this
-		Popup::Warning(_("Backup Domain Controller role
-requires to put in place a replication of data about
-users etc. However, YaST2 cannot setup
-the replication.") );		
+		Popup::Warning(_("The Backup Domain Controller role
+requires a replication of data about
+users and other aspects. However, YaST2 cannot set up
+the replication.
+") );		
 	    }
 
 	    // store the new settings
@@ -110,11 +111,13 @@ the replication.") );
 		    // translators: continue/cancel popup. Warning, that there is already a PDC present.
 		    if( ! Popup::ContinueCancel( sformat( _("You asked to set this Samba server
 to act as Primary Domain Controller.
-However, '%1' is a domain where already
-a Primary Domain Controller exists.
-The domain will not work coorectly, if there
-are two Primary domain controllers.\n
-Do you really want to continue?"), Samba::workgroup ) ) ) continue;
+However, '%1' is a domain where
+a Primary Domain Controller already exists.
+The domain will not work correctly if there
+are two Primary domain controllers.
+
+Really continue?
+"), Samba::workgroup ) ) ) continue;
 		}
 		
 		// save the settings
@@ -148,13 +151,13 @@ global define symbol OverallSharesDialog () ``{
     term contents = 
 	`HVSquash(
 	// frame label for global sharing check boxes
-	`Frame( _("Available shares"), 
+	`Frame( _("Available Shares"), 
 	`VBox( 
 	    // check box to share the home directories
-	    `Left(`CheckBox( `id( `homes ), _("Share &homes"), SambaServer::share_homes ) ),
+	    `Left(`CheckBox( `id( `homes ), _("Share &Homes"), SambaServer::share_homes ) ),
 	    `HBox( 
 		// check box to share the printers
-		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share &printers"), SambaServer::share_printers ) ),
+		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share &Printers"), SambaServer::share_printers ) ),
 		// push button
 		`PushButton( `id( `select_printers ), _("&Select...") ),
 		`HStretch()
@@ -188,7 +191,7 @@ global define symbol OverallSharesDialog () ``{
 	    UI::OpenDialog(
 		`VBox( 
 		    // translators: printer selection box
-		    `MultiSelectionBox( `id( `printer_list ), _("Select available printers:") ,
+		    `MultiSelectionBox( `id( `printer_list ), _("Select Available Printers:") ,
 		    printers2items( SambaServer::printer_status ) ),
 		    `HBox( 
 			`PushButton( `id( `ok ), `opt(`default), Label::OKButton()),
@@ -291,9 +294,11 @@ global define symbol ShareDirsDialog () ``{
 	    continue;
 	}
 	// translators: confirmation popup
-	else if(ret == `delete && Popup::ContinueCancel( sformat( _( "Do you really want to
-delete share '%1'?\n
-All its settings be lost."), select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
+	else if(ret == `delete && Popup::ContinueCancel( sformat( _("Really 
+delete share '%1'?
+
+All its settings will be lost.
+"), select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
 	    SambaServer::removeShare( select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
 	    
 	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
@@ -323,7 +328,7 @@ global define symbol AdvancedDialog () ``{
     term contents = 
     `VBox(
 	// radio button box label for password storing backend
-	`Frame( _("Authentication backend"), 
+	`Frame( _("Authentication Back-End"), 
 	`RadioButtonGroup( `id( `backend ), `VBox(
 	    // radio button label
 	    `Left(`RadioButton( `id( `smbpasswd ), `opt(`notify), _("smbpasswd") )),
@@ -331,10 +336,10 @@ global define symbol AdvancedDialog () ``{
 	    `Left(`RadioButton( `id( `ldap ), `opt(`notify), _("LDAP") )),
 	    `VBox(
 		// text entry label
-		`TextEntry( `id( `ldap_server ), _("LDAP &server:"), 
+		`TextEntry( `id( `ldap_server ), _("LDAP &Server:"), 
 		    SambaServer::LDAP_server != nil ? SambaServer::LDAP_server : ""),
 		// text entry label
-		`TextEntry( `id( `ldap_suffix ), _("Search &base DN:"), 
+		`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), 
 		    SambaServer::LDAP_suffix != nil ? SambaServer::LDAP_suffix: "" ),
 		// text entry label
 		`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), 
@@ -381,7 +386,7 @@ global define symbol AdvancedDialog () ``{
 	}
 	else if(ret == `ldap_password ) {
 	    // Translators: popup query for a password
-	    string passwd = passwordPopup( sformat( _("Enter LDAP administration password"), Samba::workgroup ) );
+	    string passwd = passwordPopup( sformat( _("Enter LDAP Administration Password"), Samba::workgroup ) );
 	    // user cancelled
 	    if( passwd == nil ) continue;
 
@@ -400,13 +405,13 @@ global define symbol AdvancedDialog () ``{
 	    
 	    if( size(server) == 0 ) {
 		// translators: error message
-		Popup::Error( _("Please, fill the LDAP server first.") );
+		Popup::Error( _("Enter the LDAP server first.") );
 		continue;
 	    }
 	    
 	    if( size(suffix) == 0 ) {
 		// translators: error message
-		Popup::Error( _("Please, fill the LDAP suffix first.") );
+		Popup::Error( _("Enter the LDAP suffix first.") );
 		continue;
 	    }
 	    
@@ -425,7 +430,7 @@ global define symbol AdvancedDialog () ``{
 	    SambaServer::setLDAPSuffix( UI::QueryWidget( `id( `ldap_suffix ), `Value ) );
 	    if( ! (SambaServer::switchSAMBackend( UI::QueryWidget( `id( `backend ), `CurrentButton ) ) ) ) {
 		// Translators: error message if it is not possible to switch between smbpasswd and LDAP backends
-		Popup::Error( sformat( _("It is not possible to switch to %1 backend."), 
+		Popup::Error( sformat( _("It is not possible to switch to %1 back-end."), 
 		    UI::QueryWidget( `id( `backend ), `CurrentButton ) == `ldap ? "LDAP" : "smbpasswd" ));
 	    }
 	    
@@ -457,7 +462,7 @@ global define symbol EditShareDialog () ``{
     ), `HSpacing (1));
 
     // dialog caption
-    string caption = sformat( _("Edit share \"%1\""), SambaServerWidgets::shareToEdit );
+    string caption = sformat( _("Edit Share \"%1\""), SambaServerWidgets::shareToEdit );
 
     return CWM::ShowAndRun (
 	["share_edit"], 
@@ -478,12 +483,12 @@ global define map AddSharePopup() ``{
     UI::OpenDialog( 
 	`VBox(
 	    // translators: text entry label
-	    `TextEntry( `id(`name), _("Share &name:") ),
+	    `TextEntry( `id(`name), _("Share &Name:") ),
 	    // translators: text entry label
-	    `TextEntry( `id(`comment), _("Share &description:") ),
+	    `TextEntry( `id(`comment), _("Share &Description:") ),
 	    `HBox(
 		// translators: text entry label
-		`TextEntry( `id(`path), _("&Path of the share:") ),
+		`TextEntry( `id(`path), _("Share &Path:") ),
 		`Bottom( `PushButton( `id( `browse ), Label::BrowseButton() ) )
 	    ),
 	    `HBox( 
@@ -518,11 +523,11 @@ global define map AddSharePopup() ``{
 	
 	    if( size( name ) == 0 ) {
 		// translators: error message
-		Popup::Error( _("Name of a share cannot be empty.") );
+		Popup::Error( _("Share name cannot be empty.") );
 		ret = nil;
 	    } else if( size( pathvalue ) == 0 ) {
 		// translators: error message
-		Popup::Error( _("Path of a share cannot be empty.") );
+		Popup::Error( _("Share path cannot be empty.") );
 		ret = nil;
 	    } else if( SCR::Read( .target.stat, pathvalue ) == $[] ) {
 		// translators: question popup. A user entered non-existent path

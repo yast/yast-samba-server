@@ -43,7 +43,7 @@ global define boolean ShareHandler(map options) ``{
     if( share == nil ) {	
 	// translators: error message for share command line action
 	// must provide the share name
-	Report::Error( sformat( _("You must specify the name of a share.") ) );
+	Report::Error( sformat( _("Specify the share name.") ) );
 	return false;
     }
     
@@ -70,7 +70,7 @@ global define boolean ShareHandler(map options) ``{
     {
 	if( ! haskey( options, "path" ) ) {
 	    // translators: error message for "add share" command line action
-	    Report::Error( _("You must provide the path of a directory to be shared.") );
+	    Report::Error( _("Provide the path of a directory to share.") );
 	    return false;
 	}
 	
@@ -183,7 +183,7 @@ global define boolean BackendHandler( map options ) ``{
      
     if( ! SambaServer::switchLDAPBackend( backend ) ) {
 	// translators: error message for backend command line action, %1 is the backend user wanted to switch to
-	Report::Error( sformat( _("Cannot change the backend of the Samba server to '%1'."), command ) );
+	Report::Error( sformat( _("Cannot change the back-end of the Samba server to '%1'."), command ) );
 	return false;
     }
     
@@ -306,7 +306,7 @@ See Samba documentation for details."),
 	"backend" :$[
 	    "handler"	: ``(BackendHandler()),
 	    // translators: command line help text for backend selection action
-	    "help"	: _("Set the backend for storing user information")
+	    "help"	: _("Set the back-end for storing user information")
 	],
 	"service" :$[
 	    "handler"	: ``(SambaServerEnableHandler()),
@@ -330,7 +330,7 @@ See Samba documentation for details."),
 	],
 	"delete"	:$[
 	    // translators: command line help text for delete share option
-	    "help"	: _("Remove the share from the configuration file" )
+	    "help"	: _("Remove the share from the configuration file")
 	],
 	"name"		:$[
 	    // translators: command line help text for share name option
@@ -347,7 +347,7 @@ See Samba documentation for details."),
 	], 
 	"show"		:$[
 	    // translators: command line help text for "share show" subaction
-	    "help"	: _("Show the options of a shae"),
+	    "help"	: _("Show the options of a share"),
 	], 
 	"comment"	:$[
 	    // translators: command line help text for share comment option
@@ -356,7 +356,7 @@ See Samba documentation for details."),
 	], 
 	"path"		:$[
 	    // translators: command line help text for share path option
-	    "help"	: _("The path (directory) to be shared"),
+	    "help"	: _("The path (directory) to share"),
 	    "type"	: "string"
 	], 
 	"printable"	:$[
@@ -366,12 +366,12 @@ See Samba documentation for details."),
 	], 
 	"read_list"	:$[
 	    // translators: command line help text for share read_list option
-	    "help"	: _("A comma separated list of users allowed to read from the share"),
+	    "help"	: _("A comma-separated list of users allowed to read from the share"),
 	    "type"	: "string"
 	], 
 	"write_list"	:$[
 	    // translators: command line help text for share write_list option
-	    "help"	: _("A comma separated list of users allowed to write to the share"),
+	    "help"	: _("A comma-separated list of users allowed to write to the share"),
 	    "type"	: "string"
 	], 
 	"browseable"	:$[
@@ -386,7 +386,7 @@ See Samba documentation for details."),
 	], 
 	"valid_users"	:$[
 	    // translators: command line help text for share valid_users option
-	    "help"	: _("A comma separated list of users allowed to access the share"),
+	    "help"	: _("A comma-separated list of users allowed to access the share"),
 	    "type"	: "string"
 	],
 	"pdc"		:$[
@@ -421,17 +421,17 @@ See Samba documentation for details."),
 	], 
 	"ldap_server"	:$[
 	    // translators: command line help text for ldap_server option
-	    "help"	: _("The LDAP server to be used"),
+	    "help"	: _("The LDAP server to use"),
 	    "type"	: "host"
 	], 
 	"ldap_suffix"	:$[
 	    // translators: command line help text for ldap_suffix option
-	    "help"	: _("The LDAP suffix DN used for manipulating the user information on LDAP server"),
+	    "help"	: _("The LDAP suffix DN for manipulating the user information on the LDAP server"),
 	    "type"	: "string"
 	], 
 	"ldap_admin_dn"	:$[
 	    // translators: command line help text for ldap_admin_dn option
-	    "help"	: _("The LDAP DN for modifying contents of the LDAP server (for example changing passwords)"),
+	    "help"	: _("The LDAP DN for modifying contents of the LDAP server (for example, changing passwords)"),
 	    "type"	: "string"
 	]
     ],

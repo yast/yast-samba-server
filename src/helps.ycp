@@ -17,114 +17,135 @@ textdomain "samba-server";
 global map HELPS = $[
 
     /* Read dialog help 1/2 */
-    "read" : _("<p><b><big>Initializing Samba server configuration</big></b><br>
-Please wait for a while...<br></p>") +
+    "read" : _("<p><b><big>Initializing Samba Server Configuration</big></b><br>
+Please wait...<br></p>
+") +
 
     /* Read dialog help 2/2 */
-    _("<p><b><big>Aborting the initialization:</big></b><br>
-Safely abort the configuration utility by pressing the <b>Abort</b> now.</p>"),
+    _("<p><b><big>Aborting Initialization:</big></b><br>
+Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
+"),
 
     /* Write dialog help 1/2 */
-    "write" : _("<p><b><big>Saving Samba server configuration</big></b><br>
-Please wait for a while...<br></p>") +
+    "write" : _("<p><b><big>Saving Samba Server Configuration</big></b><br>
+Please wait...<br></p>
+") +
 
     /* Write dialog help 2/2 */
-_("<p><b><big>Aborting the saving:</big></b><br>
-You can abort the saving by pressing the <b>Abort</b> button.
-An additional dialog will inform you whether it is safe to do so or not.
-</p>"),
+_("<p><b><big>Aborting Saving:</big></b><br>
+Abort the save procedure by pressing <b>Abort</b>.
+An additional dialog will inform you whether it is safe to do so.
+</p>
+"),
 
     /* Samba role dialog help 1/5 */
-    "RoleDialog" : _("<p><b><big>Selection of Samba server role</big></b><br>
-In a network, Samba server can provide a different degree of services and integration
-with the rest of the Windows network.</p>")+
+    "RoleDialog" : _("<p><b><big>Selection of Samba Server Role</big></b><br>
+In a network, a Samba server can provide a different degree of services and integration
+with the rest of the Windows network.</p>
+")+
 
     /* Samba role dialog help 2/5 */
-_("<p>If the server is not <b>Disabled</b>, the <b>File and printer sharing</b> 
-allows the server to provide directories and printers.<br>
+_("<p>If the server is not <b>Disabled</b>, <b>File and Printer Sharing</b> 
+allows the server to provide directories and printers.
 <b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> provide 
-logon of Windows clients into a Windows domain. The backup controller will 
-use another domain controller for validation, while the primary controller
-will use it's own information about users and their passwords.
-</p>") +
+logon of Windows clients into a Windows domain. The backup controller 
+uses another domain controller for validation. The primary controller
+uses its own information about users and their passwords.
+</p>
+") +
 
     /* Samba role dialog help 3/5 */
-_("<p>In <b>Domain or workgroup</b> you can specify the name of the workgroup,
-where this Samba server belongs. The <b>Browse</b> button
-will present the list of all workgroups and domains found in the
-network.</p>") +
+_("<p>In <b>Domain or Workgroup</b>, specify the name of the workgroup
+to which this Samba server belongs. <b>Browse</b> 
+presents the list of all workgroups and domains found in the
+network.</p>
+") +
 
     /* Samba role dialog help 4/5 */
-_("<p>Optionally, it is possible to set <b>Server Description</b>. This
-text will be shown to users on the clients.</p>")+
+_("<p>Optionally, set a <b>Server Description</b>. This
+text is shown to users on the clients.</p>
+")+
     /* Samba role dialog help 5/5 */
-_("<p>Use <b>Authentication details</b> if you need to configure details 
-how should Samba server store the authentication information.</p>"),
+_("<p>Use <b>Authentication Details</b> to configure 
+how the Samba server should store the authentication information.</p>
+"),
 
     /* High-level share dialog help 1/3 */
-    "OverallShares" : _("<p><b><big>Shared resources</big></b><br>
+    "OverallShares" : _("<p><b><big>Shared Resources</big></b><br>
 Here, it is possible to select the basic services provided by
-the Samba server.<br></p>") +
+the Samba server.<br></p>
+") +
 
     /* High-level share dialog help 2/3 */
-_("<p><b>Share homes</b> allows users to map their home 
+_("<p><b>Share Homes</b> allows users to map their home 
 directories on the server as a Windows share on the client.
-</p>")+
+</p>
+")+
 
     /* High-level share dialog help 3/3 */
-_("<p><b>Share printers</b> will turn on sharing of 
+_("<p><b>Share Printers</b> enables sharing of 
 printers configured on the Samba server. By default, all printers
-present of the system are provided by the Samba server. Using
-<b>Select...</b> you can choose, which printers should be 
-provided.</p>")+
+present on the system are provided by the Samba server. Using
+<b>Select...</b>, choose which printers should be 
+provided.</p>
+")+
 
     /* High-level share dialog help 3/3 */
-_("<p><b>Advanced...</b> allows to fine configure options of
-the shared resources.</p>"),
+_("<p><b>Advanced...</b> allows detailed configuration of options for
+the shared resources.</p>
+"),
 
     /* Share list dialog help 1/2 */
     "ShareDirs" : _("<p><b><big>Shares</big></b><br>
 This is a list of already configured shares, whether they 
-are enabled or disabled and some basic information about them.<br></p>") +
+are enabled or disabled, and some basic information about them.<br></p>
+") +
 
     /* Share list dialog help 2/2 */
 _("<p>Use <b>Add</b> to add a new share, <b>Edit</b> to modify
-already existing share and <b>Remove</b> to completely
-remove the information about a share.</p>"),
+already existing share, and <b>Remove</b> to completely
+remove the information about a share.</p>
+"),
 
     /* Single share editing dialog help 1/2 */
     "share_edit" : _("<p><b><big>Edit Single Share</big></b><br>
-Here you can fine tune the options of a share. 
-<br></p>") +
+Here, fine-tune the options of a share. 
+<br></p>
+") +
 
     /* Single share editing dialog help 2/2 */
 _("<p>Use <b>Add</b> to add a new configuration option, <b>Edit</b> to modify
-already existing option and <b>Delete</b> to delete an option.</p>"),
+already existing option, and <b>Delete</b> to delete an option.</p>
+"),
 
     /* Advanced SAMBA configuration dialog help 1/4 */
-    "Advanced" : _("<p><b><big>Advanced server options</big></b><br>
-Here you can choose, where should the Samba server find and
-store the information about users, groups and passwords.</p>") +
+    "Advanced" : _("<p><b><big>Advanced Server Options</big></b><br>
+Here, choose where the Samba server should find and
+store the information about users, groups, and passwords.</p>
+") +
 
     /* Advanced SAMBA configuration dialog help 2/4 */
-_("<p>Samba can store the user/group information in a file
-called <b>smbpasswd</b> similar to <i>/etc/passwd</i>.
-</p>")+
+_("<p>Samba can store the user and group information in a file
+called <b>smbpasswd</b>, which resembles <i>/etc/passwd</i>.
+</p>
+")+
 
     /* Advanced SAMBA configuration dialog help 3/4 */
-_("<p>Another option is to store the information on a <b>LDAP</b>
-server. Then, you should provide <b>LDAP server</b> (its DNS name
-or IP address), <b>Search base DN</b> (Distinguished Name) as
-a base where to start searching the information and <b>Administration DN</b> used when
+_("<p>Another option is to store the information on an <b>LDAP</b>
+server. For that, provide the <b>LDAP Server</b> (its DNS name
+or IP address), <b>Search Base DN</b> (Distinguished Name) as
+a base at which to start searching the information, and <b>Administration DN</b>, which is used when
 creating new users and groups. If the administration DN requires
-a password for write access, you can set the password using
-<b>Set LDAP administration password</b> button.
-You can test availability of the server by pressing
-the <b>Test connection</b> button.</p>")+
+a password for write access, set the password using
+<b>Set LDAP Administration Password</b>.
+You can test the availability of the server by pressing
+<b>Test Connection</b>.</p>
+")+
 
     /* Advanced SAMBA configuration dialog help 4/4 */
-_("<p><b>Notice:</b>If you try to set the LDAP administration password
-or join a domain, YaST2 will save the settings first.</p>"),
+_("<p><b>Note:</b>If you try to set the LDAP administration password
+or join a domain, YaST2 will save the settings first.</p>
+"),
 ];
 
 /* EOF */
