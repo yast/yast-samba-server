@@ -24,7 +24,7 @@ use Crypt::SmbHash;
 YaST::YCP::Import ("SCR");
 
 POSIX::setlocale(LC_MESSAGES, "");
-textdomain("users");	# TODO own textdomain for new plugins
+textdomain("samba-users");	# TODO own textdomain for new plugins
 
 ##--------------------------------------
 ##--------------------- global imports
