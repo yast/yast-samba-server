@@ -93,7 +93,7 @@ sub Summary {
     my $self	= shift;
     my $what	= "user";
     # summary
-    my $ret 	= _("Manage Samba Attribute of LDAP groups");
+    my $ret 	= _("Manage Samba attribute of LDAP groups");
 
     return $ret;
 }

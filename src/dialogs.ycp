@@ -354,9 +354,9 @@ void TrustedDomainsWidgetInit (map<string, any> descr, any key)
     if ( Mode::config && !autoyast_warning_done)
     {
 	// issue a warning, if not already done so
-	Popup::Warning (_("YaST needs to store a password for trusted domains 
+	Popup::Warning (_("YaST needs to store a password for trusted domains
 in the autoinstallation control file. The password
-will be stored as a plain text. This can be considered
+is stored as plain text. This can be considered
 a security threat."));
 	autoyast_warning_done = true;
     }

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 10 15:16:41 CEST 2004 - mlazar@suse.cz
+
+- integrated proofreading (proofed-2004-08-09.tar.gz)
+
+-------------------------------------------------------------------
 Mon Aug  9 19:06:08 CEST 2004 - mlazar@suse.cz
 
 - LdapServer module replaced by LdapServerAccess

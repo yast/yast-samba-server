@@ -126,15 +126,15 @@ global settings of the server.</p>
     "smb_conf_tab_trusted_domains" : _("<p><b><big>Trusted Domains</big></b><br>
 NT-style trusted domains represent a possibility to assign
 access rights to users from another domain.
-Here, you can create a list of domains for which 
+Here, create a list of domains for which 
 the Samba server should provide access.</p>
 ") +
 
     _("<p>To add a new domain into the list, press <b>Add</b>.
 Enter the name of the domain to trust
-and a password in the dialog that opens. The password will be used by the Samba
+and a password in the dialog that opens. The password is used by the Samba
 server to access the trusted domain. After <b>OK</b> is pressed,
-YaST will try to establish the trust relationship. To delete a domain,
+YaST tries to establish the trust relationship. To delete a domain,
 choose it in the list and press <b>Delete</b>.</p>
 ") +
 
@@ -240,7 +240,7 @@ entered for a directory share.</p>
 
 map <string,string> warnings = $[
     // translators: warning text
-    "netbios": _("If you change the 'netbios name' setting, Samba will create a
+    "netbios": _("If you change the 'netbios name' setting, Samba creates a
 service identifier (SID) for your server with the first client
 connection.  As the new SID is not equal to the old one, clients can
 no longer authenticate as domain members.

@@ -248,8 +248,8 @@ sub EditBefore {
         $data->{'sambainternal'} = {};
         my $ret = $self->init_samba_sid( $config, $data );
         if( $ret ) {
-            y2internal("Could not initialize samba sid");
-            $error	= __("Could not initialize samba SID. Disabling plug-in.");
+            y2internal("Could not initialize Samba SID");
+            $error	= __("Could not initialize Samba SID. Disabling plug-in.");
             my @updated_plugin;
             foreach my $plugin ( @{$data->{'plugin'}} ) {
                 if ( lc($plugin) ne $pluginName ) {
@@ -290,7 +290,7 @@ sub Edit {
         $data->{'sambainternal'}->{'initialized'} = 1;
     } elsif ( (! $data->{'sambalmpassword'}) && 
               ( (! $data->{'text_userpassword'} ) || ($data->{'text_userpassword'} eq "" )) ){
-            $error	= __("Please change the password to create the samba account");
+            $error	= __("Change the password to create the Samba account");
             return undef;
     }
 

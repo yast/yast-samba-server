@@ -61,7 +61,7 @@
 	// helptext
 	string help_text = _("<p>Here, edit the setting of the user's samba account.</p>") +
             _("<p>If do not enter custom values for ") +
-            _("<b>\"Home Drive\"</b>, <b>\"Home Path\"</b>, <b>\"Profile Path\"</b> and <b>\"Logon Script\"</b> ") +
+            _("<b>Home Drive</b>, <b>Home Path</b>, <b>Profile Path</b>, and <b>Logon Script</b> ") +
             _("the default values as defined in your local Samba Configuration will be used.</p>");
 
         term contents = `Empty();
@@ -95,6 +95,7 @@
 					    size (data["sambaprofilepath"]:"") <= 0))
 			   )
 		     ),
+	    // translators: logon is the Windows synonym for login
 	    `Frame ( _("Logon Script"),
 		     `VBox(
 			   `TextEntry(`id(`logonScript), "", data["sambalogonscript"]:"" ),

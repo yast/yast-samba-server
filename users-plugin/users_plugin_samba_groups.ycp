@@ -65,7 +65,7 @@
 
 
 
-	string help_text = _("help");
+	string help_text = _("Help");
         term contents = `Empty();
 
         contents = `HBox(`HSpacing (1.5), `VBox(
