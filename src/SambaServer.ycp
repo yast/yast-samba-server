@@ -19,10 +19,7 @@ import "Samba";
 
 import "Progress";
 import "Report";
-import "Summary";
 import "Runlevel";
-import "Spooler";
-import "Ldap";
 
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
@@ -31,7 +28,6 @@ global define symbol DetermineRole();
 global define void ReadLDAPSettings();
 global define boolean WriteSettings();
 global define void WriteLDAPSettings();
-global define boolean WriteSAMBackend();
 global define boolean enableServer( boolean on );
 global define string roleName( symbol role );
 global define boolean ReloadSettings();
@@ -42,7 +38,7 @@ global define void enableAllSystemPrinters();
 /**
  * list of required packages
  */
-global list<string> required_packages = ["samba"];
+global list<string> required_packages = (list<string>)union (["samba"], Samba::required_packages);
 
 /**
  * Abort function
@@ -127,16 +123,6 @@ global boolean share_printers = false;
  * load printers
  */
 global boolean load_printers = true;
-
-/**
- * SAM backend: `smbpasswd or `ldap
- */
-global symbol SAM = `smbpasswd;
-
-/**
- * LDAP server
- */
-global string LDAP_server = nil;
 
 /**
  * LDAP admin dn
@@ -257,7 +243,6 @@ global define boolean Read() ``{
     /* Samba-server read dialog caption */
     string caption = _("Initializing Samba Server Configuration");
 
-    Samba::Read();
     
     integer steps = 4;
 
@@ -288,12 +273,15 @@ global define boolean Read() ``{
 
     // read global settings
     Progress::NextStage();
+
+    Progress::off ();
+    Samba::Read();
+    Progress::on ();
     
     string value = "";
     
-    value = (string) SCR::Read( .sysconfig.samba.SAMBA_SAM );
-    if( value == "ldap" ) SAM = `ldap;
-    else SAM = `smbpasswd;
+    import "SambaServerPassdb";
+    SambaServerPassdb::Read ();
     
     value = (string) SCR::Read( .etc.smb.value.global."server string" );
     if( value != nil ) server_string = value;
@@ -414,6 +402,8 @@ Remove one of the options to resolve this conflict.
     printer_status = $[];
     
     Progress::off();
+    import "Spooler";
+    
     Spooler::Set (Spooler::checkSpoolSystemNoDialog());
     system_printers = Spooler::GetAvailableQueues();
     Progress::on();
@@ -501,12 +491,16 @@ global define boolean Write() ``{
 	""
     );
     
+    import "SambaServerPassdb";
+
     // if nothing to write, quit (but show at least the progress bar :-)
-    if( ! modified ) return true;
+    if( ! modified && ! SambaServerPassdb::Modified ()) return true;
 
     // write settings
     if(Abort()) return false;
     Progress::NextStage();
+
+    SambaServerPassdb::Write ();
     
     WriteSettings();
     WriteLDAPSettings();
@@ -523,12 +517,6 @@ global define boolean Write() ``{
 
     // run SuSEconfig for samba
     Progress::NextStage();
-
-    if( ! WriteSAMBackend() ) {
-	// translators: error message
-	Report::Error (_("SuSEconfig script failed."));
-    }
-    
 
     if(Abort()) return false;
     Progress::NextStage ();
@@ -639,10 +627,10 @@ global define boolean Import (map settings) ``{
     share_printers = settings["global","share_printers"]: share_printers;
 
     string value = (string) (settings["global","backend"]: nil);
-    if( value == "LDAP" ) SAM = `ldap ;
-    else SAM = `smbpasswd;
+    // FIXME: we should support this somehow
+    // if( value == "LDAP" ) SAM = `ldap ;
+    //else SAM = `smbpasswd;
 
-    LDAP_server = settings["global","LDAP_server"]: LDAP_server;
     LDAP_admin_dn = settings["global","LDAP_admin_dn"]: LDAP_admin_dn;
     LDAP_suffix = settings["global","LDAP_suffix"]: LDAP_suffix;
     
@@ -674,15 +662,14 @@ global define boolean Import (map settings) ``{
 global define map Export () ``{
 
     map samba = Samba::Export();
-    
+
+    // TODO: passdb backends    
     map globals = union( samba["global"]:$[], $[
 	"workgroup": Samba::workgroup,
 	"server_string": server_string,
 	"role": role2name[ role ]: nil,
 	"share_homes": share_homes,
 	"share_printers" : share_printers,
-	"backend" : SAM == `smbpasswd ? "smbpasswd" : "LDAP",
-	"LDAP_server" : LDAP_server,
 	"LDAP_admin_dn": LDAP_admin_dn,
 	"LDAP_suffix" : LDAP_suffix
     ]);
@@ -713,6 +700,8 @@ global define map Export () ``{
  */
 global define string Summary() ``{
     
+    import "Summary";
+    
     string nc = Summary::NotConfigured ();
     
     // summary header
@@ -732,17 +721,13 @@ global define string Summary() ``{
 	
 	// summary item: samba server description
 	summary = Summary::AddLine(summary, sformat(_("Description: %1"), server_string) );
-	// summary item: selected user information backend
-	summary = Summary::AddLine(summary, sformat( _("User Information Back-End: %1"), 
-		(SAM == `smbpasswd ? "smbpasswd" : "LDAP") ) );
-	if( SAM == `ldap ) {
-	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP Server: %1"), LDAP_server != nil ? LDAP_server : nc ) );
-	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP Suffix: %1"), LDAP_suffix != nil ? LDAP_suffix : nc ) );
-	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP Administration DN: %1"), LDAP_admin_dn != nil ? LDAP_admin_dn : nc ) );
-	}
+	// FIXME: summary item: selected user information backend
+	summary = Summary::AddLine(summary, sformat( _("User Information Back-Ends: %1"), 
+		"FIXME") );
+	// summary item
+	summary = Summary::AddLine(summary, sformat(_("LDAP Suffix: %1"), LDAP_suffix != nil ? LDAP_suffix : nc ) );
+	// summary item
+	summary = Summary::AddLine(summary, sformat(_("LDAP Administration DN: %1"), LDAP_admin_dn != nil ? LDAP_admin_dn : nc ) );
     } else {
 	summary = Summary::AddLine(summary, nc );
     }
@@ -936,6 +921,7 @@ global define boolean setAsPDC() ``{
     domain_master = "yes";
     local_master = true;
     add_machine_script = "/usr/sbin/useradd  -c Machine -d /dev/null -s /bin/false %m$";
+    Samba::setDomainMembershipLevel( "pdc");
     
     return true;
 }
@@ -949,6 +935,7 @@ global define boolean setAsBDC() ``{
     domain_master = "false";
     domain_logons = true;
     Samba::security = "user";
+    Samba::setDomainMembershipLevel( "bdc");
     
     return true;
 }
@@ -961,6 +948,7 @@ global define boolean setAsBDC() ``{
 global define boolean setAsStandalone() ``{
     domain_master = "false";
     domain_logons = false;
+    Samba::setDomainMembershipLevel( "member");
 
     return true;
 }
@@ -989,18 +977,6 @@ global define boolean setRole( symbol new_role ) ``{
 }
 
 /**
- * Set the LDAP server.
- *
- * @param server	IP or name for a new server
- */
-global define void setLDAPServer( string server ) ``{
-    if( LDAP_server == server ) return;
-    
-    LDAP_server = server;
-    modified = true;
-}
-
-/**
  * Set the LDAP server administration DN.
  *
  * @param dn	administration dn
@@ -1024,62 +1000,6 @@ global define void setLDAPSuffix( string suffix ) ``{
     modified = true;
 }
 
-/**
- * Set the server SAM backend.
- *
- * @param backend	symbol of the new backend
- */
-global define void setSAMBackend( symbol backend ) ``{
-    if( SAM == backend ) return;
-    SAM = backend;
-    modified = true;
-}
-
-/** 
- * Switch of smbpasswd/LDAP. Store the configuration only.
- *
- * @param backend	the new backend
- * @return boolean	true on success
- */
-global define boolean switchSAMBackend( symbol backend ) ``{
-    // if the backend is already switched, do nothing
-    if( backend == (SCR::Read( .sysconfig.samba.SAMBA_SAM ) == "ldap"? `ldap : `smbpasswd) )
-	return true;
-	
-    SAM = backend;
-    
-    WriteLDAPSettings();
-    // flush the settings from INI agent
-    SCR::Write( .etc.smb, nil );
-
-    if( !WriteSAMBackend() ) return false;
-    return ReloadSettings();
-}
-
-/** 
- * Switch of smbpasswd/LDAP. Store the configuration and run SuSEconfig to proceed
- * with the configuration.
- *
- * @return boolean	true on success
- */
-global define boolean WriteSAMBackend() ``{
-    // write the sysconfig setting
-    if( !SCR::Write( .sysconfig.samba.SAMBA_SAM, SAM == `ldap ? "ldap" : "classic" ) )
-	return false;
-    SCR::Write( .sysconfig.samba, nil );
-    
-    if( write_only ) return true;
-
-    integer ret = (integer) SCR::Execute( .target.bash, "/sbin/SuSEconfig --module samba" );
-    
-    if( ret != 0 ) {
-	y2error( "SuSEconfig --module samba failed: %1", ret );
-	return false;
-    }
-    
-    return true;
-}
-    
 /**
  * Reload settings for smbd and nmbd. Calls the initscripts with restart
  * to switch backend if necessary.
@@ -1108,15 +1028,14 @@ global define boolean ReloadSettings() ``{
  * Read LDAP-related settings.
  */
 global define void ReadLDAPSettings() ``{
-    LDAP_server = (string) SCR::Read( .etc.smb.value.global."ldap server" );
     LDAP_admin_dn = (string) SCR::Read( .etc.smb.value.global."ldap admin dn" );
     LDAP_suffix = (string) SCR::Read( .etc.smb.value.global."ldap suffix" );
 
-    if( LDAP_server == nil || LDAP_admin_dn == nil ) {
+    if( LDAP_admin_dn == nil ) {
+	import "Ldap";
+
 	// we miss some information, ask LDAP for defaults
         Ldap::Read();
-	if( LDAP_server == nil ) 
-	    LDAP_server = Ldap::server;
 	// ask LDAP client about default configuration DN
 	if( LDAP_admin_dn == nil )
 	    LDAP_admin_dn = Ldap::GetMainConfigDN ();
@@ -1131,29 +1050,12 @@ global define void ReadLDAPSettings() ``{
  */
 global define void WriteLDAPSettings() ``{
     // delete if not neccessary
-    if( LDAP_server == "" ) LDAP_server = nil;
     if( LDAP_admin_dn == "" ) LDAP_admin_dn = nil;
     if( LDAP_suffix == "" ) LDAP_suffix = nil;
     
     // otherwise comment out if necessary
-    SCR::Write( .etc.smb.value.global."ldap server", LDAP_server );
     SCR::Write( .etc.smb.value.global."ldap admin dn", LDAP_admin_dn );
-    if( SAM == `ldap ) {
-	if( LDAP_server != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap server", 0 );
-	if( LDAP_admin_dn != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap admin dn", 0 );
-	if( LDAP_suffix != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap suffix", 0 );
-    } else {
-	// write the LDAP settings as comments
-	if( LDAP_server != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap server", 1 );
-	if( LDAP_admin_dn != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap admin dn", 1 );
-	if( LDAP_suffix != nil )
-	    SCR::Write( .etc.smb.value_type.global."ldap suffix", 1 );
-    }
+    SCR::Write( .etc.smb.value.global."ldap suffix", LDAP_suffix );
 }
 
 /**
@@ -1163,10 +1065,7 @@ global define void WriteLDAPSettings() ``{
  * @return string 	nil for success, error message otherwise
  */
 global define string setLDAPAdminPassword( string password ) ``{
-    switchSAMBackend( `ldap );
-    
-    // TODO: this will not work for passwords containing "
-    string cmd = "smbpasswd -w \""+password+"\"";
+    string cmd = "smbpasswd -w '"+password+"'";
     map result = (map) SCR::Execute( .target.bash_output, cmd );
     
     // check the exit code, return nil on success
@@ -1187,16 +1086,12 @@ global define string setLDAPAdminPassword( string password ) ``{
  * @return boolean	true on success
  */
 global define boolean testLDAPS( string server, string search_base ) ``{
-    map result = (map) SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
-    y2debug( "LDAPS test search result: %1", result );
+    map result = (map) SCR::Execute( .target.bash_output, "ldapsearch -x -H "+server+" -b "+search_base );
+    y2debug( "LDAP test search result: %1", result );
     if( result["exit"]:-1 != 0 ) {
 	// translators: warning message, %1 is LDAP server name/IP
 	Report::Warning( sformat( _("It seems like there is no functional
-SSL LDAP server at %1.
-
-It is recommended to run Samba with LDAP using SSL.
-If you still want to turn off SSL, add \"ldap ssl = false\"
-to your \"smb.conf\" file manually.
+LDAP server at %1.
 "), server ) );
 	return false;
     }

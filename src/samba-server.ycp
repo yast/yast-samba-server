@@ -21,10 +21,8 @@ import "CommandLine";
 import "Popup";
 import "Report";
 import "Require";
-import "Samba";
 import "SambaServer";
 
-include "commandline/commandline.ycp";
 include "samba-server/routines.ycp";
 
 /**
@@ -174,21 +172,8 @@ boolean ListHandler( map options ) {
  * @return boolean	true on success
  */
 boolean BackendHandler( map options ) {
+    // FIXME:
     // check the backend to be present exactly once
-    string command = CommandLine::UniqueOption( options, 
-	["smbpasswd", "ldap" ] );
-    if( command == nil ) return false;
-
-    symbol backend = nil;
-    if( command == "smbpasswd" ) backend = `smbpasswd;
-    else if( command == "ldap" ) backend = `ldap;
-     
-    if( ! SambaServer::switchSAMBackend( backend ) ) {
-	// translators: error message for backend command line action, %1 is the backend user wanted to switch to
-	Report::Error( sformat( _("Cannot change the back-end of the Samba server to '%1'."), command ) );
-	return false;
-    }
-    
     return true;
 }
 
@@ -253,15 +238,13 @@ boolean SambaServerEnableHandler( map options ) {
  * @return boolean	true on success
  */
 boolean ChangeConfiguration( map options ) {
+    import "Samba";
 	
     string value = (string) (options["workgroup"]:nil);
     if( value != nil ) Samba::setWorkgroup(value);
 
     value = (string) (options["description"]:nil);
     if( value != nil ) SambaServer::setDescription(value);
-
-    value = (string) (options["ldap_server"]:nil);
-    if( value != nil ) SambaServer::setLDAPServer(value);
 
     value = (string) (options["ldap_suffix"]:nil);
     if( value != nil ) SambaServer::setLDAPSuffix(value);
@@ -421,11 +404,6 @@ See Samba documentation for details."),
 	    "help"	: _("The human-readable description for the Samba server"),
 	    "type"	: "string"
 	], 
-	"ldap_server"	:$[
-	    // translators: command line help text for ldap_server option
-	    "help"	: _("The LDAP server to use"),
-	    "type"	: "host"
-	], 
 	"ldap_suffix"	:$[
 	    // translators: command line help text for ldap_suffix option
 	    "help"	: _("The LDAP suffix DN for manipulating the user information on the LDAP server"),
@@ -445,7 +423,7 @@ See Samba documentation for details."),
 	"role"		: [ "pdc", "bdc", "standalone" ],
 	"backend" 	: [ "smbpasswd", "ldap" ],
 	"service" 	: [ "enable", "disable" ],
-	"configure"	: [ "workgroup", "description", "ldap_server", "ldap_suffix", "ldap_admin_dn" ]
+	"configure"	: [ "workgroup", "description", "ldap_suffix", "ldap_admin_dn" ]
     ]
 ];
 
@@ -470,7 +448,7 @@ without installing the required packages."), "samba" ) );
     return false;
 }
 
-ret = CommandLineRun( cmdline );
+ret = CommandLine::Run( cmdline );
 
 y2debug("ret=%1", ret);
 

@@ -1,6 +1,6 @@
 {
 
-// test for SambaServer::setSAMBackend
+// test for SambaServerPassdb::SetBackends
 // $Id$
 
     include "testsuite.ycp";
@@ -15,20 +15,21 @@
         ]
     ], nil );
     
-    import "SambaServer";
+    import "SambaServerPassdb";
     
-    SambaServer::setSAMBackend( `ldap );
-    DUMP(SambaServer::SAM);
-    DUMP(SambaServer::modified);
-    
-    SambaServer::modified = false;
-    SambaServer::setSAMBackend( `ldap );
-    DUMP(SambaServer::SAM);
-    // this time modified should not be set
-    DUMP(SambaServer::modified);
+    SambaServerPassdb::SetBackends( ["smbpasswd"] );
+    DUMP(SambaServerPassdb::GetBackends());
+    DUMP(SambaServerPassdb::Modified());
 
-    SambaServer::setSAMBackend( `smbpasswd );
-    DUMP(SambaServer::SAM);
+    SambaServerPassdb::Write();   
+ 
+    SambaServerPassdb::SetBackends( ["smbpasswd"] );
+    DUMP(SambaServerPassdb::GetBackends());
+    // this time modified should not be set - this does not work ATM
+    DUMP(SambaServerPassdb::Modified());
+
+    SambaServerPassdb::SetBackends( ["ldapsam:ldaps://ldap.example.com"] );
+    DUMP(SambaServerPassdb::GetBackends ());
     // modified again
-    DUMP(SambaServer::modified);
+    DUMP(SambaServerPassdb::Modified());
 }

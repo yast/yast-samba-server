@@ -15,19 +15,18 @@ import "Wizard";
 import "Label";
 import "SambaServer";
 
-include "wizard/sequencer.ycp";
-
 include "samba-server/dialogs.ycp";
 include "samba-server/complex.ycp";
 
-global define symbol MainSequence();
+symbol MainSequence();
 
 
 /**
  * Whole configuration of samba-server
  * @return sequence result
  */
-global define symbol SambaServerSequence() ``{
+symbol SambaServerSequence() ``{
+    import "Sequencer";
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
@@ -53,7 +52,7 @@ global define symbol SambaServerSequence() ``{
 
     Wizard::CreateDialog();
 
-    symbol ret = WizardSequencer(aliases, sequence);
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     UI::CloseDialog();
     return ret;
@@ -64,7 +63,7 @@ global define symbol SambaServerSequence() ``{
  * For use with autoinstallation.
  * @return sequence result
  */
-global define symbol SambaServerAutoSequence() ``{
+symbol SambaServerAutoSequence() ``{
     // translators: inicialization dialog caption
     string caption = _("Samba Server Configuration");
     // translators: inicialization dialog contents
@@ -90,14 +89,16 @@ global define symbol SambaServerAutoSequence() ``{
  * Main workflow of the samba-server configuration
  * @return sequence result
  */
-global define symbol MainSequence() ``{
+symbol MainSequence() ``{
+    import "Sequencer";
 
     map aliases = $[
 	"samba_role"		:   ``( RoleDialog() ),
 	"enable_shares"		:   ``( OverallSharesDialog() ),
+	"passdb_edit"		:   ``( PassdbDialog() ),
 	"shared_directories"	:   ``( ShareDirsDialog() ),
-	"advanced"		:   ``( AdvancedDialog() ),
-	"share_edit"		:   ``( EditShareDialog() )
+	"share_edit"		:   ``( EditShareDialog() ),
+	"ldap_edit"		:   ``( LDAPDialog() ),
     ];
 
     map sequence = $[
@@ -110,24 +111,29 @@ global define symbol MainSequence() ``{
 	"samba_role"	: $[
 		`abort	: `abort,
 		`next	: "enable_shares",
-		`advanced	: "advanced",
+		`advanced	: "passdb_edit",
 	],
 	"shared_directories"	: $[
 		`abort	: `abort,
 		`edit	: "share_edit",
 		`next	: "enable_shares",
 	],
-	"advanced"	: $[
+	"passdb_edit"	: $[
 		`abort	: `abort,
 		`next	: "samba_role",
+		`ldap	: "ldap_edit",
 	],
 	"share_edit"	: $[
 		`abort	: `abort,
 		`next	: "shared_directories",
 	],
+	"ldap_edit"	:  $[
+		`abort	: `abort,
+		`next	: "passdb_edit",
+	],
     ];
 
-    symbol ret = WizardSequencer(aliases, sequence);
+    symbol ret = Sequencer::Run(aliases, sequence);
 
     return ret;
 }

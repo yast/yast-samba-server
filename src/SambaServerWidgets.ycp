@@ -18,6 +18,7 @@
     import "LogView";
     import "TablePopup";
     import "SambaServer";
+    import "SambaServerPassdb";
     
     include "samba-server/routines.ycp";
     include "samba-server/helps.ycp";
@@ -28,6 +29,13 @@
     global define string ShareEditSummary (any opt_id, any opt_key);
     global define boolean ShareEditEntryDelete (any opt_id, any opt_key);
 
+    global define list PassdbEditContents (map descr);
+    global define string PassdbEditOptionSummary (any opt_id, any opt_key);
+    global define boolean PassdbOptionMove (any opt_id, string opt_key, symbol direction);
+    global define string PassdbId2Key (map desc, any id);
+    global define boolean PassdbEntryDelete (any opt_id, any opt_key);
+    global define void PassdbEditOptionInit (any opt_id, any opt_key);
+    global define void PassdbEditOptionStore (any opt_id, any opt_key);
 
 /**
  * A share name do be editted in the Edit share dialog
@@ -74,10 +82,14 @@ global map smbconf_popups = $[
    ]
 ];
 
-global define byteblock initFun(any key);
+global define boolean initFun(any key);
 global define symbol handleFun(any key, map event_descr);
+global define boolean initPassdb(any key);
+global define symbol handlePassdb(any key, map event_descr);
+global define void storePassdb(any key);
+global define void AddPassdbBackend ();
 
-global map defaulthostwidget =  TablePopup::CreateTableDescr (
+global map shareswidget =  TablePopup::CreateTableDescr (
 	    $["add_delete" : true, 
 	      "up_down" : false, 
 	      "unique_keys" : true]
@@ -97,15 +109,76 @@ global map defaulthostwidget =  TablePopup::CreateTableDescr (
 	    "help" : HELPS["share_edit"]:"",
 	]);
 
+global map passdboptions = $[
+    "smbpasswd" : $[
+        "table" : $[
+	    // table entry description for smbpasswd-based SAM
+           "label" : _("smbpasswd file"),
+        ],
+        "popup" : $[
+         "widget" : `textentry,
+        ],
+    ],
+    "ldapsam" : $[
+        "table" : $[
+	    // table entry description for LDAP-based SAM
+           "label" : _("LDAP"),
+        ],
+        "popup" : $[
+         "widget" : `textentry,
+        ],
+    ],
+    "tdbsam" : $[
+        "table" : $[
+           "label" : _("TDB database"),
+        ],
+        "popup" : $[
+         "widget" : `textentry,
+        ],
+    ],
+    "mysql" : $[
+        "table" : $[
+           "label" : _("MySQL database"),
+        ],
+        "popup" : $[
+         "widget" : `textentry,
+        ],
+    ],
+];
+
+global map passdbwidget =  TablePopup::CreateTableDescr (
+	    $["add_delete" : true, 
+	      "up_down_buttons" : true, 
+	      "unique_keys" : false]
+	  , $[
+	    "init" : initPassdb,
+	    "handle" : handlePassdb,
+	    "store" : storePassdb,
+	    "ids" : PassdbEditContents,
+	    "help" : HELPS["passdb_edit"]:"",
+	    "options": passdboptions,
+	    "add_items" : [ "smbpasswd", "ldapsam", "tdbsam", "mysql" ],
+	    "add_unlisted" : false,
+	    "id2key": SambaServerWidgets::PassdbId2Key,
+	    "option_delete" : SambaServerWidgets::PassdbEntryDelete,
+	    "option_move" : SambaServerWidgets::PassdbOptionMove,
+	    "fallback" : $[
+		"init"	  : PassdbEditOptionInit,
+		"store"	  : PassdbEditOptionStore,
+		"summary" : PassdbEditOptionSummary,
+	    ],
+	]);
+
 
 /**
  * Map of widgets for CWM
  */
 global map widgets = $[
-	"share_edit" : defaulthostwidget,
+	"share_edit" : shareswidget,
+	"passdb_edit" : passdbwidget
 ];
 
-global define byteblock initFun(any key) ``{
+global define boolean initFun(any key) ``{
     return TablePopup::TableInit(SambaServerWidgets::widgets["share_edit"]:$[], key);
 }
 
@@ -121,7 +194,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @return list of items for the table
       */
     global define list ShareEditContents (map descr) ``{
-	return filter( string key, maplist (`k, `v, SambaServer::shares[shareToEdit]:$[], ``(v == nil ? nil : k )),
+	return filter( string key, maplist ( `k, `v, SambaServer::shares[shareToEdit]:$[], ``(v == nil ? nil : k )),
 	    ``( key != nil ) );
     }
     
@@ -136,7 +209,7 @@ global define symbol handleFun(any key, map event_descr) ``{
 	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
 	SambaServer::shares[shareToEdit]
-	    = filter (`k, `v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
+	    = filter (string k, `v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
 	return true;
     }
 
@@ -173,6 +246,242 @@ global define symbol handleFun(any key, map event_descr) ``{
     global define string ShareEditSummary (any opt_id, any opt_key) ``{
 	return sformat ("%1", SambaServer::shares[shareToEdit, opt_key]:"");
     }
+
+
+/************************************* passdb list table ************************************/
+
+    integer max_id = 0;
+    map<string, string> passdb_backends = nil;
+    list<string> passdb_order = [];
+    
+    global define list PassdbEditContents (map descr) ``{
+	if (passdb_backends != nil)
+	{
+	    // we are already initialized
+	    return passdb_order;
+	}
+	else 
+	{
+	    list<string> l = SambaServerPassdb::GetBackends ();
+	    list<string> ids = [];
+	    max_id = -1;
+	    passdb_backends = (map<string, string>)listmap ( string backend, l, ``{ 
+		max_id = max_id + 1;
+		string s = sformat( "%1", max_id );
+		ids = add( ids, s );
+		return $[ s: backend ];
+	    });
+	    max_id = max_id + 1;
+	    passdb_order = ids;
+	    return ids;
+	}
+    }
+    
+    global define void PassdbEditOptionInit (any opt_id, any opt_key) ``{
+	if( opt_id != nil ) {
+	    // not adding a new option
+	    UI::ChangeWidget (`id (opt_key), `Value,
+		SambaServerPassdb::BackendDetails(passdb_backends [(string)opt_id]:""));
+	}
+	UI::SetFocus (`id (opt_key));
+    }
+
+    global define void PassdbEditOptionStore (any opt_id, any opt_key) ``{
+	string details = (string) UI::QueryWidget (`id (opt_key), `Value);
+	// TODO: handle empty details
+	
+	if (size(details) != 0 )
+	{
+	    details = ":"+details;
+	}
+	
+	if ( opt_id != nil )
+	{
+	    // update
+	    // take the SAM type from the old data and append the new details
+	    passdb_backends[ (string)opt_id ] = SambaServerPassdb::BackendSAM(passdb_backends[ (string)opt_id ]:nil)
+		+ details;
+	}
+	else
+	{
+	    // insert new
+	    string id = sformat ("%1", max_id);
+	    max_id = max_id+1;
+	    passdb_backends = (map<string, string>)add ( passdb_backends, id, (string)opt_key+details );
+	    passdb_order = (list<string>) add (passdb_order, id);
+	}
+    }
+
+    global define string PassdbEditOptionSummary (any opt_id, any opt_key) ``{
+	string option = passdb_backends [(string)opt_id]:"";
+	return SambaServerPassdb::BackendDetails (option);
+    }
+    
+    global define string PassdbId2Key (map desc, any id)
+    {
+	string s_id = passdb_backends [(string)id]:"";
+	return SambaServerPassdb::BackendSAM (s_id);
+    }
+
+    global define boolean PassdbEntryDelete (any opt_id, any opt_key) ``{
+    
+	// don't delete the last one
+	if (size (passdb_backends) == 1)
+	{
+	    import "Report";
+	    
+	    Report::Error (_("At least one backend must be specified.
+
+The backend will not be deleted."));
+	    return false;
+	}
+	
+	// message popup
+	if (! Popup::YesNo (_("Delete the selected backend?")))
+	    return false;
+	    
+	string id = (string) opt_id;
+	passdb_backends = (map<string, string>)filter (string k, string v, passdb_backends, ``(k != id));
+	passdb_order = (list<string>)filter (string k, passdb_order, ``(k != id));
+	return true;
+    }
+    
+    global define void AddPassdbBackend () {
+	UI::OpenDialog (
+	    `VBox (
+		`Frame (_("Backend type"),
+		`RadioButtonGroup ( `id (`types),
+		`VBox(
+		    `Left (`RadioButton ( `id("smbpasswd"), _("smbpasswd file") ) ),
+		    `Left (`RadioButton ( `id("ldapsam"), _("LDAP") ) ),
+		    `Left (`RadioButton ( `id("tdbsam"), _("TDB database") ) ),
+		    `Left (`RadioButton ( `id("mysqlsam"), _("MySQL database") ) )
+		))),
+		`TextEntry ( `id(`details), _("Details:") ),
+		`HBox (
+		    `PushButton (`id (`add), `opt(`default), Label::AddButton ()),
+		    `PushButton (`id (`cancel), Label::CancelButton ())
+		)
+	    )
+	);
+	
+	do {
+	    any ret = UI::UserInput ();
+	
+	    if ( ret == `add )
+	    {
+		// check: all types except smbpasswd must get detailed info
+		string type = (string) UI::QueryWidget ( `types, `CurrentButton );
+		string details = (string) UI::QueryWidget ( `details, `Value );
+		if (size(details) != 0 )
+		{
+		    details = ":"+details;
+		}
+	
+		if (type == "mysqlsam" && size (details) == 0)
+		{
+		    Popup::Message ( _(
+"An identifier must be provided
+in the details text entry 
+for the MySQL passdb backend.
+
+Consult Samba HOWTO Collection for
+further information.") );
+		    continue;
+		}
+		
+		// add the value		
+		string id = sformat ("%1", max_id);
+		max_id = max_id+1;
+		passdb_backends = (map<string, string>)add ( passdb_backends, id, type+details );
+		passdb_order = (list<string>) add (passdb_order, id);
+	    }
+	    break;
+	} while (true);
+	
+	UI::CloseDialog ();
+    }
+    
+    global define boolean PassdbOptionMove (any opt_id, string opt_key, symbol direction) {
+	string id = (string)opt_id;
+	passdb_order = sort (string left, string right, passdb_order, ``{ boolean res = 
+	    direction == `down ?
+	    (left == id ? false : true)
+	    :
+	    (right == id ? false : true);
+	    return res;
+	});
+	initPassdb (opt_key);
+	return true;
+    }
+
+    // test the LDAP over SSL connection
+    define void testLDAPServer (string server, string suffix) {
+        // translators: progress dialog text
+        UI::OpenDialog(`Label( _("Testing LDAP connection...") ) );
+        if( SambaServer::testLDAPS( server, suffix ) )
+        {
+            // translators: test result popup message
+            Popup::Message( _("LDAP connection is OK.") );
+        }
+        UI::CloseDialog();
+    }
+
+
+    global define boolean initPassdb(any key) ``{
+	return TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], key);
+    }
+
+    global define symbol handlePassdb(any key, map event_descr) ``{
+	if ( event_descr["ID"]:nil == `_tp_add )
+	{
+	    AddPassdbBackend ();
+	    TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], key);
+	    // continue
+	    return nil;
+	}
+
+	// LDAP settings menu item selected, move to a different dialog	
+	if ( event_descr["ID"]:nil == `ldap )
+	{
+	    return `ldap;
+	}
+	
+	// test LDAP menu item selected, try the item
+	if ( event_descr["ID"]:nil == `ldap_test )
+	{
+	    string backend = passdb_backends[(string)UI::QueryWidget (`_tp_table, `CurrentItem)]: nil;
+	    
+	    if (SambaServerPassdb::BackendSAM(backend) != "ldapsam")
+	    {
+		// translators: the current item is not LDAP, LDAP connection cannot be tested.
+		Popup::Error (_("Select an LDAP backend to test."));
+		return nil;
+	    }
+	    testLDAPServer( SambaServerPassdb::BackendDetails(backend), SambaServer::LDAP_suffix);
+	    return nil;	    
+	}
+	
+	if ( event_descr["ID"]:nil == `back )
+	{
+	    passdb_backends = nil;
+	    return nil;
+	}
+    
+	return TablePopup::TableHandle(SambaServerWidgets::widgets["passdb_edit"]:$[], key, event_descr);
+    }
+
+    global define void storePassdb(any key) ``{
+	y2error ("Passdb backends: %1", passdb_backends);
+	list<string> res = maplist (string id, passdb_order, ``{
+	    y2error ("Doing id %1: %2", id, passdb_backends[id]:"");
+	    return passdb_backends[id]:"";
+	});
+	y2error ("storing passdb: %1", res);
+	SambaServerPassdb::SetBackends (res);
+	passdb_backends = nil; // require a new initialization
+    }
+
 
 /* EOF */
 }

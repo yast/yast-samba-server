@@ -1,6 +1,6 @@
 {
 
-// test for SambaServer::WriteSAMBackend()
+// test for SambaServerPassdb::Write()
 // $Id$
 
     include "testsuite.ycp";
@@ -15,19 +15,15 @@
         ]
     ], nil );
     
-    import "SambaServer";
+    import "SambaServerPassdb";
+
+    SambaServerPassdb::SetBackends ( [ "smbpasswd", "ldapsam:ldaps://ldap.example.com" ] );
     
-    TEST( ``( SambaServer::WriteSAMBackend() ), [
+    TEST( ``( SambaServerPassdb::Write() ), [
 	$[],
 	$[],
 	$[ "target" : $[ "bash" : 0 ] ] 
     ], true );
     
-    TEST( ``( SambaServer::WriteSAMBackend() ), [
-	$[],
-	$[],
-	$[ "target" : $[ "bash" : 1 ] ] 
-    ], true );
-    
-    DUMP( SambaServer::modified );
+    DUMP( SambaServerPassdb::Modified() );
 }

@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Feb 18 12:32:48 CET 2004 - visnov@suse.cz
+
+- rewritten SAM support. Now multiple passdb backends can be configured
+  (done as Perl module)
+- better support for LDAP
+- fix testsuites
+- drop samba-client from requirements, install it on demand
+- 2.9.2 
+
+-------------------------------------------------------------------
 Mon Feb  9 12:52:06 CET 2004 - visnov@suse.cz
 
 - remove "global"

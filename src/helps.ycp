@@ -152,6 +152,37 @@ You can test the availability of the server by pressing
 _("<p><b>Note:</b>If you try to set the LDAP administration password,
  YaST2 will save the settings first.</p>
 "),
+
+    /* passdb backend configuration dialog help 1/6 */
+  "passdb_edit" : _("<p><b><big>User authentication information backends</big></b><br>
+Here, choose where the Samba server should look for the authentication
+information. The top one is used as a default for adding
+a new users. Samba 3 supports multiple backend types and a same type
+can be used for multiple backends.</p>
+") + 
+    /* passdb backend configuration dialog help 2/6 */
+_("<p><b>smbpasswd file</b> is the file using the same format as
+the previous versions of Samba. It's layout is similar to the
+passwd file. It is possible to have a multiple files in this 
+format.</p>
+") +
+    /* passdb backend configuration dialog help 3/6 */
+_("<p><b>LDAP</b> is a URL of a LDAP server, where to look for
+the information.</p>
+") +
+    /* passdb backend configuration dialog help 4/6 */
+_("<p><b>TDB database</b> uses an internal Samba database binary format
+to store and lookup the information.</p>
+") +
+    /* passdb backend configuration dialog help 5/6 */
+_("<p><b>MySQL database</b> uses an external MySQL database to 
+to store and lookup the information.</p>
+") +
+    /* passdb backend configuration dialog help 6/6 */
+_("<p>Use <b>Add</b> to add a new configuration option, <b>Edit</b> to modify
+already existing option, and <b>Delete</b> to delete an option.</p>
+"),
+
 ];
 
 /* EOF */

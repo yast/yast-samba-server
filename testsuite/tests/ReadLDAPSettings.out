@@ -12,11 +12,9 @@ Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
 Read	.target.tmpdir "/tmp"
-Read	.etc.smb.value.global."ldap server" "192.168.1.2"
 Read	.etc.smb.value.global."ldap admin dn" "uid=root,dc=example,dc=com"
 Read	.etc.smb.value.global."ldap suffix" "dc=example,dc=com"
 Return	nil
-Dump	192.168.1.2
 Dump	uid=root,dc=example,dc=com
 Dump	dc=example,dc=com
 Dump	false

@@ -20,7 +20,8 @@ desktop_DATA =			\
 
 module_DATA =			\
 	SambaServer.ycp		\
-	SambaServerWidgets.ycp
+	SambaServerWidgets.ycp	\
+	SambaServerPassdb.pm
 
 samba-server:
 	ln -sf . samba-server

@@ -306,14 +306,14 @@ symbol ShareDirsDialog () ``{
 	    else continue;
 	}
 	else if(ret == `edit ) {
-	    SambaServerWidgets::shareToEdit = (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	    SambaServerWidgets::shareToEdit = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
 	    break;
 	}
         else if(ret == `next || ret == `back) {
             break;
         }
 	else if(ret == `toggle ) {
-	    string share = (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	    string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
 	    SambaServer::enableShare( share, (SambaServer::shares[share, "commentout"]:false) );
 	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 	    UI::ChangeWidget( `id(`table), `CurrentItem, id );
@@ -337,7 +337,7 @@ delete share '%1'?
 
 All its settings will be lost.
 "), select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
-		SambaServer::removeShare( (string) select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
+		SambaServer::removeShare( (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
 	    
 		UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 		continue;
@@ -355,69 +355,73 @@ All its settings will be lost.
 }
 
 /**
- * AdvancedDialog dialog
+ * Dialog to configure passdb backends.
  * @return dialog result
  */
-symbol AdvancedDialog () ``{
+symbol PassdbDialog () {
+    // dialog caption
+    string caption = _("User information sources");
+
+    list<map> w = CWM::CreateWidgets (["passdb_edit"],
+        SambaServerWidgets::widgets);
+
+    term contents = `HBox (`HSpacing (1), `VBox (
+        `VSpacing (1), 
+	w[0, "widget"]:`VSpacing (0)
+    ), `HSpacing (1));
+
+    string help = CWM::MergeHelps (w) + HELPS["passdb_edit"]:"";
+
+    Wizard::SetContentsButtons (caption, contents, help,
+        Label::BackButton (), Label::OKButton ());
+
+    UI::ReplaceWidget( `id(`_tp_table_repl),
+        // translators: menu button label for accessing the LDAP-related settings and actions
+        `MenuButton( "LDAP",
+	    // translators: menu item to show a LDAP-related settings
+	    [ `item( `id(`ldap), _("Global LDAP Settings") ),
+	      // translators: menu item to test the currently selected LDAP url
+	      `item( `id(`ldap_test), _("Test LDAP Connection") ),
+	    ]
+	) 
+    );
+
+    return CWM::Run (w, $[]);
+}
+
+/**
+ * LDAP Dialog
+ * @return dialog result
+ */
+symbol LDAPDialog () ``{
 
     /* Samba-server advanced dialog caption */
-    string caption = _("Advanced Samba Server Options");
+    string caption = _("LDAP Samba Server Options");
 
     /* Samba-server advanced dialog contents */
     term contents = 
     `VBox(
-	// radio button box label for password storing backend
-	`Frame( _("Authentication Back-End"), 
-	`RadioButtonGroup( `id( `backend ), `VBox(
-	    // radio button label
-	    `Left(`RadioButton( `id( `smbpasswd ), `opt(`notify), _("smbpasswd") )),
-	    // radio button label
-	    `Left(`RadioButton( `id( `ldap ), `opt(`notify), _("LDAP") )),
-	    `VBox(
-		// text entry label
-		`TextEntry( `id( `ldap_server ), _("LDAP &Server:"), 
-		    SambaServer::LDAP_server != nil ? SambaServer::LDAP_server : ""),
-		// text entry label
-		`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), 
-		    SambaServer::LDAP_suffix != nil ? SambaServer::LDAP_suffix: "" ),
-		// text entry label
-		`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), 
-		    SambaServer::LDAP_admin_dn != nil ? SambaServer::LDAP_admin_dn : ""  ),
-		Mode::config ? `Empty() : 
-		`HBox(
-		    // push button label
-		    `PushButton( `id( `ldap_test ), _("&Test Connection") ),
-		    // push button label
-		    `PushButton( `id( `ldap_password ), _("Set LDAP Administration &Password") )
-		)
+	// text entry label
+	`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), 
+	    SambaServer::LDAP_suffix != nil ? SambaServer::LDAP_suffix: "" ),
+	// text entry label
+	`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), 
+	    SambaServer::LDAP_admin_dn != nil ? SambaServer::LDAP_admin_dn : ""  ),
+	Mode::config ? `Empty() : 
+	    `HBox(
+		// push button label
+		`PushButton( `id( `ldap_password ), _("Set LDAP Administration &Password") )
 	    )
-	) ) )
     );
 
     Wizard::SetContentsButtons(caption, contents, HELPS["Advanced"]:"",
 	    Label::BackButton(), Label::OKButton());
 
-    UI::ChangeWidget( `id(SambaServer::SAM), `Value, true );
-
     any ret = nil;
     while(true) {
 
-	// enable widgets according to the settings
-	boolean ldap = UI::QueryWidget( `id( `backend ), `CurrentButton ) == `ldap;
-	UI::ChangeWidget( `id( `ldap_server ), `Enabled, ldap );
-	UI::ChangeWidget( `id( `ldap_admin_dn ), `Enabled, ldap );
-	UI::ChangeWidget( `id( `ldap_suffix ), `Enabled, ldap );
-	
-	if( ! Mode::config ) {
-	    UI::ChangeWidget( `id( `ldap_password ), `Enabled, ldap );
-	    UI::ChangeWidget( `id( `ldap_test ), `Enabled, ldap );
-	}
-
 	ret = UI::UserInput();
 	
-	// these are only to update widget states
-	if( ret == `ldap || ret == `smbpasswd ) continue;
-
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
 	    if(ReallyAbort()) break;
@@ -437,46 +441,9 @@ symbol AdvancedDialog () ``{
 	    // Translators: Information popup
 	    else Popup::Message( _("LDAP administration password was successfully changed.") );
 	}
-	else if(ret == `ldap_test ) {
-	    // test the LDAP over SSL connection
-	    string server = (string) UI::QueryWidget( `id( `ldap_server ), `Value );
-	    string suffix = (string) UI::QueryWidget( `id( `ldap_suffix ), `Value );
-	    
-	    if( size(server) == 0 ) {
-		// translators: error message
-		Popup::Error( _("Enter the LDAP server first.") );
-		continue;
-	    }
-	    
-	    if( size(suffix) == 0 ) {
-		// translators: error message
-		Popup::Error( _("Enter the LDAP suffix first.") );
-		continue;
-	    }
-	    
-	    // translators: progress dialog text
-	    UI::OpenDialog(`Label( _("Testing LDAPS connection...") ) );
-	    if( SambaServer::testLDAPS( server, suffix ) )
-	    {
-		// translators: test result popup message
-		Popup::Message( _("LDAPS connection is OK.") );
-	    }
-	    UI::CloseDialog();
-	}
         else if(ret == `next ) {
-	    SambaServer::setLDAPServer( (string) UI::QueryWidget( `id( `ldap_server ), `Value ) );
 	    SambaServer::setLDAPAdminDN( (string) UI::QueryWidget( `id( `ldap_admin_dn ), `Value ) );
 	    SambaServer::setLDAPSuffix( (string) UI::QueryWidget( `id( `ldap_suffix ), `Value ) );
-		if (!Mode::config) {
-	    if( ! (SambaServer::switchSAMBackend( (symbol) UI::QueryWidget( `id( `backend ), `CurrentButton ) ) ) ) {
-		// Translators: error message if it is not possible to switch between smbpasswd and LDAP backends
-		Popup::Error( sformat( _("It is not possible to switch to %1 back-end."), 
-		    UI::QueryWidget( `id( `backend ), `CurrentButton ) == `ldap ? "LDAP" : "smbpasswd" ));
-	    }
-		}
-		else {
-			SambaServer::SAM = (symbol) UI::QueryWidget( `id( `backend ), `CurrentButton );
-		}
 
             break;
         }
