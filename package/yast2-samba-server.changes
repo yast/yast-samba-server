@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 15 11:40:15 CET 2004 - mlazar@suse.cz
+
+- added writable flag to shares list and Add Share dialog (#39656)
+
+-------------------------------------------------------------------
 Fri Nov 12 14:34:07 CET 2004 - mlazar@suse.cz
 
 - fixed CWM handlers

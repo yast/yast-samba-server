@@ -57,7 +57,10 @@ list sharesItems(boolean filt) {
 	string pth = SambaConfig::ShareGetStr(name, "path", "");
 	string enabled = SambaConfig::ShareEnabled(name) ? _("Enabled") : _("Disabled");
 	string comment = SambaConfig::ShareGetStr(name, "comment", "");
-	return `item( `id(index), enabled, name, pth , comment);
+	boolean ro = SambaConfig::ShareGetTruth(name, "read only", true);
+	return `item( `id(index), enabled, ro ? 
+	    "" : 
+	    _("Yes"), name, pth , comment);
     });
 }
 
@@ -296,7 +299,7 @@ symbol SharesWidgetHandle(string key, map event_descr)
     integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
     if (id == nil) return nil;
 	
-    string share = (string)argsof((term)UI::QueryWidget(`id(`table), `Item(id)))[2]:nil;
+    string share = (string)argsof((term)UI::QueryWidget(`id(`table), `Item(id)))[3]:nil;
     if (share == nil) return nil;
     
     if (ret == `edit) {
@@ -475,33 +478,27 @@ symbol GlobalSettingsDialog () ``{
 
 symbol AddShareDialog () ``{
 
-    term contents = `HVSquash (`HBox (`HSpacing (1), `VBox ( `opt (`hstretch),
-	`VSpacing (1),
-	`Frame ( _("Identification:"),
-	    `VBox (
-		`TextEntry ( `id (`name), _("Share &Name:") ),
-		`TextEntry (`id (`comment), _("Share &Description:") )
-	    )
-	),
-	`Frame ( _("Share Type:"),
-	    `HBox (
+    term contents = `HVSquash(`HBox(
+	`HSpacing(1),
+	`VBox(`opt(`hstretch),
+	    `VSpacing(1),
+	    `Frame(_("Identification:"), `VBox(
+		`TextEntry(`id(`name), _("Share &Name:")),
+		`TextEntry(`id(`comment), _("Share &Description:")))),
+	    `Frame(_("Share Type:"), `HBox(
 		`HSpacing ( 1 ),
-		`VBox ( `opt ( `hstretch ),
-		    `RadioButtonGroup( 
-		    `VBox (
-			`Left( `RadioButton( `id ( `printer), `opt( `notify ), _("&Printer") ) ),
-			`Left( `RadioButton( `id ( `directory), `opt( `notify ), _("&Directory"), true ) )
-		    )
-		),
-                `HBox(
-            	    // translators: text entry label
-            	    `TextEntry( `id(`path), _("Share &Path:"), "/home" ),
-            	    `Bottom( `PushButton( `id( `browse ), Label::BrowseButton() ) )
-        	)),
-		`HSpacing ( 1 )
-	    )
-	)
-    )));
+		`VBox(`opt(`hstretch ),
+		    `RadioButtonGroup(`VBox(
+			`Left(`RadioButton(`id(`printer), `opt(`notify), _("&Printer"))),
+			`Left(`RadioButton(`id(`directory), `opt(`notify), _("&Directory"), true)))),
+            	    `HBox(
+            		// translators: text entry label
+            		`TextEntry(`id(`path), _("Share &Path:"), "/home"),
+            		`Bottom(`PushButton(`id(`browse), Label::BrowseButton()))),
+            	    `HBox(
+            		// translators: checkbox label
+            		`Left(`CheckBox(`id(`writable), _("&Writable"), false)))),
+		`HSpacing(1))))));
     
     // translators: dialog caption
     string caption = _("Add New Share");
@@ -519,6 +516,7 @@ symbol AddShareDialog () ``{
 	boolean on = (boolean)UI::QueryWidget ( `id( `directory ), `Value );
 	UI::ChangeWidget ( `id (`path), `Enabled, on );
 	UI::ChangeWidget ( `id (`browse), `Enabled, on );
+	UI::ChangeWidget ( `id (`writable), `Enabled, on );
 	
 	ret = (symbol)UI::UserInput ();
 	
@@ -547,6 +545,7 @@ symbol AddShareDialog () ``{
 	    string pathvalue = (string) UI::QueryWidget( `id( `path ), `Value );
 	    string comment = (string) UI::QueryWidget( `id( `comment ), `Value );
 	    boolean printable = (boolean) UI::QueryWidget (`id ( `printer ), `Value );
+	    boolean writable = (boolean)UI::QueryWidget(`id(`writable), `Value);
 	
 	    if( size( name ) == 0 ) {
 		// translators: error message
@@ -558,7 +557,7 @@ symbol AddShareDialog () ``{
 		Popup::Error( _("Share path cannot be empty.") );
 		ret = nil;
 		continue;
-	    } else if ( ! SharePathWarning (pathvalue) ) {
+	    } else if (!printable && !SharePathWarning(pathvalue)) {
 		ret = nil;
 		continue;
 	    } else if( !printable && ! Mode::config() && SCR::Read( .target.stat, pathvalue ) == $[] ) {
@@ -583,7 +582,7 @@ symbol AddShareDialog () ``{
 	    }
 	    else
 	    {
-		res["writeable"] = "Yes";
+		res["writable"] = writable ? "Yes" : "No";
 		res["path"] = pathvalue;
 	    }
 
@@ -615,7 +614,7 @@ any Installation_Conf_Tab () {
 		    `item(`id(`filter_all), "Show &All Shares" ),
 		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )]))),
 	    // translators: table header texts
-	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Name"),  _("Path"), _("Comment")), []),
+	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Writeable"), _("Name"),  _("Path"), _("Comment")), []),
 	    `HBox(
 		`PushButton(`id(`add), Label::AddButton() + "..."),
 		`PushButton(`id(`edit), Label::EditButton() + "..."),

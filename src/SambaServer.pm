@@ -229,7 +229,7 @@ sub Write {
     # write settings
 #    if (Abort()) return false;
 
-    if (SambaConfig->Write($write_only)) {
+    if (!SambaConfig->Write($write_only)) {
     	Report->Error(__("Cannot write settings to /etc/samba/smb.conf."));
 	return 0;
     }

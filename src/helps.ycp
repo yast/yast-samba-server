@@ -247,7 +247,12 @@ purpose of the share.</p>") +
 is presented as a printer to clients. A <b>Directory</b> share 
 is presented as a network disk. <b>Share Path</b> must be
 entered for a directory share.</p>
-")
+") +
+    /* add new share dialog help 4/3 */
+    _("<p>If <b>writeable</b> parameter is checked, then users
+of a service may create or modify files in the service's
+directory.</p>")
+
 ];
 
 map <string,string> warnings = $[
