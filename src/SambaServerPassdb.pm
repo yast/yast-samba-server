@@ -132,7 +132,12 @@ sub BackendSAM
     my $url = shift;
     my @parts = split (/:/, $url);
     
-    return $parts[0];
+    if( @parts )
+    {
+	return $parts[0];
+    }
+    
+    return undef;
 }
     
 BEGIN { $TYPEINFO{BackendDetails} = ["function", "string", "string" ]; }
