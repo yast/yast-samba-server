@@ -179,10 +179,9 @@ boolean BackendHandler( map<string,string> options )
     if (command == "smbpasswd") {
 	SambaServerPassdb::SetBackends(["smbpasswd"]);
     } else {
-	string url = options["ldap"]:"127.0.0.1";
-	string backend = SambaServerPassdb::BackendString("ldapsam", url);
+	string url = options["ldap"]:"ldap://127.0.0.1";
+	string backend = SambaServerPassdb::BackendString("ldap", url);
 	SambaServerPassdb::SetBackends([backend]);
-	y2milestone("BLEE");
     }
     
     return true;

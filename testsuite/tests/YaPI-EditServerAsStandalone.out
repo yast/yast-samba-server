@@ -71,6 +71,7 @@ Write	.etc.smb.value_type.global."workgroup" 0 true
 Write	.etc.smb.section_type.global 0 true
 Write	.etc.smb.value.global."ldap admin dn" nil true
 Write	.etc.smb.value.global."ldap suffix" nil true
+Write	.etc.smb.value.global."idmap backend" nil true
 Write	.etc.smb nil true
 Execute	.target.bash "touch /var/lib/YaST2/samba_server_done_once" 1
 Return	true

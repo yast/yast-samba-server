@@ -150,10 +150,9 @@ Read	.etc.smb.section_comment."lp" nil
 Write	.etc.smb.section_comment."lp" "\n" true
 Write	.etc.smb.value.global."ldap admin dn" nil true
 Write	.etc.smb.value.global."ldap suffix" nil true
+Write	.etc.smb.value.global."idmap backend" nil true
 Write	.etc.smb nil true
 Execute	.target.bash "touch /var/lib/YaST2/samba_server_done_once" 1
-Write	.etc.smb.value.global."ldap admin dn" nil true
-Write	.etc.smb.value.global."ldap suffix" nil true
 Write	.etc.smb nil true
 Read	.init.scripts.exists "nmb" nil
 Log	Service nmb does not exist.
