@@ -1070,12 +1070,12 @@ global define void ReadLDAPSettings() ``{
         Ldap::Read();
 	if( LDAP_server == nil ) 
 	    LDAP_server = Ldap::server;
-	// TODO: ask LDAP client about default configuration DN
+	// ask LDAP client about default configuration DN
 	if( LDAP_admin_dn == nil )
-	    LDAP_admin_dn = "";
-	// TODO: ask LDAP client about default search DN
+	    LDAP_admin_dn = Ldap::GetMainConfigDN ();
+	// ask LDAP client about default search DN
 	if( LDAP_suffix == nil )
-	    LDAP_suffix = "";
+	    LDAP_suffix = Ldap::GetDomain();
     }
 }
 
@@ -1203,13 +1203,13 @@ global define void enablePrinterNames( list enable_names ) ``{
     });
     
     // work on enable_names
-    y2error( "Now need to work on %1", enable_names );
+    y2debug( "Now need to work on %1", enable_names );
     foreach( string name, enable_names, ``{
 	if( haskey( shares, name ) ) {
 	    if( shares[name, "printable"]:false == true ) {
 		printer_status[ name ] = true;
 		enableShare( name, true );
-		y2error( "Enabling printer %1", name );
+		y2debug( "Enabling printer %1", name );
 	    }
 	    else 
 	    {
@@ -1233,6 +1233,20 @@ YaST2 will not modify this share."), name ) );
     });
     
     modified = true;
+}
+
+/**
+ * Are some of the system printers enabled?
+ *
+ * @return boolean	true if yes
+ */
+global define boolean SystemPrintersEnabled() ``{
+    boolean result = false;
+    foreach( string printer, system_printers, ``{
+	if( printer_status[ printer ]:false ) result = true;
+    });
+    
+    return result;
 }
 
 /**
