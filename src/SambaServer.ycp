@@ -166,7 +166,7 @@ list system_printers = [];
 /**
  * Just ensure a translation to exist
  */
-string ____1 = _("File and printer sharing");
+string ____1 = _("File and Printer Sharing");
 string ____2 =_("Backup Domain Controller");
 string ____3 =_("Primary Domain Controller");
 
@@ -250,7 +250,7 @@ global define boolean Read() ``{
 	    // translators: progress step 2/4
 	    _("Reading the Samba shares..."),
 	    // translators: progress step 3/4
-	    _("Read the printing settings..."),
+	    _("Reading the printing settings..."),
 	    // translators: progress step 4/4
 	    _("Reading the LDAP settings..."),
 	    // translators: progress finished

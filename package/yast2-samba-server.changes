@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  5 08:46:03 CEST 2003 - visnov@suse.de
+
+- merged in texts from proofread
+- 2.8.8
+
+-------------------------------------------------------------------
 Wed Sep  3 16:45:16 CEST 2003 - visnov@suse.de
 
 - if the server is disabled, set the radio button of the would-be enabled role 

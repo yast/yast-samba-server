@@ -114,15 +114,15 @@ global define symbol RoleDialog () ``{
 	    // warning about replication for BDC
 	    if( role == `bdc ) {
 		// translators: BDC requires replication of important data but YaST does not support this
-		Popup::Warning(_("The Backup Domain Controller role
+		Popup::Warning(_("The backup domain controller role
 requires a replication of data about
-users and other aspects from 
-Primary Domain Controller. 
+users and other aspects from a 
+primary domain controller. 
 However, YaST2 cannot set up
 the replication.
 
-Also note that the Primary Domain 
-Controller must be a Samba server.
+The primary domain 
+controller must be a Samba server.
 ") );		
 	    }
 
@@ -143,12 +143,12 @@ Controller must be a Samba server.
 		symbol res = CheckWorkgroup( Samba::workgroup );
 		if( res != `workgroup && SambaServer::role == `pdc ) {
 		    // translators: continue/cancel popup. Warning, that there is already a PDC present.
-		    if( ! Popup::ContinueCancel( sformat( _("You asked to set this Samba server
-to act as Primary Domain Controller.
-However, '%1' is a domain where
-a Primary Domain Controller already exists.
+		    if( ! Popup::ContinueCancel( sformat( _("You set this Samba server
+to act as primary domain controller.
+However, a primary domain controller
+already exists in domain '%1'.
 The domain will not work correctly if there
-are two Primary domain controllers.
+are two primary domain controllers.
 
 Really continue?
 "), Samba::workgroup ) ) ) continue;
@@ -544,7 +544,7 @@ global define map AddSharePopup() ``{
 	    UI::CloseDialog();
 	    return nil;
 	} else if( ret == `browse ) {
-	    string dir = UI::AskForExistingDirectory ( "/", _("Path for a share") );
+	    string dir = UI::AskForExistingDirectory ( "/", _("Path for a Share") );
 	    if( dir != nil ) {
 		UI::ChangeWidget( `id (`path), `Value, dir );
 	    }
@@ -568,7 +568,8 @@ global define map AddSharePopup() ``{
 		// translators: question popup. A user entered non-existent path
 		// for a share
 		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.
-Do you really want to use this path?"), pathvalue ) ) ) {
+Really use this path?
+"), pathvalue ) ) ) {
 		    ret = nil;
 		}
 	    }

@@ -40,14 +40,14 @@ An additional dialog will inform you whether it is safe to do so.
 
     /* Samba role dialog help 1/5 */
     "RoleDialog" : _("<p><b><big>Selection of Samba Server Role</big></b><br>
-In a network, a Samba server can provide a different degree of services and integration
+In a network, a Samba server can provide different degrees of services and integration
 with the rest of the Windows network.</p>
 ")+
 
     /* Samba role dialog help 2/5 */
 _("<p>If the server is not <b>Disabled</b>, <b>File and Printer Sharing</b> 
 allows the server to provide directories and printers.
-<b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> provide 
+<b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> allow
 logon of Windows clients into a Windows domain. The backup controller 
 uses another domain controller for validation. The primary controller
 uses its own information about users and their passwords.
