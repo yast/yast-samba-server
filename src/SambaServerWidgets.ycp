@@ -330,14 +330,15 @@ global define symbol handleFun(any key, map event_descr) ``{
 	{
 	    import "Report";
 	    
-	    Report::Error (_("At least one backend must be specified.
+	    Report::Error (_("At least one back-end must be specified.
 
-The backend will not be deleted."));
+The back-end will not be deleted.
+"));
 	    return false;
 	}
 	
 	// message popup
-	if (! Popup::YesNo (_("Delete the selected backend?")))
+	if (! Popup::YesNo (_("Delete the selected back-end?")))
 	    return false;
 	    
 	string id = (string) opt_id;
@@ -349,7 +350,7 @@ The backend will not be deleted."));
     global define void AddPassdbBackend () {
 	UI::OpenDialog (
 	    `VBox (
-		`Frame (_("Backend type"),
+		`Frame (_("Back-end Type"),
 		`RadioButtonGroup ( `id (`types),
 		`VBox(
 		    `Left (`RadioButton ( `id("smbpasswd"), _("smbpasswd file") ) ),
@@ -380,13 +381,13 @@ The backend will not be deleted."));
 	
 		if (type == "mysqlsam" && size (details) == 0)
 		{
-		    Popup::Message ( _(
-"An identifier must be provided
-in the details text entry 
-for the MySQL passdb backend.
+		    Popup::Message ( _("An identifier must be provided
+in details 
+for the MySQL passdb back-end.
 
-Consult Samba HOWTO Collection for
-further information.") );
+Consult the Samba HOWTO Collection for
+further information.
+") );
 		    continue;
 		}
 		
@@ -455,7 +456,7 @@ further information.") );
 	    if (SambaServerPassdb::BackendSAM(backend) != "ldapsam")
 	    {
 		// translators: the current item is not LDAP, LDAP connection cannot be tested.
-		Popup::Error (_("Select an LDAP backend to test."));
+		Popup::Error (_("Select an LDAP back-end to test."));
 		return nil;
 	    }
 	    testLDAPServer( SambaServerPassdb::BackendDetails(backend), SambaServer::LDAP_suffix);

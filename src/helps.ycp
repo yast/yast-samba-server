@@ -44,7 +44,8 @@ In a network, a Samba server can provide different degrees of services and integ
 with the rest of the Windows network.</p>
 ")+
 
-    /* Samba role dialog help 2/5 */
+    /* Samba role dialog help 2/5 
+    logon is the Windows synonym for login */
 _("<p>If the server is not <b>Disabled</b>, <b>File and Printer Sharing</b> 
 allows the server to provide directories and printers.
 <b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> allow
@@ -64,7 +65,7 @@ network.</p>
     /* Samba role dialog help 4/5 */
 _("<p>Optionally, set a <b>Server Description</b> and <b>Server NetBIOS Name</b>. The
 description is shown to users on the clients and the NetBIOS name is the name
-the server will use in the SMB networks.</p>
+the server uses in the SMB networks.</p>
 ")+
     /* Samba role dialog help 5/5 */
 _("<p>Use <b>Authentication Details</b> to configure 
@@ -155,20 +156,20 @@ _("<p><b>Note:</b>If you try to set the LDAP administration password,
 "),
 
     /* passdb backend configuration dialog help 1/6 */
-  "passdb_edit" : _("<p><b><big>User authentication information backends</big></b><br>
+  "passdb_edit" : _("<p><b><big>User Authentication Information Back-Ends</big></b><br>
 Here, choose where the Samba server should look for the authentication
 information. The top one is used as a default for adding
-a new users. Samba 3 supports multiple backend types and a same type
-can be used for multiple backends.</p>
+a new users. Samba 3 supports multiple back-end types and a same type
+can be used for multiple back-ends.</p>
 ") + 
     /* passdb backend configuration dialog help 2/6 */
 _("<p><b>smbpasswd file</b> is the file using the same format as
-the previous versions of Samba. It's layout is similar to the
+the previous versions of Samba. Its layout is similar to the
 passwd file. It is possible to have a multiple files in this 
 format.</p>
 ") +
     /* passdb backend configuration dialog help 3/6 */
-_("<p><b>LDAP</b> is a URL of a LDAP server, where to look for
+_("<p><b>LDAP</b> is a URL of an LDAP server to check for
 the information.</p>
 ") +
     /* passdb backend configuration dialog help 4/6 */

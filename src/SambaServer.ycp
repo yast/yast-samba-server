@@ -936,7 +936,7 @@ global define boolean setAsPDC() ``{
     preferred_master = "yes";
     domain_master = "yes";
     local_master = true;
-    add_machine_script = "/usr/sbin/useradd  -c Machine -d /dev/null -s /bin/false %m$";
+    add_machine_script = "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$";
     Samba::setDomainMembershipLevel( "pdc");
     
     return true;

@@ -384,6 +384,7 @@ See Samba documentation for details."),
 	], 
 	"standalone"	:$[
 	    // translators: command line help text for standalone server role option
+	    // logon is the Windows synonym for login
 	    "help"	: _("Server should provide shares, but should not allow domain logons."),
 	],
 	"smbpasswd"	:$[

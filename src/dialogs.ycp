@@ -364,7 +364,7 @@ All its settings will be lost.
  */
 symbol PassdbDialog () {
     // dialog caption
-    string caption = _("User information sources");
+    string caption = _("User Information Sources");
 
     list<map> w = CWM::CreateWidgets (["passdb_edit"],
         SambaServerWidgets::widgets);
