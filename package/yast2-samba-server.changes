@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 29 15:19:37 CET 2004 - mlazar@suse.cz
+
+- fixed many bugs in Samba LDAP Settings
+
+-------------------------------------------------------------------
 Thu Dec 23 13:05:58 CET 2004 - mlazar@suse.cz
 
 - fixed LDAP support

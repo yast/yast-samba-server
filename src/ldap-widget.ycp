@@ -74,19 +74,34 @@ void store_ldap_str(string id)
 
 void store_ldap_int(string id)
 {
-    integer val = (integer)UI::QueryWidget(`id(id), `Value);
+    string val = tostring((integer)UI::QueryWidget(`id(id), `Value));
     // do not store default values
-    if (val == tointeger(SambaBackendLDAP::GetSuseDefaultValue(id)) &&
-	val == tointeger(SambaBackendLDAP::GetSambaDefaultValue(id)))
+    if (val == SambaBackendLDAP::GetSuseDefaultValue(id) &&
+	val == SambaBackendLDAP::GetSambaDefaultValue(id))
     {
 	val = nil;
     }
-    SambaConfig::GlobalSetInteger(id, val);
+    SambaConfig::GlobalSetStr(id, val);
 }
 
 
 // Samba LDAP Settings Essential Widget
 //////////////////////////////////////////////////////////////////////
+
+boolean _try_connect(string url, string admin_dn, string passwd)
+{
+    if (url == "") {
+        // translators: popup warning message about empty text entry
+        Popup::Warning(_("You have to specify server URL"));
+        return false;
+    }
+    string err = SambaBackendLDAP::TryBind(url, admin_dn, passwd);
+    if (err != nil) {
+        Ldap::LDAPErrorMessage("bind", err);
+        return false;
+    }
+    return true;
+}
 
 boolean SambaLDAPTryConnect()
 {
@@ -102,31 +117,13 @@ boolean SambaLDAPTryConnect()
     string url = nil;
     if ((boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value)) {
 	url = (string)UI::QueryWidget(`id(`ldap_passdb_backend_url), `Value);
-	if (url == "") {
-	    // translators: popup warning message about empty text entry
-	    Popup::Warning(_("You have to specify passdb backend server"));
-	    return false;
-	}
-	string err = SambaBackendLDAP::TryBind(url, admin_dn, passwd);
-	if (err != nil) {
-	    Ldap::LDAPErrorMessage("bind", err);
-	    return false;
-	}
+	if (!_try_connect(url, admin_dn, passwd1)) return false;
     }
     
     if ((boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value)) {
 	string idmap_url = (string)UI::QueryWidget(`id(`ldap_idmap_backend_url), `Value);
-	if (idmap_url == "") {
-	    // translators: popup warning message about empty text entry
-	    Popup::Warning(_("You have to specify idmap backend server"));
-	    return false;
-	}
 	if (url != idmap_url) {
-	    string err = SambaBackendLDAP::TryBind(idmap_url, admin_dn, passwd);
-	    if (err != nil) {
-	        Ldap::LDAPErrorMessage("bind", err);
-	        return false;
-	    }
+	    if (!_try_connect(idmap_url, admin_dn, passwd1)) return false;
 	}
     }
     
@@ -143,16 +140,16 @@ void SambaLDAPSettingsEssentialWidgetInit(string key)
     UI::ChangeWidget(`id(`passwd2), `Value, SambaBackendLDAP::GetAdminPassword());
     
     map<string,string> passdb_url = SambaBackendLDAP::GetPassdbServerUrl();
-    UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Value, passdb_url == nil ? "default?" : URL::Build(passdb_url));
+    UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Value, passdb_url == nil ? "" : URL::Build(passdb_url));
     UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Enabled, passdb_url != nil);
     UI::ChangeWidget(`id(`ldap_passdb_backend_enable), `Value, passdb_url != nil);
 
     map<string,string> idmap_url = SambaBackendLDAP::GetIdmapServerUrl();
-    UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Value, idmap_url == nil ? "default?" : URL::Build(idmap_url));
+    UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Value, idmap_url == nil ? "" : URL::Build(idmap_url));
     UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Enabled, idmap_url != nil);
     UI::ChangeWidget(`id(`ldap_idmap_backend_enable), `Value, idmap_url != nil);
     
-    foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_expert_settings], {
+    foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_advanced_settings], {
 	UI::ChangeWidget(`id(id), `Enabled, idmap_url!=nil || passdb_url!=nil);
     });
     
@@ -184,13 +181,29 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
         boolean idmap = (boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value);
 	UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Enabled, idmap);
 
-	foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_expert_settings], {
+	foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_advanced_settings], {
 	    UI::ChangeWidget(`id(id), `Enabled, idmap || passdb);
 	});
     } else if (id == `ldap_expert_settings) {
 	SambaLDAPExpertSettingsDialog();
     } else if (id == `ldap_try_connect) {
-	SambaLDAPTryConnect()
+	if (SambaLDAPTryConnect()) {
+	    // translators: popup message
+	    Popup::Message(_("Connection successful"));
+	}
+    } else if (id == `ldap_suse_defaults) {
+	// translators: popup message
+	if (Popup::YesNo(_("All current LDAP-related values will be rewrited.\nDo you want to continue?"))) {
+	    SambaConfig::GlobalSetMap(SambaBackendLDAP::GetSuseDefaultValues());
+	    if (Ldap::server != nil && Ldap::server != "") {
+		SambaConfig::GlobalSetStr("idmap backend", "ldap:ldap://" + Ldap::GetFirstServer(Ldap::server));
+		SambaBackend::AddPassdbBackend("ldapsam", "ldap://" + Ldap::GetFirstServer(Ldap::server));
+	    } else {
+		SambaConfig::GlobalSetStr("idmap backend", nil);
+		SambaBackend::RemovePassdbBackend("ldapsam");
+	    }
+	    SambaLDAPSettingsEssentialWidgetInit(nil);
+	}
     }
 
     return nil;
@@ -222,16 +235,12 @@ void SambaLDAPSettingsEssentialWidgetStore(string key, map event_descr)
     boolean passdb = (boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value);
     boolean idmap = (boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value);
     
-    list<string> backends = [];
     if (passdb) {
 	string passdb_url = (string)UI::QueryWidget(`id(`ldap_passdb_backend_url), `Value);
-	backends = filter(string be, SambaBackend::GetPassdbBackends(), {return SambaBackend::GetName(be) != "ldapsam";});
-	backends = (list<string>)merge(["ldapsam:"+passdb_url], backends);
+	SambaBackend::AddPassdbBackend("ldapsam", passdb_url);
     } else {
-	backends = filter(string be, SambaBackend::GetPassdbBackends(), {return SambaBackend::GetName(be) != "ldapsam";});
+	SambaBackend::RemovePassdbBackend("ldapsam");
     }
-    if(size(backends)==0) backends = [ "tdbsam" ];
-    SambaBackend::SetPassdbBackends(backends);
 
     if (idmap) {
 	string idmap_url = (string)UI::QueryWidget(`id(`ldap_idmap_backend_url), `Value);
@@ -286,10 +295,11 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	    `VWeight(1, `Empty()),
 	    basedn,
 	    `VWeight(8, `Empty()),
-	    `Right(`ComboBox(`id(`ldap_combo), _("Advanced Settings..."), [
-		`item(`id(`ldap_expert_settings), _("E&xpert LDAP Settings")),
-		`item(`id(`ldap_suse_defaults), _("Default Values")),
-		`item(`id(`ldap_try_connect), _("Try Connect"))))),
+	    `Right(`HBox(
+		`PushButton(`id(`ldap_try_connect), _("Try Connect")),
+		`MenuButton(`id(`ldap_advanced_settings), _("Advanced Settings..."), [
+		    `item(`id(`ldap_expert_settings), _("E&xpert LDAP Settings")),
+		    `item(`id(`ldap_suse_defaults), _("Default Values"))])))),
 	`HSpacing(1)));
 
     return $[

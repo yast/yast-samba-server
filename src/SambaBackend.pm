@@ -35,6 +35,7 @@ foreach(values %AvailableBackends) {
     YaST::YCP::Import($_);
 }
 
+
 use constant {
     TRUE => 1,
     FALSE => 0,
@@ -75,15 +76,38 @@ sub SetPassdbBackends {
 	}
     }
     foreach (keys %toDisable) {
-	$AvailableBackends{$_}->Disable($_) or $failed++;
+	$AvailableBackends{$_}->PassdbDisable($_) or $failed++;
     }
     foreach (@toEnable) {
-	$_->{backend}->Enable($_->{name}, $_->{location}) or $failed++;
+	$_->{backend}->PassdbEnable($_->{name}, $_->{location}) or $failed++;
     }
     SambaConfig->GlobalSetStr("passdb backend", join(" ", @$backends));
     return $failed==0;
 }
 
+# add default (first in list) passdb backend
+BEGIN{$TYPEINFO{AddPassdbBackend}=["function","boolean","string","string"]}
+sub AddPassdbBackend {
+    my ($self, $name, $url) = @_;
+    # get backend and delete $name from list
+    my @backends = grep {$_ !~ /^$name(:.*)$/} split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
+    # prepend with new backend
+    unshift @backends, $url ? "$name:$url" : $name;
+    # set abckends
+    return SetPassdbBackends($self, \@backends);
+}
+
+# delete passdb backend
+BEGIN{$TYPEINFO{RemovePassdbBackend}=["function","boolean","string"]}
+sub RemovePassdbBackend {
+    my ($self, $name) = @_;
+    # get backend and delete $name from list
+    my @backends = grep {$_ !~ /^$name(:.*)$/} split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
+    # set default backend
+    @backends = ("tdbsam") unless @backends;
+    # set abckends
+    return SetPassdbBackends($self, \@backends);
+}
 
 BEGIN{$TYPEINFO{UpdateScripts}=["function","boolean"]}
 sub UpdateScripts {

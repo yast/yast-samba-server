@@ -30,14 +30,16 @@ use constant {
     FALSE => 0,
 };
 
-BEGIN{$TYPEINFO{Enable}=["function","boolean","string", "string"]}
-sub Enable {
+# enable passdb backend
+BEGIN{$TYPEINFO{PassdbEnable}=["function","boolean","string", "string"]}
+sub PassdbEnable {
     my ($self, $name, $location) = @_;
     return TRUE;
 }
 
-BEGIN{$TYPEINFO{Disable}=["function","boolean","string"]}
-sub Disable {
+# diable passdb backend
+BEGIN{$TYPEINFO{PassdbDisable}=["function","boolean","string"]}
+sub PassdbDisable {
     my ($self,$name) = @_;
     return TRUE;
 }

@@ -86,12 +86,20 @@ sub GetSuseDefaultValue {
     return undef;
 }
 
+# get SUSE default (recomendet) config value
+BEGIN{$TYPEINFO{GetSuseDefaultValues}=["function",["map", "string", "string"]]}
+sub GetSuseDefaultValues {
+    my ($self,$opt) = @_;
+    return $SuseDefaultValues;
+}
+
 # get modified flag
 BEGIN{$TYPEINFO{GetModified}=["function","boolean","string"]}
 sub GetModified {
     my ($self,$name) = @_;
     my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", "");
-    return $admin_dn ne $OrgAdminDN or $Passwd ne $OrgPasswd;
+    # also modified if any "ldap suffix ..." modified => modified if any samba config entry modified
+    return $admin_dn ne $OrgAdminDN or $Passwd ne $OrgPasswd or SambaConfig::GetModified();
 }
 
 # return true if ldapsam is first passdb backend
@@ -135,9 +143,9 @@ sub installSchema {
 
     return if Mode::test();
 
-    my $url = GetServerUrl();
+    my $url = GetPassdbServerUrl();
     unless ($url) {
-	y2warning("No ldapsam backend found");
+#	y2warning("No ldapsam backend found");
 	return;
     }
     return unless DNS->IsHostLocal($url->{host});
@@ -228,19 +236,22 @@ sub getLdapError {
     $map = SCR->Read(".ldap.error") unless defined $map;
     if ($map) {
 	my $msg = $map->{msg};
-	$msg .= "\n" . $map->{server_msg} if $map->{server_msg};
+	# translators: in error message
+	$msg .= "\n" . __("Additional info:") . " ". $map->{server_msg} if $map->{server_msg};
 	return $msg if $msg;
     }
+    # translators: unknown error message
     return __("Unknown error. Perhaps 'yast2-ldap' is not available.");
 }
 
-# try to setup users plugin, i.e. ...
+# try to setup users plugin, i.e. add UserPluginSamba to UserTemplate/susePlugin
+# and UserPluginSambaGroup to GroupTemplate/susePlugin
 # TODO: test it
 sub setupUsersPlugin {
     my $res;
     return if Mode::test();
     
-    # only Common (SUSE) LDAP server contains (SUSE) UsersPlugin
+    # only Common (SUSE) LDAP server contains (SUSE) UsersTemplate and GroupTempalte
     return unless isLDAPDefault() and usingCommonLDAP();
     
     if ($res = Ldap->LDAPInit())	{ y2error($res); return }
@@ -283,15 +294,15 @@ sub addLdapDn {
     # check existence
     my $res = SCR->Read(".ldap.search", {base_dn=>$dn, scope=>Integer(0), not_found_ok=>Boolean(1)});
     unless (defined $res) {
-	y2error(getLdapError());
-	return 1;
+	return getLdapError();
     }
-    return 0 if @$res;
+    return if @$res;	# dn already exists
     
     # create parent
     my ($attr, $value, $parent) = ($dn =~ /^([^=]*)=([^,]*)(?:,(.*))?$/);
     if ($parent) {
-	return if addLdapDn($parent);
+	my $errmsg = addLdapDn($parent);
+	return $errmsg if $errmsg;
     }
 
     # create dn
@@ -300,12 +311,15 @@ sub addLdapDn {
     given($attr) {
 	when ("dc") {$map = {objectclass => ["top", "dcobject"], dc => $value}}
 	when ("ou") {$map = {objectclass => ["top", "organizationalunit"], ou => $value}}
-	default {y2warning("Unknown dn: $dn")}
+	# translators: error message
+	default {return __("Unknown class:")." $dn\n".__("YaST supports only dcObject (dc) and organizationalUnit (ou) classes.")}
     };
     
-    if ($map && SCR->Write(".ldap.add", {dn=>$dn}, $map)) {
-	y2error(getLdapError());
+    if ($map && !SCR->Write(".ldap.add", {dn=>$dn}, $map)) {
+	return getLdapError();
     }
+    
+    return undef;
 }
 
 # try bind to specified LDAP server with specified admin_dn and password
@@ -357,49 +371,64 @@ sub createSuffixes {
     return if Mode::test();
     my $suffix = SambaConfig->GlobalGetStr("ldap suffix", "");
     my ($mysuffix, $dn);
+    my $errmsg;
+    
+    my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", $SambaDefaultValues->{"ldap admin dn"}) || "";
 
     # create "ldap XXX suffix" on ldap server if first "passdb backend" is "ldapsam"
     if (isLDAPDefault()) {
-	tryBind(GetPassdbServerUrl()) or return;
-
-	# create suffix
-	foreach my $subSuffix ("machine", "user", "group") {
-	    $mysuffix = SambaConfig->GlobalGetStr("ldap $subSuffix suffix", "");
+	$errmsg = tryBind(GetPassdbServerUrl(), $admin_dn, $Passwd);
+	return $errmsg if $errmsg;
+        # create suffix
+        foreach my $subSuffix ("machine", "user", "group") {
+	    $mysuffix = SambaConfig->GlobalGetStr("ldap $subSuffix suffix", $SambaDefaultValues->{"ldap $subSuffix suffix"});
 	    $dn = ($mysuffix||"") . ($suffix && $mysuffix ? "," : "") . ($suffix||"");
-	    addLdapDn($dn) or return;
+	    $errmsg = addLdapDn($dn);
+	    return $errmsg if $errmsg;
 	}
+    } else {
+	y2milestone("ldapsam backend isn't default => omit create suffixes");
     }
 
     # create "ldap idmap suffix" on ldap server if "idmap backend" is "ldap"
     my $idmap_url = GetIdmapServerUrl();
     if ($idmap_url) {
-	tryBind($idmap_url) or return;
+	$errmsg = tryBind(GetPassdbServerUrl(), $admin_dn, $Passwd);
+	return $errmsg if $errmsg;
 	$mysuffix = SambaConfig->GlobalGetStr("ldap idmap suffix", "");
 	$dn = ($mysuffix||"") . ($suffix && $mysuffix ? "," : "") . ($suffix||"");
-	addLdapDn($dn) or return;
+	$errmsg = addLdapDn($dn);
+	return $errmsg if $errmsg;
     }
+    
+    return undef;
 }
 
-# Enable ldapsam: fill LDAP Samba Default Values in configuration.
-BEGIN{$TYPEINFO{Enable}=["function","boolean","string", "string"]}
-sub Enable {
+# Enable ldapsam
+# if there is no ldap settings in config file, use LDAP Samba Default Values
+# othervise do nothing
+BEGIN{$TYPEINFO{PassdbEnable}=["function","boolean","string", "string"]}
+sub PassdbEnable {
     my ($self, $name, $location) = @_;
-    my $cfg = {%{$SambaDefaultValues}};
-    while(my ($k,$v) = each %{$SambaDefaultValues}) {
-	$v = undef if $v eq $SuseDefaultValues->{$k};
+    my $configured;
+    while(!$configured && (my ($k,$v) = each %{$SambaDefaultValues})) {
+	$configured = 1 if SambaConfig->GlobalGetStr($k, undef);
+    }
+    
+    unless($configured) {
+	SambaConfig->GlobalSetMap($SambaDefaultValues);
+	y2milestone("enabling ldap settings (use suse default values)");
+    } else {
+	y2milestone("ldap settings already enabled (do not use suse default values)");
     }
 
-    SambaConfig->GlobalUpdateMap($cfg);
-#    SambaConfig->GlobalUpdateMap({"idmap backend" => "ldap:$location"});
-    
     return TRUE;
 }
 
 # Disable ldapsam: actualy do nothing.
-BEGIN{$TYPEINFO{Disable}=["function","boolean","string"]}
-sub Disable {
+BEGIN{$TYPEINFO{PassdbDisable}=["function","boolean","string"]}
+sub PassdbDisable {
     my ($self, $name) = @_;
-#    SambaConfig->GlobalSetStr("idmap backend", undef);
     return TRUE;
 }
 
@@ -424,7 +453,10 @@ sub readSuseDefaultValues {
 
     # try to lookup user/group suffix
     my (@user, @group);
-    if (!Mode::test() && Ldap->LDAPInit()) {
+    my $errmsg = Ldap->LDAPInit();
+    if ($errmsg) {
+	y2warning("Can't initialize LDAP: $errmsg");
+    } elsif (!Mode::test()) {
 	Ldap->ReadConfigModules();
 	my $conf = Ldap->GetConfigModules();
 	while(my ($dn, $c) = each %$conf) {
@@ -437,11 +469,13 @@ sub readSuseDefaultValues {
     
     # remove common suffix
     my @suffix = split ",", Ldap->GetDomain();
-    for(my $i=0; @user && $i<=@suffix; $i++) {
+    @user = () if @user < @suffix;
+    for(my $i=0; @user && $i<@suffix; $i++) {
         @user = () if $user[-$i-1] ne $suffix[-$i-1]
     }
     @user = @user[0..(@user-@suffix-1)] if @user;
-    for(my $i=0; @group && $i<=@suffix; $i++) {
+    @group = () if @group < @suffix;
+    for(my $i=0; @group && $i<@suffix; $i++) {
 	@group = () if $group[-$i-1] ne $suffix[-$i-1]
     }
     @group = @group[0..(@group-@suffix-1)] if @group;
@@ -454,7 +488,7 @@ sub readSuseDefaultValues {
 	"ldap suffix" => Ldap->GetDomain(),
 	"ldap machine suffix" => "$p=Machines",
 	"ldap idmap suffix" => "$p=Idmap",
-	"ldap bind dn" => Ldap->bind_dn,
+	"ldap admin dn" => Ldap->bind_dn,
     };
     
     # log defaults - for debuging
@@ -487,7 +521,7 @@ sub writePasswd {
 # Writa all LDAP-related settings.
 BEGIN{$TYPEINFO{Write}=["function","boolean","string","boolean"]}
 sub Write {
-    my ($self, $name,$write_only) = @_;
+    my ($self, $name, $write_only) = @_;
 
     # write password only if changed password or admin_dn
     writePasswd();
@@ -498,7 +532,12 @@ sub Write {
     # create suffixes only if the default backend is a ldapsam
     # idmap suffix is created always (indeed unless already exists)
     # bind with smb.conf "ldap admin dn" and secret.tdb LDAP_BIND_PW password (via SCR)
-    createSuffixes();
+    if (!$write_only) {
+	my $errmsg = createSuffixes();
+	if ($errmsg) {
+	    y2error("Create suffixes: $errmsg");
+	}
+    }
     
     # setup UsersPlugin only if the default backend is the SUSE's common LDAP server
     # bind with common dn (== "ldap admin dn") and secret.tdb LDAP_BIND_PW password (via LDAP module)
