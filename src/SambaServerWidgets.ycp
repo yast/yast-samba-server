@@ -68,11 +68,11 @@ global map smbconf_popups = $[
 ];
 
 
-global map defaulthostwidget = union ( CWM::CreateTable (
+global map defaulthostwidget =  CWM::CreateTableDescr (
 	    $["add_delete" : true, 
 	      "up_down" : false, 
 	      "unique_keys" : true]
-	), $[
+	  , $[
 	    "init" : ``(CWM::TableInit (
 		SambaServerWidgets::widgets["share_edit"]:$[])),
 	    "handle" : ``(CWM::TableHandle (

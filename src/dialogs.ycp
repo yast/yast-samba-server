@@ -118,8 +118,8 @@ Do you really want to continue?"), Samba::workgroup ) ) ) continue;
 		}
 		
 		// save the settings
-		WriteSAMBackend();
-		ReloadSettings();
+		SambaServer::WriteSAMBackend();
+		SambaServer::ReloadSettings();
 		
 		// ask to join the domain
 		AskJoinDomain( Samba::workgroup, res );
@@ -449,21 +449,23 @@ global define symbol AdvancedDialog () ``{
  * @return dialog result
  */
 global define symbol EditShareDialog () ``{
-    list w = CWM::CreateWidgets (["share_edit"],
-            SambaServerWidgets::widgets);
+
     term contents = `HBox (`HSpacing (1), `VBox (
-        `VSpacing (1),
-        w[0, "widget"]:`VSpacing(1)
+        `VSpacing (1), 
+        "share_edit"
     ), `HSpacing (1));
 
     // dialog caption
     string caption = sformat( _("Edit share \"%1\""), SambaServerWidgets::shareToEdit );
-    string help = CWM::MergeHelps (w);
 
-    Wizard::SetContentsButtons (caption, contents, help,
-            Label::BackButton (), Label::OKButton ());
-
-    return CWM::Run (w, $[]);
+    return CWM::ShowAndRun (
+	["share_edit"], 
+	SambaServerWidgets::widgets, 
+	contents, 
+	caption, 
+	Label::BackButton (), Label::OKButton (), 
+	$[]
+    );
 }
 
 /**
