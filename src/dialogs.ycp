@@ -462,12 +462,17 @@ global define symbol AdvancedDialog () ``{
 	    SambaServer::setLDAPServer( UI::QueryWidget( `id( `ldap_server ), `Value ) );
 	    SambaServer::setLDAPAdminDN( UI::QueryWidget( `id( `ldap_admin_dn ), `Value ) );
 	    SambaServer::setLDAPSuffix( UI::QueryWidget( `id( `ldap_suffix ), `Value ) );
+		if (!Mode::config) {
 	    if( ! (SambaServer::switchSAMBackend( UI::QueryWidget( `id( `backend ), `CurrentButton ) ) ) ) {
 		// Translators: error message if it is not possible to switch between smbpasswd and LDAP backends
 		Popup::Error( sformat( _("It is not possible to switch to %1 back-end."), 
 		    UI::QueryWidget( `id( `backend ), `CurrentButton ) == `ldap ? "LDAP" : "smbpasswd" ));
 	    }
-	    
+		}
+		else {
+			SambaServer::SAM = UI::QueryWidget( `id( `backend ), `CurrentButton );
+		}
+
             break;
         }
 	else if(ret == `back ) {
