@@ -670,7 +670,7 @@ global define string Summary() ``{
     string nc = Summary::NotConfigured ();
     
     // summary header
-    summary = Summary::AddHeader(summary, _("Global configuration"));
+    string summary = Summary::AddHeader("", _("Global configuration"));
     
     if( globals_configured ) {
 	// summary item: configured workgroup/domain
@@ -691,11 +691,11 @@ global define string Summary() ``{
 		(SAM == `smbpasswd ? "smbpasswd" : "LDAP") ) );
 	if( SAM == `ldap ) {
 	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP server: %1"), LDAP_server ) );
+	    summary = Summary::AddLine(summary, sformat(_("LDAP server: %1"), LDAP_server != nil ? LDAP_server : nc ) );
 	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP suffix: %1"), LDAP_suffix ) );
+	    summary = Summary::AddLine(summary, sformat(_("LDAP suffix: %1"), LDAP_suffix != nil ? LDAP_suffix : nc ) );
 	    // summary item
-	    summary = Summary::AddLine(summary, sformat(_("LDAP administration DN: %1"), LDAP_admin_dn ) );
+	    summary = Summary::AddLine(summary, sformat(_("LDAP administration DN: %1"), LDAP_admin_dn != nil ? LDAP_admin_dn : nc ) );
 	}
     } else {
 	summary = Summary::AddLine(summary, nc );
