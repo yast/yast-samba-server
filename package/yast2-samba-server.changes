@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 20 15:38:58 CEST 2003 - visnov@suse.de
+
+- Do not show Initializing... dialog
+
+-------------------------------------------------------------------
 Tue Aug 19 14:02:35 CEST 2003 - visnov@suse.de
 
 - improve start dialog
