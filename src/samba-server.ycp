@@ -18,6 +18,7 @@
 textdomain "samba-server";
 
 import "CommandLine";
+import "Popup";
 import "Report";
 import "Require";
 import "Samba";
@@ -458,7 +459,7 @@ if( !Require::RequireAndConflictTarget( ["samba"], [],
         // translators: error popup before aborting the module
         Popup::Error( sformat( _("<p>The package <b>%1</b> is not available.<br>
 YaST2 cannot continue the configuration
-without installing the package.<p>"), "samba" ) );
+without installing the package.</p>"), "samba" ) );
     } else {
         // translators: error popup before aborting the module
         Popup::Error( sformat( _("YaST2 cannot continue the configuration
