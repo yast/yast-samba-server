@@ -222,9 +222,11 @@ global define symbol handleFun(any key, map event_descr) ``{
       */
     global define void ShareEditPopupInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
+	    any value = SambaServer::shares[shareToEdit, opt_key]:nil;
+	    
 	    // not adding a new option
 	    UI::ChangeWidget (`id (opt_key), `Value,
-		SambaServer::shares[shareToEdit, opt_key]:"not found");
+		value);
 	}
 	UI::SetFocus (`id (opt_key));
     }
