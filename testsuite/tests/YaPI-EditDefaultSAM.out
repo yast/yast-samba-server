@@ -3,9 +3,13 @@ Read	.target.tmpdir "/tmp"
 Read	.product.features.UI_MODE "expert"
 Read	.product.features.ENABLE_AUTOLOGIN "no"
 Read	.product.features.EVMS_CONFIG "no"
+Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
+Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
 Read	.product.features.UI_MODE "expert"
 Read	.product.features.ENABLE_AUTOLOGIN "no"
 Read	.product.features.EVMS_CONFIG "no"
+Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
+Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
 Write	.etc.smb.value.global."domain logons" "no" true
 Write	.etc.smb.value_type.global."domain logons" 0 true
 Write	.etc.smb.value.global."domain master" "no" true

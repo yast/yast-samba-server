@@ -3,7 +3,11 @@ Read	.target.tmpdir "/tmp"
 Read	.product.features.UI_MODE "expert"
 Read	.product.features.ENABLE_AUTOLOGIN "no"
 Read	.product.features.EVMS_CONFIG "no"
+Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
+Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
 Read	.product.features.UI_MODE "expert"
 Read	.product.features.ENABLE_AUTOLOGIN "no"
 Read	.product.features.EVMS_CONFIG "no"
+Read	.product.features.INCOMPLETE_TRANSLATION_TRESHOLD nil
+Log	Failed reading '.product.features.INCOMPLETE_TRANSLATION_TRESHOLD'
 Return	nil
