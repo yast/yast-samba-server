@@ -15,9 +15,6 @@ ynclude_DATA =			\
 	complex.ycp		\
 	routines.ycp
 
-config_DATA =			\
-	samba-server.y2cc
-
 desktop_DATA =			\
 	samba-server.desktop
 
@@ -25,7 +22,14 @@ module_DATA =			\
 	SambaServer.ycp		\
 	SambaServerWidgets.ycp
 
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA) $(desktop_DATA)
+samba-server:
+	ln -sf . samba-server
+
+ycpchook = samba-server
+
+YCPCFLAGS = -I.
+
+EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
  

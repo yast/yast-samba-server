@@ -23,13 +23,13 @@ include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
-global define map AddSharePopup();
+map AddSharePopup();
 
 /**
  * SAMBA role dialog
  * @return dialog result
  */
-global define symbol RoleDialog () ``{
+symbol RoleDialog () ``{
 
     /* Samba-server role dialog caption */
     string caption = _("Samba Server Role");
@@ -175,7 +175,7 @@ Really continue?
  * OverallSharesDialog dialog
  * @return dialog result
  */
-global define symbol OverallSharesDialog () ``{
+symbol OverallSharesDialog () ``{
 
     // skip the dialog, if the service is disabled
     if( SambaServer::role == `disabled ) return `next;
@@ -258,7 +258,7 @@ global define symbol OverallSharesDialog () ``{
  * ShareDirsDialog dialog
  * @return dialog result
  */
-global define symbol ShareDirsDialog () ``{
+symbol ShareDirsDialog () ``{
 
     list items = shares2items( SambaServer::shares );
     
@@ -358,7 +358,7 @@ All its settings will be lost.
  * AdvancedDialog dialog
  * @return dialog result
  */
-global define symbol AdvancedDialog () ``{
+symbol AdvancedDialog () ``{
 
     /* Samba-server advanced dialog caption */
     string caption = _("Advanced Samba Server Options");
@@ -498,7 +498,7 @@ global define symbol AdvancedDialog () ``{
  * EditShareDialog dialog
  * @return dialog result
  */
-global define symbol EditShareDialog () ``{
+symbol EditShareDialog () ``{
 
     term contents = `HBox (`HSpacing (1), `VBox (
         `VSpacing (1), 
@@ -523,7 +523,7 @@ global define symbol EditShareDialog () ``{
  * 
  * @return map	description of the new share
  */
-global define map AddSharePopup() ``{
+map AddSharePopup() ``{
     UI::OpenDialog( 
 	`VBox(
 	    // translators: text entry label

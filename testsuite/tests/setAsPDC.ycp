@@ -15,6 +15,7 @@
         ]
     ], nil );
     
+    import "Samba";
     import "SambaServer";
     
     DUMP(SambaServer::role);

@@ -109,9 +109,9 @@ global boolean local_master = false;
 global string preferred_master = "auto";
 
 /**
- * add user script
+ * add machine script
  */
-global string add_user_script = "";
+global string add_machine_script = "";
 
 /**
  * Should be [homes] section present
@@ -297,8 +297,8 @@ global define boolean Read() ``{
     
     value = (string) SCR::Read( .etc.smb.value.global."server string" );
     if( value != nil ) server_string = value;
-    value = (string) SCR::Read( .etc.smb.value.global."add user script" );
-    if( value != nil ) add_user_script = value;
+    value = (string) SCR::Read( .etc.smb.value.global."add machine script" );
+    if( value != nil ) add_machine_script = value;
     value = (string) SCR::Read( .etc.smb.value.global."domain master" );
     if( value != nil ) domain_master = value;
     value = (string) SCR::Read( .etc.smb.value.global."domain logons" );
@@ -536,7 +536,7 @@ global define boolean Write() ``{
     enableServer( role != `disabled );
     if( role == `bdc ) {
 	// Retrieve the domain SID for DOMAIN
-	map result = (map) SCR::Execute( .target.bash_output, "smbpasswd -S" );
+	map result = (map) SCR::Execute( .target.bash_output, "net rpc getsid" );
 	if( result["exit"]:1 != 0 ) {
 	    y2debug( "Error retrieving SID: %1", result );
 	    // translators: error message
@@ -560,7 +560,7 @@ global define boolean WriteSettings() ``{
 
     // write global settings
     SCR::Write( .etc.smb.value.global."server string", server_string );
-    SCR::Write( .etc.smb.value.global."add user script", add_user_script );
+    SCR::Write( .etc.smb.value.global."add machine script", add_machine_script );
     if( domain_master != "auto" ) 
 	SCR::Write( .etc.smb.value.global."domain master" , domain_master );
     SCR::Write( .etc.smb.value.global."domain logons" , domain_logons ? "yes" : "no" );
@@ -935,7 +935,7 @@ global define boolean setAsPDC() ``{
     preferred_master = "yes";
     domain_master = "yes";
     local_master = true;
-    add_user_script = "/usr/sbin/useradd -c Machine -d /dev/null -s /bin/false  %m$";
+    add_machine_script = "/usr/sbin/useradd  -c Machine -d /dev/null -s /bin/false %m$";
     
     return true;
 }

@@ -19,7 +19,7 @@ textdomain "samba-server";
  * @param default	the default value for value == nil
  * @return boolean	the converted value or default
  */
-global define boolean normalize_boolean( string value, boolean default ) ``{
+boolean normalize_boolean( string value, boolean default ) ``{
     if( value == nil ) return default;
     string s = toupper( value );
     return ( s == "YES" || s == "1" || s == "TRUE" );
@@ -32,7 +32,7 @@ global define boolean normalize_boolean( string value, boolean default ) ``{
  * @param default	the default value for value == nil
  * @return string	the converted value or default
  */
-global define string normalize_string( string value, string default ) ``{
+string normalize_string( string value, string default ) ``{
     if( value == nil ) return default;
     string s = toupper( value );
     if ( s == "YES" || s == "1" || s == "TRUE" ) return "yes";
@@ -46,7 +46,7 @@ global define string normalize_string( string value, string default ) ``{
  * @param value		string value
  * @return boolean	true if it is yes or auto
  */
-global define boolean yes_or_auto( string value ) ``{
+boolean yes_or_auto( string value ) ``{
     return toupper( value ) == "AUTO" || normalize_boolean( value, false);
 }
 
@@ -56,7 +56,7 @@ global define boolean yes_or_auto( string value ) ``{
  * @param shares	map of available shares
  * @return list 	list of table items
  */
-global define list shares2items( map shares ) ``{
+list shares2items( map shares ) ``{
     integer index = 0;
     return maplist( string name, map descr, shares, ``{ index = index+1; return `item( `id(index), descr["commentout"]:false ? _("Disabled"): _("Enabled") , name, descr["path"]:"", descr["comment"]:"" ); }  );
 }
@@ -67,7 +67,7 @@ global define list shares2items( map shares ) ``{
  * @param options	description of the share
  * @return boolean	true if the share is enabled
  */
-global define boolean shareEnabled( map options ) ``{
+boolean shareEnabled( map options ) ``{
     boolean result = !( options["commentout"]:false );
     
     if( result ) result = normalize_boolean(options["available"]:"yes", true);
@@ -81,7 +81,7 @@ global define boolean shareEnabled( map options ) ``{
  * @param printers	map of available printers
  * @return list 	list of box items
  */
-global define list printers2items( map printers ) ``{
+list printers2items( map printers ) ``{
     return maplist( string name, boolean value, printers, ``{
 	return `item( `id( name ), name , value );
     });

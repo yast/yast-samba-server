@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb  9 12:52:06 CET 2004 - visnov@suse.cz
+
+- remove "global"
+- fix testsuite
+- use "net getsid" instead of "smbpasswd -S"
+- drop y2cc
+- 2.9.1
+
+-------------------------------------------------------------------
 Fri Jan 30 13:27:07 CET 2004 - visnov@suse.cz
 
 - first version for new interpreter 
