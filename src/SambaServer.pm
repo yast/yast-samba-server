@@ -29,7 +29,7 @@ YaST::YCP::Import("Report");
 YaST::YCP::Import("Summary");
 YaST::YCP::Import("Progress");
 #HELPME: YaST::YCP::Import("Directory");
-#HELPME: YaST::YCP::Import("SuSEFirewall");
+YaST::YCP::Import("SuSEFirewall");
 YaST::YCP::Import("PackageSystem");
 
 YaST::YCP::Import("SambaRole");
@@ -134,7 +134,7 @@ sub Read {
     
     # read firewall setting
     Progress->NextStage();
-# HELPME:    SuSEFirewall->Read();
+    SuSEFirewall->Read();
 #    if(Abort()) return false;
 
     # Read finished
@@ -234,7 +234,7 @@ sub Write {
 #    if(Abort()) return false;
 
     # save firewall settings
-#HELPME    SuSEFirewall->Write();
+    SuSEFirewall->Write();
 #    if(Abort()) return false;
     
     # progress finished
