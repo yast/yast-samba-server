@@ -1238,7 +1238,7 @@ global define void enablePrinterNames( list enable_names ) ``{
 		// a share with the same name, but without printable!!!
 		y2error( "Share '%1' is not printable: %2", name, shares[name]:$[] );
 		// translators: error message. There is a given share, but configured differently
-		Report::Error( sformat( _("There is already a share '%',
+		Report::Error( sformat( _("There is already a share '%1',
 but it is not configured
 as a printer.\n
 YaST2 will not modify this share."), name ) );
