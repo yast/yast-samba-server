@@ -271,7 +271,7 @@ symbol WinsSettingsWidgetHandle(string key, map event_descr)
 
 symbol AdvancedSettingsWidgetHandle(string key, map event)
 {
-    if (is(event["ID"]:nil, symbol) && contains([ `ldap, `passdb, `global_settings], event["ID"]:`cancel)) {
+    if (is(event["ID"]:nil, symbol) && contains([ `passdb, `global_settings], event["ID"]:`cancel)) {
 	return_tab = "identity";
 	return event["ID"]:`next;
     }
@@ -294,7 +294,7 @@ symbol SharesWidgetHandle(string key, map event_descr)
     symbol ret = (symbol) event_descr["ID"]:nil;
     return_tab = "shares";
 
-    if (ret == `add || ret == `ldap || ret == `passdb ) {
+    if (ret == `add) {
 	return ret;
     }
     if (ret == `filter_all || ret == `filter_non_system) {
@@ -669,7 +669,6 @@ any Installation_Conf_Tab () {
     
     term advanced_settings_widget = `MenuButton(_("Advanced Settings..."), [
 	`item(`id(`global_settings), _("&Expert Global Settings")),
-	`item(`id(`ldap), _("&LDAP Settings")),
 	`item(`id(`passdb), _("&User Authentication Sources")) ] );
 	
     term trusted_domains_widget = `HBox(
@@ -856,6 +855,7 @@ symbol PassdbDialog () {
 
     Wizard::SetContentsButtons (caption, contents, help, Label::BackButton (), Label::OKButton ());
 
+/*
     UI::ReplaceWidget( `id(`_tp_table_repl),
         // translators: menu button label for accessing the LDAP-related settings and actions
         `MenuButton( "LDAP",
@@ -866,7 +866,7 @@ symbol PassdbDialog () {
 	    ]
 	) 
     );
-
+*/
     return CWM::Run (w, $[`abort: confirmAbort]);
 }
 

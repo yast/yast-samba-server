@@ -445,7 +445,7 @@ sub UpdateScripts {
 # read secret password
 sub readPasswd {
     $OrgAdminDN = SambaConfig->GlobalGetStr("ldap admin dn", "");
-    $Passwd = $OrgPasswd = SambaSecrets->GetLDAPBindPw($OrgAdminDN);
+    $Passwd = $OrgPasswd = Mode::test() ? "secret" : SambaSecrets->GetLDAPBindPw($OrgAdminDN);
 }
 
 # read SUSE default values
@@ -453,10 +453,9 @@ sub readSuseDefaultValues {
 
     # try to lookup user/group suffix
     my (@user, @group);
-    my $errmsg = Ldap->LDAPInit();
-    if ($errmsg) {
-	y2warning("Can't initialize LDAP: $errmsg");
-    } elsif (!Mode::test()) {
+    if (!Mode::test()) {
+	my $errmsg = Ldap->LDAPInit();
+	if ($errmsg) { y2warning("Can't initialize LDAP: $errmsg"); }
 	Ldap->ReadConfigModules();
 	my $conf = Ldap->GetConfigModules();
 	while(my ($dn, $c) = each %$conf) {
@@ -489,9 +488,10 @@ sub readSuseDefaultValues {
 	"ldap machine suffix" => "$p=Machines",
 	"ldap idmap suffix" => "$p=Idmap",
 	"ldap admin dn" => Ldap->bind_dn,
+	"ldap ssl" => Ldap->ldap_tls ? "Start_tls" : "No",
     };
     
-    # log defaults - for debuging
+    # log suse defaults (for debuging)
     my $s;
     for(keys %$SuseDefaultValues) {
 	(my $k = $_) =~ s/^ldap //;
