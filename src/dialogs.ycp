@@ -14,6 +14,8 @@ textdomain "samba-server";
 import "String";
 import "Label";
 import "Wizard";
+import "ProductFeatures";
+import "CWMFirewallInterfaces";
 import "Samba";
 import "SambaServer";
 import "SambaServerWidgets";
@@ -93,52 +95,28 @@ any Installation_Step2 () {
     
     y2milestone ("Proposal: %1", proposal);
 
-    term contents =
-	`VBox (
-	    `VSquash (
-		`Left ( `Label ( _("Current Domain Name:") + " " + Samba::workgroup) )
-	    ),
-	    `VSpacing ( 1 ),
-	    `VSquash (
-		`Frame ( _("Type Selection for SAMBA Server"),
-		    `VBox (
-			`RadioButtonGroup( `id ( "samba_server_type" ),
-			    `VBox (
-				`VSpacing ( 1 ),
-				`Left( `Label ( _("The available options in the configuration dialogs
+    term contents = `VBox(
+	`VSquash(`Left(`Label( _("Current Domain Name:") + " " + Samba::workgroup))),
+	`VSpacing(1),
+	`VSquash(`Frame(_("Type Selection for SAMBA Server"), `VBox(
+	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
+		`VSpacing(1),
+		`Left(`Label(_("The available options in the configuration dialogs
 depend on the settings in this selection.
-") ) ),
-				`Left( `RadioButton( 
-				    `id (`pdc)
-				    , _("&Primary Domain Controller (PDC)")
-				    , proposal["pdc","propose"]:false ) ),
-				`HBox (
-				    `HSpacing ( 4 ),
-				    `Left( `Label ( proposal["pdc","message"]:"" ) )
-				),
-				`Left( `RadioButton( 
-				    `id (`bdc)
-				    , _("B&ackup Domain Controller (BDC)")
-				    , proposal["bdc","propose"]:false ) ),
-				`HBox (
-				    `HSpacing ( 4 ),
-				    `Left( `Label ( proposal["bdc","message"]:"" ) )
-				),
-				`Left( `RadioButton( 
-				    `id (`standalone)
-				    , _("No Domain &Controller")
-				    , proposal["standalone","propose"]:false ) ),
-				`VSpacing ( 1 )
-			    )
-			)
-		    )
-		)
-	    ),
-	    `VStretch ()
-	);
+"))),
+		`Left(`RadioButton(`id(`pdc), _("&Primary Domain Controller (PDC)"), proposal["pdc","propose"]:false)),
+		`HBox(
+		    `HSpacing(4),
+		    `Left(`Label(proposal["pdc","message"]:""))),
+		`Left(`RadioButton(`id(`bdc), _("B&ackup Domain Controller (BDC)"), proposal["bdc","propose"]:false)),
+		`HBox(
+		    `HSpacing(4),
+		    `Left(`Label(proposal["bdc","message"]:""))),
+		`Left(`RadioButton(`id (`standalone), _("No Domain &Controller"), proposal["standalone","propose"]:false)),
+		`VSpacing(1)))))),
+	`VStretch());
 
-    Wizard::SetContents ( caption, contents, HELPS["inst_step2"]:"",
-	true, true );
+    Wizard::SetContents ( caption, contents, HELPS["inst_step2"]:"", true, true );
 	
     UI::ChangeWidget ( `id (`pdc), `Enabled, proposal["pdc","possible"]:true );
     UI::ChangeWidget ( `id (`bdc), `Enabled, proposal["bdc","possible"]:true );
@@ -439,14 +417,16 @@ symbol EditShareDialog () ``{
     // dialog caption
     string caption = sformat( _("Edit Share \"%1\""), SambaServerWidgets::shareToEdit );
 
-    return CWM::ShowAndRun (
-	["share_edit"], 
-	SambaServerWidgets::widgets, 
-	contents, 
-	caption, 
-	Label::BackButton (), Label::OKButton (), 
-	$[`abort: SambaServer::AbortFunction]
-    );
+
+    return CWM::ShowAndRun($[
+	"widget_names" : ["share_edit"],
+	"widget_descr" : SambaServerWidgets::widgets,
+	"contents" : contents,
+	"caption" : caption,
+	"back_button" : Label::BackButton(),
+	"next_button" : Label::OKButton(),
+	"fallback_functions" : $[`abort: SambaServer::AbortFunction]
+    ]);
 }
 
 symbol GlobalSettingsDialog () ``{
@@ -459,15 +439,16 @@ symbol GlobalSettingsDialog () ``{
     // dialog caption
     string caption = _("Expert Global Settings Configuration");
 
-    symbol res = CWM::ShowAndRun (
-	["globalsettings"], 
-	SambaServerWidgets::widgets, 
-	contents, 
-	caption, 
-	Label::BackButton (), Label::OKButton (), 
-	$[`abort: SambaServer::AbortFunction]
-    );
-    
+    symbol res = CWM::ShowAndRun($[
+	"widget_names" : ["globalsettings"],
+	"widget_descr" : SambaServerWidgets::widgets,
+	"contents" : contents,
+	"caption" : caption,
+	"back_button" : Label::BackButton(),
+	"next_button" : Label::OKButton(),
+	"fallback_functions" : $[`abort: SambaServer::AbortFunction]
+    ]);
+
     if (res == `next)
     {
 	// update the rest of the settings using the entered ones
@@ -624,214 +605,162 @@ boolean TabAbort () {
 
 any Installation_Conf_Tab () {
 
-    term page_start_up =
-	`HBox (
-	    `VBox (
-		`RadioButtonGroup( `id ( "samba_server_type" ),
-		    `VBox (
-			`Left( `RadioButton( `id(`enable), _("On -- &Enable Services Automatically and Start on Booting") ) ),
-			`Left( `RadioButton( `id(`disable), _("Off -- &Disable Services") ) )
-		    )
-		),
-		`VStretch ()
-	    ),
-	    `HStretch ()
-	);
+    map<string,any> firewall_settings = $[ "services" : [ "samba-server" ], "display_details" : true ];
+    map<string,any> firewall_widget = CWMFirewallInterfaces::CreateOpenFirewallWidget(firewall_settings);
+    string firewall_help = firewall_widget["help"]:"";
+    term firewall_layout = firewall_widget["custom_widget"]:`VBox();
 
-    term page_shares =
-	`HBox (
-	    `HWeight ( 1,
-		`Empty ()
-	    ),
-	    `HWeight ( 100,
-	    `VBox (
-		`VWeight (1,
-		`HBox (
-		    `Left ( `Label ( _("Available shares are") ) ),
-		    `HStretch (),
-		    `Right (
-			`MenuButton( _("&Filter"), [
-			    `item ( `id( `filter_all ), "Show &All Shares" ),
-			    `item ( `id( `filter_non_system ), "Do Not Show &System Shares" )
-			] )
-		    )
-		)
-		),
-		`VWeight ( 5,
-		    // translators: table header texts
-		    `Table ( `id ( `table ), `opt( `hvstretch ), `header( _("Status"), _("Name"),  _("Path"), _("Comment") ), [] )
-		),
-		`VWeight ( 1,
-		`HBox (
-		    `PushButton ( `id ( `add ),		Label::AddButton() + "..." ),
-		    `PushButton ( `id ( `edit ),	Label::EditButton() + "..." ),
-		    `PushButton ( `id ( `delete ),	Label::DeleteButton() ),
-		    `HStretch (),
-		    `PushButton ( `id ( `toggle ),	_("&Toggle Status") )
-		)
-		),
-		`VStretch ()
-	    )
-	    ),
-	    `HWeight ( 1,
-		`Empty ()
-	    )
-	);
+    term page_start_up = `HBox(
+	`VBox(
+	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
+		`Left(`RadioButton(`id(`enable), _("On -- &Enable Services Automatically and Start on Booting"))),
+		`Left(`RadioButton(`id(`disable), _("Off -- &Disable Services"))))),
+	    `VSpacing(1),
+	    firewall_layout,
+	    `VStretch()),
+	`HStretch());
 
-    term page_identity =
-	`HBox (
-	    `HWeight ( 1,
-		`Empty ()
-	    ),
-	    `HWeight ( 30,
-		`VBox ( `opt ( `hstretch ),
-		    `HStretch (),
-		    `Top (
-		    `HBox (
-			`HWeight ( 10,
-			    `Frame ( _("Base Settings"),
-				`HBox (
-				    `HSpacing ( 1 ),
-				    `VBox ( `opt ( `hstretch ),
-					`ComboBox ( `id ( "workgroup_domainname" ), `opt( `editable, `hstretch ), _("&Workgroup or Domain Name")
-					, maplist( string key,	boolean value, Samba::PreprocessAvailableWorkgroups (), ``(key))
-					),
-					// translators: combobox label
-					`ComboBox(  `id ( "domain_controller" ), `opt ( `hstretch ), _("Domain &Controller"), [
-					    // translators: combobox item
-					    `item ( `id ( `standalone ), _("No DC") ),
-					    // translators: combobox item
-					    `item ( `id ( `pdc ), _("Primary (PDC)") ),
-					    // translators: combobox item
-					    `item ( `id ( `bdc ), _("Backup (BDC)") )
-					] ),
-					`VStretch ()
-				    ),
-				    `HSpacing ( 1 )
-				)
-			    )
-			),
-			`HSpacing ( 1 ),
-			`HWeight ( 10,
-			    `Frame ( _("WINS"),
-				`HBox (
-				    `HSpacing ( 1 ),
-				    `VBox ( `opt ( `hstretch ),
-					`RadioButtonGroup( `id ( "wins_support" ),
-					    `VBox (
-						`Left( `RadioButton( `id ( "wins_server_support"), `opt( `notify ), _("WINS Server Support") ) ),
-						`Left( `RadioButton( `id ( "remote_wins_server"), `opt( `notify ), _("Remote WINS Server") ) )
-					    )
-					),
-					`HBox (
-					    `HSpacing ( 3 ),
-					    `TextEntry( `id( "wins_server_name" ), `opt( `hstretch ), _("Na&me:") )
-					),
-					`VStretch ()
-				    ),
-				    `HSpacing ( 1 )
-				)
-			    )
-			),
-			`HStretch ()
-		    )
-		    ),
-		    `VBox (
-			`VSpacing ( 1 ),
-			`TextEntry( `id( "netbios_hostname" ), `opt( `hstretch ), _("NetBIOS &Host Name") ),
-			`MenuButton( _("Advanced Settings..."), [
-			    `item ( `id( `global_settings ), _("&Expert Global Settings")),
-			    `item ( `id( `ldap ), _("&LDAP Settings") ),
-			    `item ( `id( `passdb ), _("&User Authentication Sources") )
-			] )
-		    ),
-		    `VStretch ()
-		)
-	    ),
-	    `HWeight ( 1,
-		`Empty ()
-	    ),
-	    `HStretch ()
-	);
+    term page_shares = `HBox(
+	`HWeight(1, `Empty()),
+	`HWeight(100, `VBox(
+	    `VWeight(1, `HBox(
+		`Left(`Label(_("Available shares are"))),
+	        `HStretch(),
+		`Right(`MenuButton(_("&Filter"), [
+		    `item(`id(`filter_all), "Show &All Shares" ),
+		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )])))),
+	    `VWeight(5,
+		// translators: table header texts
+		`Table ( `id ( `table ), `opt(`hvstretch), `header(_("Status"), _("Name"),  _("Path"), _("Comment")), [])),
+	    `VWeight(1, `HBox(
+		`PushButton(`id(`add), Label::AddButton() + "..."),
+		`PushButton(`id(`edit), Label::EditButton() + "..."),
+		`PushButton(`id(`delete), Label::DeleteButton()),
+		`HStretch(),
+		`PushButton(`id(`toggle), _("&Toggle Status")))),
+	    `VStretch())),
+	`HWeight(1, `Empty()));
 
-    term page_trusted_domains =
-	`HBox (
-	    `HWeight ( 1,
-		`Empty ()
-	    ),
-	    `HWeight ( 100,
-	    `VBox (
-		`VWeight ( 7,
-		    `ReplacePoint (`id (`domains_tr), 
-		    `SelectionBox( `id( "trusted_domains" ), _("&Trusted Domains List") , [] )
-		)),
-		`VWeight ( 1,
-		`HBox (
-		    `PushButton ( `id ( `add_domain ),		Label::AddButton() + "..." ),
-		    `PushButton ( `id ( `delete_domain ),	Label::DeleteButton() ),
-		    `HStretch ()
-		)
-		),
-		`VStretch ()
-	    )
-	    ),
-	    `HWeight ( 1,
-		`Empty ()
-	    )
-	);
+    list<term> roles = [
+	// translators: combobox item
+	`item ( `id ( `standalone ), _("No DC") ),
+	// translators: combobox item
+	`item ( `id ( `pdc ), _("Primary (PDC)") )
+	];
+
+    if (ProductFeatures::ui_mode != "simple") {
+	// translators: combobox item
+	roles = add( roles, `item ( `id ( `bdc ), _("Backup (BDC)") ));
+    }
+    
+    term page_identity_wins = `HWeight(10, `Frame(_("WINS"), `HBox(
+	`HSpacing(1),
+	`VBox(`opt(`hstretch),
+	    `RadioButtonGroup(`id("wins_support"),`VBox(
+		`Left(`RadioButton(`id("wins_server_support"), `opt(`notify ), _("WINS Server Support"))),
+		`Left(`RadioButton(`id("remote_wins_server"), `opt(`notify ), _("Remote WINS Server"))))),
+	    `HBox(
+	        `HSpacing(3),
+		`TextEntry(`id("wins_server_name"), `opt(`hstretch), _("Na&me:"))),
+	    `VStretch()),
+	`HSpacing(1))));
+
+    term page_identity_base = `HWeight(10, `Frame(_("Base Settings"), `HBox(
+        `HSpacing(1),
+	`VBox(`opt(`hstretch),
+	    `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch ), _("&Workgroup or Domain Name"),
+		maplist( string key, boolean value, Samba::PreprocessAvailableWorkgroups (), ``(key))),
+	    // translators: combobox label
+	    `ComboBox(`id("domain_controller"), `opt(`hstretch ), _("Domain &Controller"),  roles),
+	    `VStretch()),
+	`HSpacing(1))));
+	
+    term page_identity = `HBox(
+	`HWeight(1, `Empty()),
+	`HWeight(30, `VBox(`opt(`hstretch),
+	    `HStretch(),
+	    `Top(`HBox(
+			page_identity_base,
+			`HSpacing(1),
+			(ProductFeatures::ui_mode == "simple") ? `VSpacing(0) : page_identity_wins,
+			`HStretch ())),
+	    `VBox(
+		`VSpacing(1),
+		`TextEntry(`id("netbios_hostname"), `opt(`hstretch ), _("NetBIOS &Host Name")),
+		`MenuButton(_("Advanced Settings..."), [
+			`item(`id(`global_settings), _("&Expert Global Settings")),
+			`item(`id(`ldap), _("&LDAP Settings")),
+			`item(`id(`passdb), _("&User Authentication Sources")) ] )),
+	    `VStretch())),
+	`HWeight(1, `Empty()),
+	`HStretch());
+
+    term page_trusted_domains = `HBox(
+	`HWeight(1, `Empty()),
+	`HWeight(100, `VBox(
+	    `VWeight(7, `ReplacePoint(`id(`domains_tr),
+		`SelectionBox(`id("trusted_domains"), _("&Trusted Domains List"), [] ))),
+	    `VWeight(1, `HBox(
+		`PushButton(`id(`add_domain), Label::AddButton() + "..."),
+		`PushButton(`id(`delete_domain), Label::DeleteButton()),
+		`HStretch())),
+	    `VStretch())),
+	`HWeight(1, `Empty()));
 
     string caption = _("Samba Configuration");
 
-    map widgets =  $[ "overview" : TabWidget::CreateTabWidgetDescr (
-          $[], $[
-                "tabs": [
-                        CWM::prepareWidget($[
-                                "id" : "startup",
-                                "header" : _("Start &Up"),
-				"widget" : `custom,
-				"custom_widget" : page_start_up,
-				"init" : ServiceWidgetInit,
-				"store" : ServiceWidgetStore,
-				"help"	: HELPS["smb_conf_tab_startup"]:""
-                        ]),
-                        CWM::prepareWidget($[
-                                "id" : "shares",
-                                "header" : _("&Shares"),
-				"widget" : `custom,
-				"custom_widget" : page_shares,
-				"init" : SharesWidgetInit,
-				"handle" : SharesWidgetHandle,
-				"help"	: HELPS["smb_conf_tab_shares"]:""
-                        ]),
-                        CWM::prepareWidget($[
-                                "id" : "identity",
-                                "header" : _("I&dentity"),
-				"widget" : `custom,
-				"custom_widget" : page_identity,
-				"init" : IdentityWidgetInit,
-				"handle" : IdentityWidgetHandle,
-				"store" : IdentityWidgetStore,
-				"help"	: HELPS["smb_conf_tab_identity"]:""
-                        ]),
-                        CWM::prepareWidget($[
-                                "id" : "trusted_domains",
-                                "header" : _("&Trusted Domains"),
-				"widget" : `custom,
-				"custom_widget" : page_trusted_domains,
-				"init" : TrustedDomainsWidgetInit,
-				"handle" : TrustedDomainsWidgetHandle,
-				"help"	: HELPS["smb_conf_tab_trusted_domains"]:""
-                        ]),
-                ],
-		"start_tab" : return_tab,
-        ]) 
+    list tab_list = [
+	CWM::prepareWidget($[
+    	    "id" : "startup",
+            "header" : _("Start &Up"),
+	    "widget" : `custom,
+	    "custom_widget" : page_start_up,
+	    "init" : ServiceWidgetInit,
+	    "store" : ServiceWidgetStore,
+	    "help": HELPS["smb_conf_tab_startup"]:"" + firewall_help
+	]),
+        CWM::prepareWidget($[
+            "id" : "shares",
+            "header" : _("&Shares"),
+	    "widget" : `custom,
+	    "custom_widget" : page_shares,
+	    "init" : SharesWidgetInit,
+	    "handle" : SharesWidgetHandle,
+	    "help": HELPS["smb_conf_tab_shares"]:""
+	]),
+        CWM::prepareWidget($[
+            "id" : "identity",
+            "header" : _("I&dentity"),
+	    "widget" : `custom,
+	    "custom_widget" : page_identity,
+	    "init" : IdentityWidgetInit,
+	    "handle" : IdentityWidgetHandle,
+	    "store" : IdentityWidgetStore,
+	    "help": HELPS["smb_conf_tab_identity"]:""
+	])
+    ];
+    
+    if (ProductFeatures::ui_mode != "simple") {
+	tab_list = add(tab_list, CWM::prepareWidget($[
+            "id": "trusted_domains",
+            "header": _("&Trusted Domains"),
+	    "widget": `custom,
+	    "custom_widget": page_trusted_domains,
+	    "init": TrustedDomainsWidgetInit,
+	    "handle": TrustedDomainsWidgetHandle,
+	    "help": HELPS["smb_conf_tab_trusted_domains"]:""
+	]));
+    }
+
+    map widgets =  $[
+	"overview":TabWidget::CreateTabWidgetDescr($[], $["tabs":tab_list, "start_tab":return_tab])
     ];
     
     return_tab = "startup";
 
     term contents = `VBox( "overview", `VStretch ());
 
-    list<map <string, any> > w = CWM::CreateWidgets (["overview"], widgets);
+    list<map <string, any> > w = CWM::CreateWidgets (["overview"], (map <string, map <string, any> >)widgets);
     string help = CWM::MergeHelps (w);
     contents = CWM::PrepareDialog (contents, w);
 
@@ -855,8 +784,7 @@ symbol PassdbDialog () {
     // dialog caption
     string caption = _("User Information Sources");
 
-    list<map<string, any> > w = CWM::CreateWidgets (["passdb_edit"],
-        SambaServerWidgets::widgets);
+    list<map<string, any> > w = CWM::CreateWidgets (["passdb_edit"], (map <string, map <string, any> >)SambaServerWidgets::widgets);
 
     term contents = `HBox (`HSpacing (1), `VBox (
         `VSpacing (1), 

@@ -271,7 +271,7 @@ void InstallSchema () {
     import "NetworkDevices";
     import "Hostname";
     import "DNS";
-    import "YaPI::LdapServer";
+    import "LdapServerAccess";
     
     // check, if the local server is used
     boolean local_server = false;
@@ -297,87 +297,48 @@ void InstallSchema () {
 	}
     });
     
-    boolean restart_server = false;
 
-    if (local_server)
-    {
-        y2milestone ("LDAP server is local, checking included schemas");
-        list<string> schemas = YaPI::LdapServer::ReadSchemaIncludeList ();
+    if (local_server) {
+	boolean restart_server = false;
+
+        y2milestone ("LDAP server is local, including the Samba3 schema");
 	
-        if ( ! contains (schemas, "/etc/openldap/schema/samba3.schema") )
-        {
-            y2milestone ("Including the Samba3 schema");
-            schemas = add ( schemas, "/etc/openldap/schema/samba3.schema" );
-            YaPI::LdapServer::WriteSchemaIncludeList (schemas);
-	    
+	// add schema
+	boolean ret = LdapServerAccess::AddLdapSchemas(["/etc/openldap/schema/samba3.schema"], false);
+	if (ret == true) {
 	    restart_server = true;
-	    
-        }
-        else
-        {
-            y2milestone ("Samba3 schema is already included");
+	} else if (ret == nil) {
+            y2error("Add LDAP Samba3 schema failed");
         }
 	
-	// now, check indices
-	list<map<string, any> > indices = YaPI::LdapServer::ReadIndex (LDAP_suffix);
-	if (indices != nil)
-	{
-	    boolean sambaSID = false;
-	    boolean sambaPrimaryGroupSID = false;
-	    boolean sambaDomainName = false;
-	    
-	    foreach ( map<string,any> index, indices, ``{
-		list<string> attrs = splitstring ( index["attr"]:"", ",");
-		list<string> param = splitstring ( index["param"]:"", ",");
-		if ( contains (attrs, "sambaSID") && contains (param, "eq") )
-		{
-		    sambaSID = true;
-		}
-		if ( contains (attrs, "sambaPrimaryGroupSID") && contains (param, "eq") )
-		{
-		    sambaPrimaryGroupSID = true;
-		}
-		if ( contains (attrs, "sambaDomainName") && contains (param, "eq") )
-		{
-		    sambaDomainName = true;
-		}
-	    });
-	    
-	    if ( !sambaSID ) 
-	    {
-		y2milestone ("sambaSID index missing, adding");
-		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaSID", "param" : "eq" ] );
+	// add indices
+	foreach(string attr, [ "sambaSID", "sambaPrimaryGroupSID", "sambaDomainName"], {
+	    ret = LdapServerAccess::AddIndex($["attr":attr, "param":"eq"], LDAP_suffix, false);
+	    if (ret == true) {
+		restart_server = true;
+	    } else if (ret == nil) {
+                y2error("Add Index '%1' failed", attr);
 	    }
-	    if ( !sambaPrimaryGroupSID ) 
-	    {
-		y2milestone ("sambaPrimaryGroupSID index missing, adding");
-		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaPrimaryGroupSID", "param" : "eq" ] );
-	    }
-	    if ( !sambaDomainName ) 
-	    {
-		y2milestone ("sambaDomainName index missing, adding");
-		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaDomainName", "param" : "eq" ] );
-	    }
-	}
-    }
-    else
-    {
-        y2milestone ("LDAP server is remote, not checking if schemas are properly included");
-    }
-    
-    // setup ACLs
-    if (LDAP_admin_dn != nil && size(LDAP_admin_dn) > 0)
-    {
-	SCR::Write( .ldapserver.sambaACLHack, LDAP_admin_dn );
-    }
+	});
 
-    if (restart_server)
-    {
-	// restart server if running
-	if (Service::Status ("ldap") == 0)
-	{
-    	    Service::Restart ("ldap");
+        // setup ACLs
+	if (LDAP_admin_dn != nil && size(LDAP_admin_dn) > 0) {
+	    ret = LdapServerAccess::AddSambaACLHack(LDAP_admin_dn, false);
+	    if (ret == true) {
+		restart_server = true;
+	    } else if (ret == nil) {
+        	y2error("Samba ACL Hack failed");
+    	    }
 	}
+
+	if (restart_server) {
+	    // restart server if running
+	    if (Service::Status("ldap") == 0) {
+    		Service::Restart("ldap");
+	    }
+	}
+    } else {
+        y2milestone ("LDAP server is remote, not checking if schemas are properly included");
     }
 }
 
@@ -2157,7 +2118,7 @@ It will be created now."),
                     `PushButton(`id(`cancel), Label::CancelButton() )
                 )
             )
-	)));
+	))));
 
     any ret = nil;
     string passwd = nil;

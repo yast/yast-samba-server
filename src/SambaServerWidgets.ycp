@@ -228,11 +228,11 @@ global map widgets = $[
 ];
 
 global define boolean initFun(any key) ``{
-    return TablePopup::TableInit(SambaServerWidgets::widgets["share_edit"]:$[], key);
+    return TablePopup::TableInit(SambaServerWidgets::widgets["share_edit"]:$[], (string)key);
 }
 
 global define symbol handleFun(any key, map event_descr) ``{
-    return TablePopup::TableHandle(SambaServerWidgets::widgets["share_edit"]:$[], key, event_descr);
+    return TablePopup::TableHandle(SambaServerWidgets::widgets["share_edit"]:$[], (string)key, event_descr);
 }
 
 // ************************************ default host table ********************
@@ -586,14 +586,14 @@ further information.
 
 
     global define boolean initPassdb(any key) ``{
-	return TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], key);
+	return TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], (string)key);
     }
 
     global define symbol handlePassdb(any key, map event_descr) ``{
 	if ( event_descr["ID"]:nil == `_tp_add )
 	{
 	    AddPassdbBackend ();
-	    TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], key);
+	    TablePopup::TableInit(SambaServerWidgets::widgets["passdb_edit"]:$[], (string)key);
 	    // continue
 	    return nil;
 	}
@@ -625,7 +625,7 @@ further information.
 	    return nil;
 	}
     
-	return TablePopup::TableHandle(SambaServerWidgets::widgets["passdb_edit"]:$[], key, event_descr);
+	return TablePopup::TableHandle(SambaServerWidgets::widgets["passdb_edit"]:$[], (string)key, event_descr);
     }
 
     global define void storePassdb(any key, map event) ``{

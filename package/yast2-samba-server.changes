@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug  9 19:06:08 CEST 2004 - mlazar@suse.cz
+
+- LdapServer module replaced by LdapServerAccess
+- addeded firewall to UI and to #neededforbuild list
+- Simplified UI when ProductFeatures::ui_mode is "simple"
+- 2.10.1
+
+-------------------------------------------------------------------
 Wed Jun 23 08:59:23 CEST 2004 - visnov@suse.cz
 
 - missing marks of text for translation (#41404) 
