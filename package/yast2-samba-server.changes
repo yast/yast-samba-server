@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 19 02:03:53 CEST 2003 - nashif@suse.de
+
+- Added yast2-packager to neededforbuild
+
+-------------------------------------------------------------------
 Mon Aug 11 09:02:35 CEST 2003 - visnov@suse.de
 
 - merged in proofread texts
