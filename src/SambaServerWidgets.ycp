@@ -1,0 +1,158 @@
+/**
+ * File:	modules/SambaServerWidgets.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Widgets used by SAMBA server configuration
+ * Authors:	Jiri Srain <jsrain@suse.cz>
+ *		Stanislav Visnovsky <visnov@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+    module "SambaServerWidgets";
+
+    textdomain "samba-server";
+
+    import "Label";
+    import "Popup";
+    import "LogView";
+    import "CWM";
+    import "SambaServer";
+    
+    include "samba-server/routines.ycp";
+    include "samba-server/helps.ycp";
+
+/**
+ * A share name do be editted in the Edit share dialog
+ */
+global string shareToEdit = nil;
+
+/**
+ * Map of popups for CWM
+ */
+global map smbconf_popups = $[
+   "comment": $[
+   ],
+   "path": $[
+      "table" :$[
+	"optional": false,
+      ],
+   ],
+   "printable": $[
+	"popup" : $[
+	    "widget" : `checkbox,
+	]
+   ],
+   "create mask": $[
+   ],
+   "browseable": $[
+	"popup" : $[
+	    "widget" : `checkbox,
+	]
+   ],
+   "available": $[
+	"popup" : $[
+	    "widget" : `checkbox,
+	]
+   ],
+   "guest ok": $[
+	"popup" : $[
+	    "widget" : `checkbox,
+	]
+   ],
+   "read only": $[
+	"popup" : $[
+	    "widget" : `checkbox,
+	]
+   ]
+];
+
+
+global map defaulthostwidget = union ( CWM::CreateTable (
+	    $["add_delete" : true, 
+	      "up_down" : false, 
+	      "unique_keys" : true]
+	), $[
+	    "init" : ``(CWM::TableInit (
+		SambaServerWidgets::widgets["share_edit"]:$[])),
+	    "options" : smbconf_popups,
+	    "ids" : ``(SambaServerWidgets::ShareEditContents ()),
+	    "fallback" : $[
+		"init" : ``(SambaServerWidgets::ShareEditPopupInit ()),
+		"store" : ``(SambaServerWidgets::ShareEditPopupStore ()),
+		"summary" : ``(SambaServerWidgets::ShareEditSummary ()),
+	    ],
+	    "option_delete" : ``(SambaServerWidgets::ShareEditEntryDelete ()),
+	    "add_items" : maplist( string key, map values, SambaServerWidgets::smbconf_popups, 
+		``( key ) ),
+	    "help" : HELPS["share_edit"]:"",
+	]);
+
+
+/**
+ * Map of widgets for CWM
+ */
+global map widgets = $[
+	"share_edit" : defaulthostwidget,
+];
+
+// ************************************ default host table ********************
+
+    /**
+      * Function for getting contents of the default host table
+      * @param descr map description map of the table
+      * @return list of items for the table
+      */
+    global define list ShareEditContents (map descr) ``{
+	return filter( string key, maplist (`k, `v, SambaServer::shares[shareToEdit]:$[], ``(v == nil ? nil : k )),
+	    ``( key != nil ) );
+    }
+    
+    /**
+      * Delete function of the global table
+      * @param opt_id any option id of selected option
+      * @param opt_key any option key of selected option
+      * @return boolean true if was really deleted
+      */
+    global define boolean ShareEditEntryDelete (any opt_id, any opt_key) ``{
+	// message popup
+	if (! Popup::YesNo (_("Delete selected entry?")))
+	    return false;
+	SambaServer::shares[shareToEdit]
+	    = filter (`k, `v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
+	return true;
+    }
+
+    /**
+      * Fallback initialization function of a table entry / popup
+      * @param opt_id any option id
+      * @param opt_key any option key
+      */
+    global define void ShareEditPopupInit (any opt_id, any opt_key) ``{
+	UI::ChangeWidget (`id (opt_key), `Value,
+	    SambaServer::shares[shareToEdit, opt_key]:"not found");
+	UI::SetFocus (`id (opt_key));
+    }
+
+    /**
+      * Fallback store function of a table entry / popup
+      * @param opt_id any option id
+      * @param opt_key any option key
+      */
+    global define void ShareEditPopupStore (any opt_id, any opt_key) ``{
+	SambaServer::shares[shareToEdit, opt_key] = UI::QueryWidget (`id (opt_key), `Value);
+	SambaServer::modified = true;
+    }
+
+    /**
+      * Fallback summary function of a table entry / popup
+      * @param opt_id any option id
+      * @param opt_key any option key
+      */
+    global define string ShareEditSummary (any opt_id, any opt_key) ``{
+	return sformat ("%1", SambaServer::shares[shareToEdit, opt_key]:"");
+    }
+
+/* EOF */
+}
+
