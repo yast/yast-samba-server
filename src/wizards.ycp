@@ -133,6 +133,8 @@ symbol MainSequence() ``{
 		`next	: "passdb_edit",
 	],
     ];
+    
+    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
 
     symbol ret = Sequencer::Run(aliases, sequence);
 

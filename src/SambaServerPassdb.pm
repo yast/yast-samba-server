@@ -42,7 +42,7 @@ my $modified = 0;
  #
 BEGIN { $TYPEINFO {Modified} = ["function", "boolean"]; }
 sub Modified {
-    y2debug ("modified=$modified");
+    y2milestone ("modified=$modified");
     return Boolean($modified);
 }
 

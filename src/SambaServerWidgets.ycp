@@ -257,7 +257,7 @@ global define symbol handleFun(any key, map event_descr) ``{
     integer max_id = 0;
     map<string, string> passdb_backends = nil;
     list<string> passdb_order = [];
-    
+
     global define list PassdbEditContents (map descr) ``{
 	if (passdb_backends != nil)
 	{
@@ -314,6 +314,8 @@ global define symbol handleFun(any key, map event_descr) ``{
 	    passdb_backends = (map<string, string>)add ( passdb_backends, id, (string)opt_key+details );
 	    passdb_order = (list<string>) add (passdb_order, id);
 	}
+	
+	SambaServer::modified = true;
     }
 
     global define string PassdbEditOptionSummary (any opt_id, any opt_key) ``{
@@ -349,6 +351,7 @@ The back-end will not be deleted.
 	string id = (string) opt_id;
 	passdb_backends = (map<string, string>)filter (string k, string v, passdb_backends, ``(k != id));
 	passdb_order = (list<string>)filter (string k, passdb_order, ``(k != id));
+	SambaServer::modified = true;
 	return true;
     }
     
@@ -409,6 +412,7 @@ further information.
 		max_id = max_id+1;
 		passdb_backends = (map<string, string>)add ( passdb_backends, id, type+details );
 		passdb_order = (list<string>) add (passdb_order, id);
+		SambaServer::modified = true;
 	    }
 	    break;
 	} while (true);
@@ -426,6 +430,7 @@ further information.
 	    return res;
 	});
 	initPassdb (opt_key);
+	SambaServer::modified = true;
 	return true;
     }
 

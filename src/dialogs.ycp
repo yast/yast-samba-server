@@ -96,7 +96,7 @@ symbol RoleDialog () ``{
 	
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
+	    if(SambaServer::AbortFunction()) break;
 	    else continue;
 	}
 	else if(ret == `browse ) {
@@ -219,7 +219,7 @@ symbol OverallSharesDialog () ``{
 
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
+	    if(SambaServer::AbortFunction()) break;
 	    else continue;
 	}
         else if(ret == `next || ret == `back || ret == `other_shares ) {
@@ -306,7 +306,7 @@ symbol ShareDirsDialog () ``{
 
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
+	    if(SambaServer::AbortFunction()) break;
 	    else continue;
 	}
 	else if(ret == `edit ) {
@@ -391,7 +391,7 @@ symbol PassdbDialog () {
 	) 
     );
 
-    return CWM::Run (w, $[`abort: ReallyAbort]);
+    return CWM::Run (w, $[`abort: SambaServer::AbortFunction]);
 }
 
 /**
@@ -429,7 +429,7 @@ symbol LDAPDialog () ``{
 	
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
+	    if(SambaServer::AbortFunction()) break;
 	    else continue;
 	}
 	else if(ret == `ldap_password ) {
@@ -486,7 +486,7 @@ symbol EditShareDialog () ``{
 	contents, 
 	caption, 
 	Label::BackButton (), Label::OKButton (), 
-	$[`abort: ReallyAbort]
+	$[`abort: SambaServer::AbortFunction]
     );
 }
 

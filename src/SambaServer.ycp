@@ -44,7 +44,7 @@ global list<string> required_packages = (list<string>)union (["samba"], Samba::r
  * Abort function
  * return boolean return true if abort
  */
-global block<boolean> AbortFunction = nil;
+global boolean() AbortFunction = nil;
 
 /**
  * Abort function
@@ -52,7 +52,7 @@ global block<boolean> AbortFunction = nil;
  */
 global define boolean Abort() ``{
     if(AbortFunction != nil)
-	return eval(AbortFunction) == true;
+	return AbortFunction();
     return false;
 }
 
@@ -71,6 +71,11 @@ global boolean shares_configured = false;
  * Don't run services and SuSEconfig, it's all done at one place.
  */
 global boolean write_only = false;
+
+global boolean ServerReallyAbort () {
+    import "SambaServerPassdb";
+    return !(modified || Samba::modified || SambaServerPassdb::Modified ()) || Popup::ReallyAbort (true);
+}
 
 /** ================================ global data =============================*/
 
