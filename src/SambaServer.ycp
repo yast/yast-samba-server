@@ -2147,7 +2147,6 @@ boolean EnsureRootAccount ()
     UI::OpenDialog(
 	`HVSquash(
         `VBox(
-	    // FIXME: we need a Samba mentioned here (9.2)
 	    `Label ( _("For a proper function, Samba server needs an
 administrative account (root).
 It will be created now."),
