@@ -52,23 +52,8 @@ my $Modified;
 # list of required packages
 my $RequiredPackages = ["samba", "samba-client"];
 
-# Abort function
-# return boolean return true if abort
-#my $AbortFunction = undef;
-
 my $GlobalsConfigured = 0;
 
-
-#sub ServerReallyAbort {
-#    my ($self) = @_;
-#    return !GetModified() || Popup->ReallyAbort(Boolean(1));
-#}
-
-# Abort function
-#sub Abort {
-#    my ($self) = @_;
-#    return defined $AbortFunction ? &$AbortFunction() : 0;
-#}
 
 # Set modify flag
 BEGIN{ $TYPEINFO{SetModified} = ["function", "void"] }

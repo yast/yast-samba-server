@@ -15,6 +15,7 @@ import "String";
 import "Label";
 import "Wizard";
 import "Mode";
+import "Popup";
 
 import "ProductFeatures";
 
@@ -60,6 +61,11 @@ list sharesItems(boolean filt) {
 	boolean ro = SambaConfig::ShareGetTruth(name, "read only", true);
 	return `item( `id(index), enabled, ro ? _("Yes") : _("No"), name, pth , comment);
     });
+}
+
+boolean confirmAbort() {
+    y2warning("confirm abort");
+    return !SambaServer::GetModified() || Popup::ReallyAbort(true);
 }
 
 
@@ -156,8 +162,8 @@ any Installation_Step2 () {
     any ret = nil;
     while(true) {
 	ret = UI::UserInput();
-	if ( ( ret == `abort || ret == `cancel ) /*&& ! SambaServer::AbortFunction ()*/ )
-	{
+	if (ret == `abort || ret == `cancel) {
+	    if (confirmAbort()) break;
 	    continue;
 	}
 	if ( ret == `back || ret == `next || ret == `abort || ret == `cancel ) {
@@ -441,7 +447,7 @@ symbol EditShareDialog () ``{
 	"caption" : caption,
 	"back_button" : Label::BackButton(),
 	"next_button" : Label::OKButton(),
-//	"fallback_functions" : $[`abort: SambaServer::AbortFunction]
+	"fallback_functions" : $[`abort: confirmAbort]
     ]);
 }
 
@@ -462,7 +468,7 @@ symbol GlobalSettingsDialog () ``{
 	"caption" : caption,
 	"back_button" : Label::BackButton(),
 	"next_button" : Label::OKButton(),
-//	"fallback_functions" : $[`abort: SambaServer::AbortFunction]
+	"fallback_functions" : $[`abort: confirmAbort]
     ]);
 
 //    if (res == `next) {
@@ -597,11 +603,6 @@ symbol AddShareDialog () ``{
 	}
     } while( ret == nil );
     return ret;
-}
-
-boolean TabAbort () {
-//    return SambaServer::AbortFunction ();
-    return false;
 }
 
 any Installation_Conf_Tab () {
@@ -816,7 +817,7 @@ any Installation_Conf_Tab () {
     Wizard::SetContentsButtons(caption, contents, help, Label::NextButton (), Label::FinishButton ());
     Wizard::HideBackButton();
     
-    any ret = CWM::Run(w, $[`abort: TabAbort ]);
+    any ret = CWM::Run(w, $[`abort: confirmAbort ]);
     
     Wizard::RestoreBackButton ();
     
@@ -854,7 +855,7 @@ symbol PassdbDialog () {
 	) 
     );
 
-    return CWM::Run (w, $[/*`abort: SambaServer::AbortFunction*/]);
+    return CWM::Run (w, $[`abort: confirmAbort]);
 }
 
 /**
@@ -921,9 +922,8 @@ symbol LDAPDialog () ``{
 	
 	/* abort? */
 	if(ret == `abort || ret == `cancel) {
-//	    if(SambaServer::AbortFunction()) break;
-//	    else 
-		continue;
+	    if (confirmAbort()) break;
+	    continue;
 	}
 	else if(ret == `ldap_password ) {
 	    // Translators: popup query for a password
