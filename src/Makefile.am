@@ -9,6 +9,7 @@ client_DATA =			\
 	samba-server_auto.ycp	
 
 ynclude_DATA =			\
+	samba-synonym-map.ycp		\
 	samba-options-global.ycp	\
 	samba-options-local.ycp		\
 	helps.ycp		\
@@ -24,8 +25,7 @@ module_DATA =			\
 	SambaServer.ycp		\
 	SambaServerWidgets.ycp	\
 	SambaServerPassdb.pm	\
-	SambaSecrets.pm		\
-	TabWidget.ycp
+	SambaSecrets.pm
 
 YaPI_perldir = @moduledir@/YaPI
 
