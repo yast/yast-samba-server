@@ -33,7 +33,6 @@ YaST::YCP::Import("SuSEFirewall");
 YaST::YCP::Import("PackageSystem");
 
 YaST::YCP::Import("SambaRole");
-YaST::YCP::Import("SambaLDAP");
 YaST::YCP::Import("SambaConfig");
 YaST::YCP::Import("SambaService");
 YaST::YCP::Import("SambaBackend");

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 15 11:05:20 CET 2005 - mlazar@suse.cz
+
+- 2.11.13
+- disabled LDAP backend
+
+-------------------------------------------------------------------
 Mon Mar 14 11:24:38 CET 2005 - mlazar@suse.cz
 
 - fixed progress status indicator in Read()/Write()
