@@ -80,8 +80,8 @@
             `TextEntry(`id(`homePath), _("Homepath (leave empty to use defaults)"), data["sambahomepath"]:"" ),
             `TextEntry(`id(`profilePath), _("Profile path (leave empty to use defaults)"), data["sambaprofilepath"]:"" ),
             `TextEntry(`id(`logonScript), _("Logon script (leave empty to use defaults)"), data["sambalogonscript"]:"" ),
-            `CheckBox(`id(`disable), _("Disabled"), disabled ),
-            `CheckBox(`id(`noExpire), _("No password expiration"), noExpire ),
+            `Left(`CheckBox(`id(`disable), _("Disabled"), disabled )),
+            `Left(`CheckBox(`id(`noExpire), _("No password expiration"), noExpire )),
             `VSpacing (0.5)
             ),
             `HSpacing (1.5)
