@@ -1,8 +1,8 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-printer
+# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-pam yast2-printer yast2-country hwinfo
 
 @HEADER@
-Requires:	yast2 samba samba-client
+Requires:	yast2 samba samba-client yast2-ldap-client yast2-samba-client yast2-pam yast2-printer yast2-country hwinfo
 
 BuildArchitectures:	noarch
 
@@ -26,5 +26,6 @@ Summary:	Configuration of samba-server
 @clientdir@/samba-server.ycp
 @clientdir@/samba-server_*.ycp
 @moduledir@/SambaServer.ycp
+@moduledir@/SambaServerWidgets.ycp
 @configdir@/samba-server.y2cc
 %doc @docdir@
