@@ -458,10 +458,10 @@ map CreateSambaLDAPSettingsMiscWidget()
 	// translators: text entry label
 	`Left(`TextEntry(`id("ldap filter"), _("Search &Filter:"))),
 	// translators: combo box label
-	`Left(`ComboBox(`id("ldap delete dn"), _("&Deletes DN:"),
+	`Left(`ComboBox(`id("ldap delete dn"), _("&Delete DN:"),
 		maplist(list l, ldap_yes_no_values, {return `item(`id(l[0]:""),l[1]:"");}))),
 	// translators: combo box label
-	`Left(`ComboBox(`id("ldap passwd sync"), _("&Sync Passwords:"),
+	`Left(`ComboBox(`id("ldap passwd sync"), _("&Synchronize Passwords:"),
 		maplist(list l, ldap_yes_no_only_values, {return `item(`id(l[0]:""),l[1]:"");})))));
 
     return $[
@@ -496,7 +496,8 @@ symbol SambaLDAPExpertSettingsDialog()
 	"widget_names": ["SUFFIXES", "TIMEOUTS", "SECURITY", "MISC"],
 	"widget_descr": widget_descr,
 	"contents": contents,
-	"caption": _("Caption"),
+	// translators: dialog caption
+	"caption": _("Expert LDAP Settings"),
 	"back_button": Label::CancelButton(),
 	"next_button": Label::AcceptButton(),
 	"abort_button": nil
