@@ -50,12 +50,5 @@ global define list printers2items( map printers ) ``{
     });
 }
 
-global define list printers2names( list printer_names ) ``{
-    return maplist( map printer, printer_names, ``{
-	// translators: a default name if a printer does not have a name
-	return printer["name"]:_("Uknown");
-    });
-}
-
 /* EOF */
 }

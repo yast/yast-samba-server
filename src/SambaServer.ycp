@@ -89,6 +89,7 @@ global map name2role = $[
 /** ============================= end of global data ==========================*/
 
 map removed_shares = $[];
+list system_printers = [];
 
 /** ============================= defaults ====================================*/
 
@@ -289,17 +290,21 @@ Please, remove one of the options to resolve this conflict."), "printable",
     Progress::NextStage();
 
     printer_status = $[];
+    
+    Progress::Off();
+    Printer::Read();
+    system_printers = Printer::GetAvailableQueues();
+    Progress::On();
 
     // setup correctly the printer status
     if( haskey( shares, "printers" ) ) {
 	// load the system printers
-	Printer::Read();
 	
 	// setup system printer status
 	boolean on = shareEnabled( shares["printers"]:$[] ) && load_printers;
 	
-	foreach(  map values, Printer::printcap, ``{
-	    printer_status[ values["name"]:"unknown" ] = on;
+	foreach(  string printer, system_printers , ``{
+	    printer_status[ printer ] = on;
 	    share_printers = on;
 	});
     }
@@ -684,8 +689,8 @@ global  define void enablePrinters( boolean on ) ``{
 }
 
 global define void enableAllSystemPrinters() ``{
-    foreach(  map values, Printer::printcap, ``{
-	printer_status[ values["name"]:"unknown" ] = true;
+    foreach(  string printer, system_printers, ``{
+	printer_status[ printer ] = true;
 	share_printers = true;
     });
 }
@@ -830,7 +835,7 @@ global define boolean WriteSAMBackend() ``{
 }
     
 global define boolean ReloadSettings() ``{
-    integer ret = SCR::Execute( .target.bash, "/usr/sbin/rcsmb reload" );
+    integer ret = SCR::Execute( .target.bash, "/usr/sbin/rcsmb restart" );
     
     if( ret != 0 ) {
 	y2error( "/usr/sbin/rcsmb reload failed: %1", ret );
@@ -927,8 +932,6 @@ global define void disableAllPrinters() ``{
 }
 
 global define void enablePrinterNames( list enable_names ) ``{
-    
-    list system_printers = printers2names( Printer::printcap );
     
     y2debug( "System printers are: %1", system_printers );
     y2debug( "Enable: %1", enable_names );

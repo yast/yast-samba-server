@@ -93,14 +93,13 @@ already existing share and <b>Remove</b> to completely
 remove the information about a share.</p>"),
 
     /* Single share editing dialog help 1/2 */
-    "EditShare" : _("<p><b><big>Edit Single Share</big></b><br>
+    "share_edit" : _("<p><b><big>Edit Single Share</big></b><br>
 Here you can fine tune the options of a share. 
 <br></p>") +
 
     /* Single share editing dialog help 2/2 */
-_("<p><b><big>Selecting something:</big></b><br>
-It is not possible, you must code it first :-)
-</p>"),
+_("<p>Use <b>Add</b> to add a new configuration option, <b>Edit</b> to modify
+already existing option and <b>Delete</b> to delete an option.</p>"),
 
     /* Advanced SAMBA configuration dialog help 1/4 */
     "Advanced" : _("<p><b><big>Advanced server options</big></b><br>

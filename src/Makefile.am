@@ -19,6 +19,7 @@ config_DATA =			\
 	samba-server.y2cc
 
 module_DATA =			\
-	SambaServer.ycp
+	SambaServer.ycp		\
+	SambaServerWidgets.ycp
 
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA)

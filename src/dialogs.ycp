@@ -11,18 +11,13 @@
 textdomain "samba-server";
 
 import "SambaServer";
+import "SambaServerWidgets";
 import "Label";
 import "Popup";
-import "Printer";
 
 include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
-
-/**
- * A share name do be editted in the Edit share dialog
- */
-global string shareToEdit = nil;
 
 /**
  * SAMBA role dialog
@@ -169,7 +164,6 @@ global define symbol OverallSharesDialog () ``{
             break;
         }
 	else if(ret == `select_printers ) {
-	    Printer::Read();
 	    UI::OpenDialog(
 		`VBox( 
 		    // translators: printer selection box
@@ -243,7 +237,7 @@ global define symbol ShareDirsDialog () ``{
 	    else continue;
 	}
 	else if(ret == `edit ) {
-	    shareToEdit = select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	    SambaServerWidgets::shareToEdit = select( UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
 	    break;
 	}
         else if(ret == `next || ret == `back) {
@@ -414,47 +408,21 @@ global define symbol AdvancedDialog () ``{
  * @return dialog result
  */
 global define symbol EditShareDialog () ``{
+    list w = CWM::CreateWidgets (["share_edit"],
+            SambaServerWidgets::widgets);
+    term contents = `HBox (`HSpacing (1), `VBox (
+        `VSpacing (1),
+        w[0, "widget"]:`VSpacing(1)
+    ), `HSpacing (1));
 
-    /* Samba-server edit single share dialog caption */
-    string caption = sformat( _("Edit Share \"%1\""), shareToEdit);
+    // dialog caption
+    string caption = sformat( _("Edit share \"%1\""), SambaServerWidgets::shareToEdit );
+    string help = CWM::MergeHelps (w);
 
-    /* Samba-server edit single share dialog contents */
-    term contents = 
-    `VBox(
-	`Table(`header(_("Changed"), _("Option"), _("Value") ) ),
-	`Left(`HBox(
-	    `PushButton( `id(`add), Label::AddButton() ),
-	    `PushButton( `id(`edit), Label::EditButton() ),
-	    `PushButton( `id(`delete), Label::DeleteButton() )
-	))
-    );
+    Wizard::SetContentsButtons (caption, contents, help,
+            Label::BackButton (), Label::OKButton ());
 
-    Wizard::SetContentsButtons(caption, contents, HELPS["EditShare"]:"", Label::BackButton(), Label::OKButton() );
-
-    // FIXME: fill the options
-        
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
-    
-    Wizard::RestoreNextButton();
-
-    return ret;
+    return CWM::Run (w, $[]);
 }
 
 global define map AddSharePopup() ``{
