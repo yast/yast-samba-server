@@ -43,18 +43,18 @@ sub Write {
     foreach my $user (keys %Passwords) {
 	my $passwd = $Passwords{$user}{passwd};
 	y2debug("UserAdd($user, ".($passwd?("*"x length($passwd)):"<undef>").")");
-	if (!SCR->Write(".target.string", $tmp, $passwd + "\n" + $passwd + "\n")) {
+	if (!SCR->Write(".target.string", $tmp, $passwd . "\n" . $passwd . "\n")) {
 	    y2error("Failed to prepare pdbedit input for user '$user'");
 	    next;
 	}
     
-	my $cmd = "cat " + $tmp + " | pdbedit -a -t -u '$user'";
+	my $cmd = "cat " . $tmp . " | pdbedit -a -t -u '$user'";
 	if (SCR->Execute(".target.bash", $cmd)) {
 	    y2error("Failed to execute '$cmd'");
 	    next;
 	}
     }
-    Execute(".target.remove", $tmp);
+    SCR->Execute(".target.remove", $tmp);
     return 1;
 }
 
