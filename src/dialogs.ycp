@@ -65,6 +65,11 @@ global define symbol RoleDialog () ``{
     );
     
     UI::ChangeWidget( `id( SambaServer::role ), `Value, true );
+    if( SambaServer::role == `disabled ) 
+    {
+	// if it is disabled, set the radio button of the would-be enabled role
+	UI::ChangeWidget( `id( SambaServer::DetermineRole() ), `Value, true );
+    }
 
     any ret = nil;
     while(true) {

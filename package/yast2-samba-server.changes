@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep  3 16:45:16 CEST 2003 - visnov@suse.de
+
+- if the server is disabled, set the radio button of the would-be enabled role 
+
+-------------------------------------------------------------------
 Wed Sep  3 08:46:27 CEST 2003 - visnov@suse.de
 
 - resolve PDC as PDC, not as standalone server (#29888) 
