@@ -1,0 +1,199 @@
+/**
+ * File:
+ *	users_plugin_ldap_all.ycp
+ *
+ * Package:
+ *	Configuration of Users
+ *
+ * Summary:
+ *	This is part GUI of UsersPluginSamba - plugin for editing all LDAP
+ *	user/group attributes.
+ *
+ * $Id$
+ */
+
+
+{
+    textdomain "users"; // use own textdomain for new plugins
+
+    import "Label";
+    import "Popup";
+    import "Report";
+    import "Wizard";
+
+    import "Ldap";
+    import "LdapPopup";
+    import "Users";
+    import "UsersLDAP";
+    import "UsersPluginSamba"; // plugin module
+
+    any ret = nil;
+    string func			= "";
+    map<string,any> config	= $[];
+    map<string,any> data	= $[];
+
+    /* Check arguments */
+    if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
+	func = (string) WFM::Args(0);
+	if(size(WFM::Args()) > 1 && is(WFM::Args(1), map))
+	    config = (map<string,any>)WFM::Args(1);
+	if(size(WFM::Args()) > 2 && is(WFM::Args(2), map))
+	    data = (map<string,any>)WFM::Args(2);
+    }
+    y2milestone("----------------------------------------");
+    y2milestone("users plugin started: Samba");
+
+    y2debug ("func=%1", func);
+    y2debug ("config=%1", config);
+    y2debug ("data=%1", data);
+
+    if (func == "Summary") {
+	ret = UsersPluginSamba::Summary (config, $[]);
+    }
+    else if (func == "Name") {
+	ret = UsersPluginSamba::Name (config, $[]);
+    }
+    else if (func == "Dialog") {
+	// define the dialog for this plugin and return it's contents
+
+	string caption	= UsersPluginSamba::Name (config, $[]);
+        if (data["what"]:"" == "edit_user" ) {
+            data = UsersPluginSamba::EditBefore (config, data);
+        } else if ( data["what"]:"" == "add_user" ) {
+            data = UsersPluginSamba::AddBefore (config, data);
+        }
+
+
+
+	// helptext 1/3
+	string help_text = _("<p>
+Here, see the table of all allowed attributes for the current LDAP entry that were not set in previous dialogs.</p>") +
+
+	// helptext 1/3 (don't translate objectclass"),
+        // %1 is list of values
+	_("<p>
+The list of attributes is given by the value of \"objectclass\"
+(which is currently: <br>).  </p> ") +
+
+	// helptext 3/3
+	_("<p>
+Edit each attribute using <b>Edit</b>. Some attributes 
+could be required, as defined in the user template in the <b>LDAP Client Module</b>.</p>
+");
+
+        list items			= [];
+        list used_attributes	= [];
+        list new_attributes		= [];
+        boolean modified		= false;
+        term contents = `Empty();
+        contents = `HBox(`HSpacing (1.5), `VBox(
+            `VSpacing(0.5),
+            `TextEntry(`id(`homeDrive), _("Homedrive (leave empty to use defaults)"), data["sambahomedrive"]:"" ),
+            `TextEntry(`id(`homePath), _("Homepath (leave empty to use defaults)"), data["sambahomepath"]:"" ),
+            `TextEntry(`id(`profilePath), _("Profile path (leave empty to use defaults)"), data["sambaprofilepath"]:"" ),
+            `TextEntry(`id(`logonScript), _("Logon script (leave empty to use defaults)"), data["sambalogonscript"]:"" ),
+            `CheckBox(`id(`disable), _("Disabled"), ((map<string,any>)data["sambainternal"]:$[])["sambadisable"]:false ),
+            `CheckBox(`id(`noExpire), _("No password expiration"), ((map<string,any>)data["sambainternal"]:$[])["sambanoexpire"]:false ),
+            `VSpacing (0.5)
+            ),
+            `HSpacing (1.5)
+        );
+
+	Wizard::CreateDialog ();
+        Wizard::SetDesktopIcon("users");
+
+	// dialog caption
+	Wizard::SetContentsButtons(_("Additional LDAP Settings"),
+	    contents, help_text, Label::BackButton(), Label::NextButton());
+
+	Wizard::HideAbortButton ();
+
+	ret = `next;
+	repeat
+	{
+	    ret = UI::UserInput();
+            /*
+	    if ( ret == `edit || ret == `table)
+	    {
+		string attr		=
+		    (string) UI::QueryWidget (`id(`table), `CurrentItem);
+		list<string> value	= tmp_data [attr]:data[attr]:[];
+		value			= LdapPopup::EditAttribute (
+		    attr, value, [], Ldap::SingleValued (attr), []);
+		if (value == tmp_data [attr]:data[attr]:[])
+		{
+		    ret = `notnext;
+		    continue;
+		}
+		UI::ChangeWidget (`id(`table),`Item(attr,1),
+		    mergestring(value,","));
+		tmp_data [attr] = value;
+	     }
+            */
+	    if ( ret == `next )
+	    {
+		string err = UsersPluginSamba::Check ( config, data);
+                data["sambahomedrive"] = UI::QueryWidget(`id(`homeDrive), `Value );
+                data["sambahomepath"] = UI::QueryWidget(`id(`homePath), `Value );
+                data["sambaprofilepath"] = UI::QueryWidget(`id(`profilePath), `Value );
+                data["sambalogonscript"] = UI::QueryWidget(`id(`logonScript), `Value );
+                data["sambainternal"] = add ( data["sambainternal"]:$[], 
+                                              "sambanoexpire",
+                                              UI::QueryWidget(`id(`noExpire), `Value )
+                                              );
+                data["sambainternal"] = add ( data["sambainternal"]:$[], 
+                                              "sambadisabled",
+                                              UI::QueryWidget(`id(`disable), `Value )
+                                              );
+		if (err != "")
+		{
+		    Report::Error (err);
+		    ret = `notnext;
+		    continue;
+		}
+/*
+		if (tmp_data == $[])
+		{
+		    break;
+		}
+*/
+		// if this plugin wasn't in default set, we must save its name
+		if (!contains (data["plugins"]:[], "UsersPluginSamba"))
+		{
+		    data["plugins"] = add (data["plugins"]:[],
+			"UsersPluginSamba");
+		}
+		if (data["what"]:"" == "edit_user")
+		{
+		    Users::EditUser (data);
+		}
+		else if (data["what"]:"" == "add_user")
+		{
+		    Users::AddUser (data);
+		}
+		else if (data["what"]:"" == "edit_group")
+		{
+		    Users::EditGroup (data);
+		}
+		else if (data["what"]:"" == "add_group")
+		{
+		    Users::AddGroup (data);
+		}
+	    }
+	} until (is(ret,symbol) &&
+	    contains ([`next, `abort, `back, `cancel], (symbol) ret));
+
+	Wizard::CloseDialog ();
+    }
+    /* unknown function */
+    else {
+	y2error("unknown function: %1", func);
+	ret = false;
+    }
+
+    y2debug ("ret=%1", ret);
+    y2milestone("users plugin finished");
+    y2milestone("----------------------------------------");
+
+    return ret;
+}

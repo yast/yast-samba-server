@@ -1,0 +1,3 @@
+- Needs package Crypt::SmbHash (not yet created)
+- Edit Users does not work yet
+- Much bugfixing
