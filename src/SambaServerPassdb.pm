@@ -159,7 +159,7 @@ sub BackendString
     my $type = shift;
     my $url = shift;
     
-    if ( $url != "" )
+    if ( $url ne "" )
     {
 	return $type . ":" . $url;
     }

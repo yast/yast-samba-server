@@ -615,7 +615,8 @@ global define boolean Write() ``{
     if(Abort()) return false;
     Progress::NextStage();
 
-    SambaServerPassdb::Write ();
+    SambaServerPassdb::Write();
+    global_config = filter(string k, any v, global_config, { return (k != "passdb backend"); });
     
     // revoke trusted domains if needed
     foreach (string domain, boolean stay, trusted_domains, ``{
@@ -662,7 +663,7 @@ domain relationship for '%1'.
     }
     
     WriteSettings();
-    WriteLDAPSettings();
+//    WriteLDAPSettings();  //already in WriteSetting()
     
     InstallSchema ();
     
@@ -1470,10 +1471,12 @@ global define void WriteLDAPSettings() ``{
     SCR::Write( .etc.smb.value.global."ldap admin dn", LDAP_admin_dn );
     SCR::Write( .etc.smb.value.global."ldap suffix", LDAP_suffix );
     
-    if ( !haskey (global_config, "idmap  backend") && SambaServerPassdb::LDAPDefault () )
-    {
-	global_config["idmap backend"] = select( SambaServerPassdb::GetBackends (), 0, "");	
+    if ( /*!haskey (global_config, "idmap  backend") &&*/ SambaServerPassdb::LDAPDefault () ) {
+	global_config["idmap backend"] = "ldap:" + SambaServerPassdb::BackendDetails(select( SambaServerPassdb::GetBackends (), 0, ""));
+    } else {
+	global_config["idmap backend"] = nil;
     }
+    SCR::Write( .etc.smb.value.global."idmap backend", global_config["idmap backend"]:nil );
     
     // create ldap machine and idmap suffix
 if ( haskey (global_config, "ldap suffix")
@@ -1538,12 +1541,14 @@ foreach (string subSuffix, subSuffixList, ``{
     
 	    string password = nil;
     
-	    foreach (string key, string data, secrets,``{
-		if ( regexpmatch ( key, "SECRETS/LDAP_BIND_PW/"+LDAP_admin_dn ) )
-		{
-		    password = regexpsub (data, "(.*)\\\\00", "\\1");
-		}
-	    });
+	    if (LDAP_admin_dn != nil) {
+		foreach (string key, string data, secrets,``{
+		    if ( regexpmatch ( key, "SECRETS/LDAP_BIND_PW/"+LDAP_admin_dn ) )
+			{
+		        password = regexpsub (data, "(.*)\\\\00", "\\1");
+		    }
+	        });
+	    }
 	    
 	    if (password == nil)
 	    {

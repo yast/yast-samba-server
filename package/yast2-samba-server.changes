@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 17 15:20:35 CEST 2004 - mlazar@suse.cz
+
+- fixed Bugzilla Bug 45380: samba-server backend handler not implemented
+
+-------------------------------------------------------------------
 Tue Sep 14 10:52:28 CEST 2004 - mlazar@suse.cz
 
 - adapted testsuite to changes in yast2-firewall 

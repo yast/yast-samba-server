@@ -21,6 +21,7 @@ import "CommandLine";
 import "Popup";
 import "Report";
 import "SambaServer";
+import "SambaServerPassdb";
 
 include "samba-server/routines.ycp";
 
@@ -170,9 +171,20 @@ boolean ListHandler( map <string,string>options ) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean BackendHandler( map<string,string> options ) {
-    // FIXME:
-    // check the backend to be present exactly once
+boolean BackendHandler( map<string,string> options )
+{
+    string command = CommandLine::UniqueOption(options, ["smbpasswd", "ldap"]);
+    if (command == nil) return false;
+    
+    if (command == "smbpasswd") {
+	SambaServerPassdb::SetBackends(["smbpasswd"]);
+    } else {
+	string url = options["ldap"]:"127.0.0.1";
+	string backend = SambaServerPassdb::BackendString("ldapsam", url);
+	SambaServerPassdb::SetBackends([backend]);
+	y2milestone("BLEE");
+    }
+    
     return true;
 }
 
@@ -393,6 +405,7 @@ See Samba documentation for details."),
 	"ldap"		:$[
 	    // translators: command line help text for ldap option
 	    "help"	: _("Use the LDAP server to store user information"),
+	    "type"	: "string"
 	],
 	"workgroup"	:$[
 	    // translators: command line help text for workgroup option
