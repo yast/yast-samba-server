@@ -244,7 +244,7 @@ symbol OverallSharesDialog () ``{
 	    if( ret == `ok ) {
 		// update the list of selected printers
 		SambaServer::enablePrinterNames( 
-		    (list) UI::QueryWidget( `id( `printer_list ), `SelectedItems )
+		    (list<string>) UI::QueryWidget( `id( `printer_list ), `SelectedItems )
 		);
 	    }
 	    
@@ -366,7 +366,7 @@ symbol PassdbDialog () {
     // dialog caption
     string caption = _("User Information Sources");
 
-    list<map> w = CWM::CreateWidgets (["passdb_edit"],
+    list<map<string, any> > w = CWM::CreateWidgets (["passdb_edit"],
         SambaServerWidgets::widgets);
 
     term contents = `HBox (`HSpacing (1), `VBox (

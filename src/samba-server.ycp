@@ -31,7 +31,7 @@ include "samba-server/routines.ycp";
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean ShareHandler(map options) {
+boolean ShareHandler(map<string,string> options) {
     string share = (string) (options["name"]:nil);
     
     // check the "command" to be present exactly once
@@ -129,16 +129,16 @@ boolean ShareHandler(map options) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean ListHandler( map options ) {
+boolean ListHandler( map <string,string>options ) {
     
     // translators: heading for "list" shares command line action
     // try to keep alignment
     CommandLine::Print( _("Status  \tType\tName
 =============================="));
 
-    map printers = $[];
+    map<string, map<string,any> > printers = $[];
     
-    foreach( string share, map options, SambaServer::shares, ``{
+    foreach( string share, map<string,any> options, SambaServer::shares, ``{
 	if( options["printable"]:false ) {
 	    printers[share] = options;
 	} else {
@@ -152,7 +152,7 @@ boolean ListHandler( map options ) {
     });
     
 
-    foreach( string share, map options, printers, ``{
+    foreach( string share, map<string,any> options, printers, ``{
 	// translators: share is a printer. %1 is the status, %2 comment
 	CommandLine::Print( sformat( _("%1\tPrinter\t%2"), 
 	    options["commentout"]:false ? 
@@ -171,7 +171,7 @@ boolean ListHandler( map options ) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean BackendHandler( map options ) {
+boolean BackendHandler( map<string,string> options ) {
     // FIXME:
     // check the backend to be present exactly once
     return true;
@@ -183,7 +183,7 @@ boolean BackendHandler( map options ) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean RoleHandler( map options ) {
+boolean RoleHandler( map<string,string> options ) {
     // check the role to be present exactly once
     string command = CommandLine::UniqueOption( options, 
 	["pdc", "bdc", "standalone" ] );
@@ -210,7 +210,7 @@ boolean RoleHandler( map options ) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean SambaServerEnableHandler( map options ) {
+boolean SambaServerEnableHandler( map<string,string> options ) {
     // check the "command" to be present exactly once
     string command = CommandLine::UniqueOption( options, 
 	["enable", "disable" ] );
@@ -237,7 +237,7 @@ boolean SambaServerEnableHandler( map options ) {
  * @param options	map of options from command line
  * @return boolean	true on success
  */
-boolean ChangeConfiguration( map options ) {
+boolean ChangeConfiguration( map<string,string> options ) {
     import "Samba";
 	
     string value = (string) (options["workgroup"]:nil);

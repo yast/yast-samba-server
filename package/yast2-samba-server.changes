@@ -4,6 +4,7 @@ Mon Mar  1 14:21:01 CET 2004 - visnov@suse.cz
 - merged back proofread texts
 - use /var/lib/nobody for the add machine script (#35090)
 - better type info
+- 2.9.5
 
 -------------------------------------------------------------------
 Tue Feb 24 14:24:27 CET 2004 - visnov@suse.cz

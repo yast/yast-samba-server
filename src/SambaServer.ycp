@@ -137,17 +137,17 @@ global string LDAP_suffix = nil;
 /**
  * all shares
  */
-global map shares = $[];
+global map<string, map<string,any> > shares = $[];
 
 /**
  * status of all available printers
  */
-global map printer_status = $[];
+global map<string, boolean> printer_status = $[];
 
 /**
  * mapping of name to role
  */
-global map role2name = $[
+global map<symbol, string> role2name = $[
     `disabled: "Disabled",
     `standalone: "File and printer sharing",
     `bdc: "Backup Domain Controller",
@@ -157,7 +157,7 @@ global map role2name = $[
 /**
  * mapping of role2name
  */
-global map name2role = $[
+global map<string, symbol> name2role = $[
     "Disabled" : `disabled,
     "File and printer sharing" : `standalone,
     "Backup Domain Controller" : `bdc,
@@ -171,12 +171,12 @@ global string netbios_name = "";
 /**
  * list of shares to be removed
  */
-map removed_shares = $[];
+map<string, map<string,any> > removed_shares  = $[];
 
 /**
  * list of all system printers
  */
-list system_printers = [];
+list<string> system_printers = [];
 
 /**
  * Just ensure a translation to exist
@@ -190,7 +190,7 @@ string ____3 =_("Primary Domain Controller");
 /**
  * default settings for [printers]
  */
-map default_printers = $[
+map<string, any> default_printers = $[
    "comment": "All Printers",
    "path": "/var/tmp",
    "printable": true,
@@ -204,7 +204,7 @@ map default_printers = $[
 /**
  * default settings for a single printer share
  */
-map default_printer_share = $[
+map<string, any> default_printer_share = $[
    "path": "/var/tmp",
    "browseable": true,
    "printable": true,
@@ -214,7 +214,7 @@ map default_printer_share = $[
 /**
  * default settings for [homes]
  */
-map default_homes = $[
+map<string, any> default_homes = $[
     "comment": "Home Directories",
     "valid users": "%S",
     "browseable" : false,
@@ -333,7 +333,7 @@ Remove one of the options to resolve this conflict.
     // read the list of shares, skip "global" section        
     list<string> sl = (list<string>)SCR::Dir( .etc.smb.section );
     sl = filter(string s, sl, ``(s != "global" ) );
-    shares = listmap( string share, sl, ``{
+    shares = (map<string, map<string,any> >)listmap( string share, sl, ``{
 	path p = add( .etc.smb.value, share );
 	
 	map result = $[];
@@ -590,7 +590,7 @@ global define boolean WriteSettings() ``{
     });
 
     // write shares
-    foreach( string share, map options, shares, ``{
+    foreach( string share, map<string, any> options, shares, ``{
 	// write the options
 	
 	// prepare the right type for writing out the value
@@ -690,7 +690,7 @@ global define map Export () ``{
 	"LDAP_suffix" : LDAP_suffix
     ]);
     
-    list r_shares =  maplist( string share, map options, shares, ``{
+    list r_shares =  maplist( string share, map<string,any> options, shares, ``{
 	return $[ 
 	    "share" : share, 
 	    "options" : maplist( string key, any value, options, ``{
@@ -1130,7 +1130,7 @@ global define void disableAllPrinters() ``{
  *
  * @param enable_names	list of printer names to be enabled
  */
-global define void enablePrinterNames( list enable_names ) ``{
+global define void enablePrinterNames( list<string> enable_names ) ``{
     
     y2debug( "System printers are: %1", system_printers );
     y2debug( "Enable: %1", enable_names );
@@ -1151,7 +1151,7 @@ global define void enablePrinterNames( list enable_names ) ``{
 	// filter out printers enabled by [printers]
 	enable_names = filter( string name, enable_names, ``( !contains( system_printers, name ) ) );
 	// remove yast-defined shares
-	shares = filter( string name, map options, shares, ``( ! (options["yast"]:false) ) );
+	shares = filter( string name, map<string,any> options, shares, ``( ! (options["yast"]:false) ) );
     }
     
     // update the status of these printers

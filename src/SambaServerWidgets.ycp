@@ -24,9 +24,9 @@
     include "samba-server/helps.ycp";
 
     global define list ShareEditContents (map descr);
-    global define void ShareEditPopupInit (any opt_id, any opt_key);
+    global define void ShareEditPopupInit (any opt_id, string opt_key);
     global define void ShareEditPopupStore (any opt_id, any opt_key);
-    global define string ShareEditSummary (any opt_id, any opt_key);
+    global define string ShareEditSummary (any opt_id, string opt_key);
     global define boolean ShareEditEntryDelete (any opt_id, any opt_key);
 
     global define list PassdbEditContents (map descr);
@@ -45,7 +45,7 @@ global string shareToEdit = nil;
 /**
  * Map of popups for CWM
  */
-global map smbconf_popups = $[
+global map<string,map> smbconf_popups = $[
    "comment": $[
    ],
    "path": $[
@@ -218,7 +218,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_id any option id
       * @param opt_key any option key
       */
-    global define void ShareEditPopupInit (any opt_id, any opt_key) ``{
+    global define void ShareEditPopupInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
 	    // not adding a new option
 	    UI::ChangeWidget (`id (opt_key), `Value,
@@ -243,7 +243,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_key any option key
       * @return	value of the option
       */
-    global define string ShareEditSummary (any opt_id, any opt_key) ``{
+    global define string ShareEditSummary (any opt_id, string opt_key) ``{
 	return sformat ("%1", SambaServer::shares[shareToEdit, opt_key]:"");
     }
 
@@ -473,12 +473,9 @@ further information.
     }
 
     global define void storePassdb(any key) ``{
-	y2error ("Passdb backends: %1", passdb_backends);
 	list<string> res = maplist (string id, passdb_order, ``{
-	    y2error ("Doing id %1: %2", id, passdb_backends[id]:"");
 	    return passdb_backends[id]:"";
 	});
-	y2error ("storing passdb: %1", res);
 	SambaServerPassdb::SetBackends (res);
 	passdb_backends = nil; // require a new initialization
     }
