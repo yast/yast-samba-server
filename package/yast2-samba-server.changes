@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 14 11:23:36 CET 2005 - mlazar@suse.cz
+
+- fixed progress status indicator in Read()/Write()
+
+-------------------------------------------------------------------
 Fri Mar 11 11:31:31 CET 2005 - mlazar@suse.cz
 
 - SambaRole.pm: avoid use Switch; better error handling
