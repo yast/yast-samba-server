@@ -94,7 +94,7 @@ boolean ShareHandler(map<string,string> options) {
     }
     else if( command == "options" )
     {
-	map opts = (map) eval(SambaServer::shares[share]:$[]);
+	map<string, any> opts = (map<string, any>) eval(SambaServer::shares[share]:$[]);
 	
 	string value = (string) (options["comment"]:nil);
 	if( value != nil ) opts["comment"] = value;
