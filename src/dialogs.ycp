@@ -390,7 +390,7 @@ symbol PassdbDialog () {
 	) 
     );
 
-    return CWM::Run (w, $[]);
+    return CWM::Run (w, $[`abort: ReallyAbort]);
 }
 
 /**
@@ -485,7 +485,7 @@ symbol EditShareDialog () ``{
 	contents, 
 	caption, 
 	Label::BackButton (), Label::OKButton (), 
-	$[]
+	$[`abort: ReallyAbort]
     );
 }
 

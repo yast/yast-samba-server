@@ -112,7 +112,7 @@ sub Write {
  #
 BEGIN { $TYPEINFO{GetBackends} = ["function", ["list", "string"] ]; }
 sub GetBackends {
-    return @backends;
+    return \@backends;
 }
 
 ##

@@ -507,6 +507,27 @@ global define boolean Write() ``{
 
     SambaServerPassdb::Write ();
     
+    // check, if we need samba-pdb package
+    list<string> rpms = [];
+    list<string> backends = SambaServerPassdb::GetBackends ();
+    foreach (string bk, backends, ``{
+	if ( SambaServerPassdb::BackendSAM (bk) == "mysql" )
+	{
+	    rpms = add (rpms, "samba-pdb");
+	    break;
+	}
+    });
+    
+    if (size (rpms) > 0)
+    {
+	import "Require";
+	Require::RequireAndConflictTarget( rpms, [],
+    	    // notification about package needed 1/2
+	    _("<p>For the configured passdb backends, the <b>%1</b> package must be installed.</p>") +
+    	    // notification about package needed 2/2
+	    _("<p>Do you want to install it now?</p>"));
+    }
+    
     WriteSettings();
     WriteLDAPSettings();
 

@@ -356,7 +356,7 @@ The back-end will not be deleted.
 		    `Left (`RadioButton ( `id("smbpasswd"), _("smbpasswd file") ) ),
 		    `Left (`RadioButton ( `id("ldapsam"), _("LDAP") ) ),
 		    `Left (`RadioButton ( `id("tdbsam"), _("TDB database") ) ),
-		    `Left (`RadioButton ( `id("mysqlsam"), _("MySQL database") ) )
+		    `Left (`RadioButton ( `id("mysql"), _("MySQL database") ) )
 		))),
 		`TextEntry ( `id(`details), _("Details:") ),
 		`HBox (
@@ -379,7 +379,7 @@ The back-end will not be deleted.
 		    details = ":"+details;
 		}
 	
-		if (type == "mysqlsam" && size (details) == 0)
+		if (type == "mysql" && size (details) == 0)
 		{
 		    Popup::Message ( _("An identifier must be provided
 in details 

@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Mar 15 18:40:36 CET 2004 - visnov@suse.cz
+
+- use "mysql", not "mysqlsam" (#35393)
+- install samba-pdb if needed
+- compilation fixes
+- adapt for new perl convention
+- 2.9.10 
+
+-------------------------------------------------------------------
 Wed Mar 10 09:23:42 CET 2004 - visnov@suse.cz
 
 - don't log undef (#35523)

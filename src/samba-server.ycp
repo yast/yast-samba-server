@@ -437,9 +437,9 @@ if( !Require::RequireAndConflictTarget( SambaServer::required_packages, [],
 {
     if( !Require::IsPackageAvailable( "samba" ) ) {
         // translators: error popup before aborting the module
-        Popup::Error( sformat( _("<p>The package <b>%1</b> is not available.<br>
+        Popup::Error( sformat( _("The package '%1' is not available.
 YaST2 cannot continue the configuration
-without installing the package.</p>"), "samba" ) );
+without installing the package."), "samba" ) );
     } else {
         // translators: error popup before aborting the module
         Popup::Error( sformat( _("YaST2 cannot continue the configuration
