@@ -1,0 +1,133 @@
+/**
+ * File:	include/samba-server/wizards.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Wizards definitions
+ * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "samba-server";
+
+import "Wizard";
+import "Label";
+
+include "wizard/sequencer.ycp";
+
+include "samba-server/complex.ycp";
+include "samba-server/dialogs.ycp";
+
+/**
+ * Whole configuration of samba-server
+ * @return sequence result
+ */
+global define symbol SambaServerSequence() ``{
+
+    map aliases = $[
+	"read"	: [ ``( ReadDialog() ), true ],
+	"main"	:   ``( MainSequence() ),
+	"write"	: [ ``( WriteDialog() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `abort	: `abort,
+	    `next	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    string caption = _("samba-server configuration");
+    term contents = `Label(_("Initializing ..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = WizardSequencer(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of samba-server but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+global define symbol SambaServerAutoSequence() ``{
+    string caption = _("samba-server configuration");
+    term contents = `Label(_("Initializing ..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    BackButtonLabel(), NextButtonLabel());
+
+    any ret = MainSequence();
+
+    UI::CloseDialog();
+    
+    SambaServer::globals_configured = true;
+    SambaServer::shares_configured = true;
+    
+    return ret;
+}
+
+/**
+ * Main workflow of the samba-server configuration
+ * @return sequence result
+ */
+global define symbol MainSequence() ``{
+
+    map aliases = $[
+	"samba_role"		:   ``( RoleDialog() ),
+	"enable_shares"		:   ``( OverallSharesDialog() ),
+	"shared_directories"	:   ``( ShareDirsDialog() ),
+	"advanced"		:   ``( AdvancedDialog() ),
+	"share_edit"		:   ``( EditShareDialog() )
+    ];
+
+    map sequence = $[
+	"ws_start"	: "samba_role", 
+	"enable_shares"	: $[
+		`abort	: `abort,
+		`next	: `next,
+		`other_shares	: "shared_directories",
+	],
+	"samba_role"	: $[
+		`abort	: `abort,
+		`next	: "enable_shares",
+		`advanced	: "advanced",
+	],
+	"shared_directories"	: $[
+		`abort	: `abort,
+		`edit	: "share_edit",
+		`next	: "enable_shares",
+	],
+	"advanced"	: $[
+		`abort	: `abort,
+		`next	: "samba_role",
+	],
+	"share_edit"	: $[
+		`abort	: `abort,
+		`next	: "shared_directories",
+	],
+    ];
+
+    any ret = WizardSequencer(aliases, sequence);
+
+    return ret;
+}
+
+/* EOF */
+}

@@ -1,0 +1,1058 @@
+/**
+ * File:	modules/Samba-server.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Data for configuration of samba-server, input and output functions.
+ * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ *
+ * $Id$
+ *
+ * Representation of the configuration of samba-server.
+ * Input and output routines.
+ */
+
+{
+
+module "SambaServer";
+textdomain "samba-server";
+
+import "Samba";
+
+import "Progress";
+import "Report";
+import "Summary";
+import "Runlevel";
+import "Printer";
+import "Ldap";
+
+include "samba-server/routines.ycp";
+include "samba-client/routines.ycp";
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global block AbortFunction = nil;
+
+/**
+ * Data was modified?
+ */
+global boolean modified = false;
+
+global boolean proposal_valid = false;
+
+global boolean globals_configured = false;
+global boolean shares_configured = false;
+
+/**
+ * Write only, used during autoinstallation.
+ * Don't run services and SuSEconfig, it's all done at one place.
+ */
+global boolean write_only = false;
+
+/** ================================ global data =============================*/
+
+global string server_string = "SAMBA Server";
+global symbol role = `standalone;
+global string security = "user";
+global string domain_master = "auto";
+global boolean domain_logons = false;
+global boolean local_master = false;
+global string preferred_master = "auto";
+global string add_user_script = "";
+
+global boolean share_homes = false;
+global boolean share_printers = false;
+global boolean load_printers = true;
+
+global symbol SAM = `smbpasswd;
+global string LDAP_server = nil;
+global string LDAP_admin_dn = nil;
+global string LDAP_suffix = nil;
+
+global map shares = $[];
+
+global map printer_status = $[];
+
+global map role2name = $[
+    `disabled: "Disabled",
+    `standalone: "File and printer sharing",
+    `bdc: "Backup Domain Controller",
+    `pdc: "Primary Domain Controller"
+];
+
+global map name2role = $[
+    "Disabled" : `disabled,
+    "File and printer sharing" : `standalone,
+    "Backup Domain Controller" : `bdc,
+    "Primary Domain Controller" : `pdc
+];
+
+/** ============================= end of global data ==========================*/
+
+map removed_shares = $[];
+
+/** ============================= defaults ====================================*/
+
+map default_printers = $[
+   "comment": "All Printers",
+   "path": "/var/tmp",
+   "printable": true,
+   "create mask": "0600",
+   "browseable": false,
+   "available": "yes",
+   "guest ok": "no",
+   "yast": true
+];
+
+map default_printer_share = $[
+   "path": "/var/tmp",
+   "browseable": true,
+   "printable": true,
+   "yast": true
+];
+
+map default_homes = $[
+    "comment": "Home Directories",
+    "valid users": "%S",
+    "browseable" : false,
+    "read only": "no",
+    "create mask": "0640",
+    "directory mask" : "0750",
+    "guest ok" : false,
+    "printable" : false
+];
+
+/** ============================= end of defaults =============================*/
+
+/**
+ * Data was modified?
+ * @return true if modified
+ */
+global define boolean Modified() ``{
+    y2debug("modified=%1",modified);
+    return modified;
+};
+
+/**
+ * Read all samba-server settings
+ * @return true on success
+ */
+global define boolean Read() ``{
+
+    /* Samba-server read dialog caption */
+    string caption = _("Initializing samba-server configuration");
+
+    Samba::Read();
+    
+    integer steps = 4;
+
+    // We do not set help text here, because it was set outside
+    Progress::New( caption, " ", steps, [
+	    _("Read global the SAMBA settings"),
+	    _("Read the SAMBA shares"),
+	    _("Read the printing settings"),
+	    _("Read the LDAP settings"),
+	], [
+	    _("Reading global the SAMBA settings"),
+	    _("Reading the SAMBA shares"),
+	    _("Read the printing settings"),
+	    _("Reading the LDAP settings..."),
+	    _("Finished")
+	],
+	""
+    );
+
+    // read global settings
+    Progress::NextStage();
+    
+    string value = "";
+    
+    value = SCR::Read( .sysconfig.samba.SAMBA_SAM );
+    if( value == "ldap" ) SAM = `ldap;
+    else SAM = `smbpasswd;
+    
+    value = SCR::Read( .etc.smb.value.global."server string" );
+    if( value != nil ) server_string = value;
+    value = SCR::Read( .etc.smb.value.global."security" );
+    if( value != nil ) security = value;
+    y2debug( "security = %1", security );
+    value = SCR::Read( .etc.smb.value.global."add user script" );
+    if( value != nil ) add_user_script = value;
+    value = SCR::Read( .etc.smb.value.global."domain master" );
+    if( value != nil ) domain_master = value;
+    value = SCR::Read( .etc.smb.value.global."domain logons" );
+    if( value != nil ) domain_logons = normalize_boolean( value, false );
+    value = SCR::Read( .etc.smb.value.global."local master" ) ;
+    if( value != nil ) local_master = normalize_boolean( value, true );
+    // synonym: "prefered master"
+    value = SCR::Read( .etc.smb.value.global."preferred master" );
+    if( value != nil ) preferred_master = value;
+    value = SCR::Read( .etc.smb.value.global."prefered master" );
+    if( value != nil && value != preferred_master ) {
+	// translators: error popup on conflicting options, %1 is the name of the
+	// option which will be used, %2 is its value, %3 is the name of the
+	// other option, %4 is the %3's value
+	Report::Warning( sformat( _("The configuration file contains conflicting
+options:\n
+%1: %2
+%3: %4\n
+YaST2 will use the value of '%1' for now.\n
+Please, remove one of the options to resolve this conflict."), "preferred master", 
+	preferred_master, "prefered master", value ) );
+    }
+
+    if( !Runlevel::ServiceEnabled( "smb" ) ) {
+	role = `disabled;
+    }
+    else if( security == "user" && ! yes_or_auto(domain_master) && domain_logons )
+    {
+	role = `bdc;
+    }
+    else if( security == "user" )
+    {
+	if( domain_logons && yes_or_auto( domain_master ) && yes_or_auto( preferred_master ) && local_master ) {
+	    role = `pdc;
+	}
+	else 
+	{
+	    role = `standalone;
+	}
+    }
+    else role = `standalone;
+    
+    y2milestone( "Found role: %1", role );
+
+    globals_configured = true;
+    
+    // read shares settings
+    Progress::NextStage();
+
+    // read the list of shares, skip "global" section        
+    list sl = SCR::Dir( .etc.smb.section );
+    sl = filter(string s, sl, ``(s != "global" ) );
+    shares = listmap( string share, sl, ``{
+	path p = add( .etc.smb.value, share );
+	
+	map result = $[];
+	list options = SCR::Dir( p );
+	foreach( string option, options, ``{
+	    result[option] = SCR::Read( add(p, option) );
+	});
+
+	// ensure the needed settings are read (slower than really needed)
+	result["comment"] = SCR::Read( add(p, "comment") );
+	// synonym: "directory"
+	result["path"] = SCR::Read( add(p, "path") );
+	
+	value = SCR::Read( add( p, "directory" ) );
+	if( value != nil && value != result["path"]:nil ) {
+	    // translators: error popup on conflicting options, %1 is the name of the
+	    // option which will be used, %2 is its value, %3 is the name of the
+	    // other option, %4 is the %3's value. %5 is the name of a share
+	    Report::Warning( sformat( _("The configuration file contains conflicting
+options for share '%5':\n
+%1: %2
+%3: %4\n
+YaST2 will use the value of '%1' for now.\n
+Please, remove one of the options to resolve this conflict."), "path", 
+	    result["path"]:"", "directory", value, share ) );
+	}
+	
+	result["read list"] = SCR::Read( add(p, "read list") );
+	result["write list"] = SCR::Read( add(p, "write list") );
+	result["browseable"] = normalize_boolean( SCR::Read( add(p, "browseable") ), true);
+	result["guest ok"] = normalize_boolean( SCR::Read( add(p, "guest ok") ), false);
+	result["valid users"] = SCR::Read( add(p, "valid users") );
+	// synonym: "print ok"
+	result["printable"] = normalize_boolean( SCR::Read( add(p, "printable") ), false );
+
+	value = SCR::Read( add( p, "print ok" ) );
+	if( value != nil && value != result["printable"]:nil ) {
+	    // translators: error popup on conflicting options, %1 is the name of the
+	    // option which will be used, %2 is its value, %3 is the name of the
+	    // other option, %4 is the %3's value. %5 is the name of a share
+	    Report::Warning( sformat( _("The configuration file contains conflicting
+options for share '%5':\n
+%1: %2
+%3: %4\n
+YaST2 will use the value of '%1' for now.\n
+Please, remove one of the options to resolve this conflict."), "printable", 
+	    result["printable"]:"", "print ok", value, share ) );
+	}
+
+	result["commentout"] = SCR::Read( add(.etc.smb.section_type, share) ) > 0 ;
+	
+	return [ share, result ];
+    });
+    
+    y2debug( "Shares read: %1", shares );
+
+    share_homes = shareEnabled( shares["homes"]:$[] );
+
+    // read printer settings
+    Progress::NextStage();
+
+    printer_status = $[];
+
+    // setup correctly the printer status
+    if( haskey( shares, "printers" ) ) {
+	// load the system printers
+	Printer::Read();
+	
+	// setup system printer status
+	boolean on = shareEnabled( shares["printers"]:$[] ) && load_printers;
+	
+	foreach(  map values, Printer::printcap, ``{
+	    printer_status[ values["name"]:"unknown" ] = on;
+	    share_printers = on;
+	});
+    }
+    
+    // update printer_status for printable shares
+    foreach( string share, map options, shares, ``{
+	if( share != "printers" ) {
+	    if( options["printable"]:false ) {
+		// if the printer was enabled because of printers and it is commented, skip
+		// TODO - handle "available" correctly
+		boolean on = shareEnabled( options );
+		if( ! (printer_status[ share ]: false && !on) ) {
+		    printer_status[ share ] = on;
+		    if( shareEnabled( options ) ) share_printers = true;
+		}
+	    }
+	}
+    });
+    
+    shares_configured = true;
+
+    // read LDAP settings
+    Progress::NextStage();
+    
+    ReadLDAPSettings();
+    
+    if(Abort()) return false;
+    ProgressNextStage(_("Finished"));
+
+    modified = false;
+    return true;
+}
+
+/**
+ * Write all samba-server settings
+ * @return true on success
+ */
+global define boolean Write() ``{
+
+    /* Samba-server read dialog caption */
+    string caption = _("Saving Samba server configuration");
+    
+    Samba::write_only = true;
+    
+    Samba::Write();
+
+    integer steps = 3;
+
+    // We do not set help text here, because it was set outside
+    Progress::New(caption, " ", steps, [
+	    // translators: write progress stage
+	    _("Write the settings"),
+	    // translators: write progress stage
+	    _("Run SuSEconfig"),
+	    // translators: write progress stage
+	    role == `disabled ? _("Disable SAMBA services") : _("Enable SAMBA services")
+	], [
+	    // translators: write progress step
+	    _("Writing the settings..."),
+	    // translators: write progress step
+	    _("Running SuSEconfig..."),
+	    // translators: write progress step
+	    role == `disabled ? _("Disabling SAMBA services") : _("Enabling SAMBA services"),
+	    // translators: write progress step
+	    _("Finished")
+	],
+	""
+    );
+    
+    // if nothing to write, quit (but show at least the progress bar :-)
+    if( ! modified ) return true;
+
+    // write settings
+    if(Abort()) return false;
+    Progress::NextStage();
+    
+    WriteSettings();
+    WriteLDAPSettings();
+
+    if( !SCR::Write( .etc.smb, nil ) ) Report::Error (sformat(_("Cannot write settings to %1!"), "/etc/samba/smb.conf") );
+    if( !SCR::Write( .sysconfig.samba, nil ) ) Report::Error(sformat(_("Cannot write settings to %1!"), "/etc/sysconfig/samba") );
+
+    // run SuSEconfig for samba
+    Progress::NextStage();
+
+    if( ! WriteSAMBackend() ) Report::Error (_("SuSEconfig script failed!"));
+    
+
+    if(Abort()) return false;
+    Progress::NextStage ();
+    
+    enableServer( role != `disabled );
+    if( role == `bdc ) {
+	// Retrieve the domain SID for DOMAIN
+	map result = SCR::Execute( .target.bash_output, "smbpasswd -S" );
+	if( result["exit"]:1 != 0 ) {
+	    y2debug( "Error retrieving SID: %1", result );
+	    Report::Error( _("Unable to retrieve SID for the domain!"));
+	}
+    }
+
+    if(Abort()) return false;
+    ProgressNextStage(_("Finished"));
+
+    if(Abort()) return false;
+    return true;
+}
+
+/**
+ * Write all samba-server settings
+ * @return true on success
+ */
+global define boolean WriteSettings() ``{
+
+    // write global settings
+    SCR::Write( .etc.smb.value.global."server string", server_string );
+    SCR::Write( .etc.smb.value.global."security", security );
+    SCR::Write( .etc.smb.value.global."add user script", add_user_script );
+    if( domain_master != "auto" ) 
+	SCR::Write( .etc.smb.value.global."domain master" , domain_master );
+    SCR::Write( .etc.smb.value.global."domain logons" , domain_logons ? "yes" : "no" );
+    SCR::Write( .etc.smb.value.global."local master", local_master ? "yes" : "no" ) ;
+    SCR::Write( .etc.smb.value.global."preferred master" , preferred_master );
+    if( !load_printers )
+        SCR::Write( .etc.smb.value.global."load printers", load_printers ? "yes" : "no" );
+    
+    // ensure "encrypt passwords = yes";
+    SCR::Write( .etc.smb.value.global."encrypt passwords" , "yes" );
+    
+    // remove removed shares first
+    foreach( string share, map options, removed_shares, ``{
+	SCR::Write( add( .etc.smb.section, share ), nil );
+    });
+
+    // write shares
+    foreach( string share, map options, shares, ``{
+	// write the options
+	
+	// prepare the right type for writing out the value
+	integer type = ( options["commentout"]:false ) ? 1 : 0;
+	
+	// write the type of the section
+	SCR::Write( add(.etc.smb.section_type, share), type );
+	
+	// write all the options
+	path sectionpath = add( .etc.smb.value, share );
+	path sectiontypepath = add( .etc.smb.value_type, share );
+	foreach( string opt, any value, options, ``{
+	    // skip our internal option
+	    if( opt != "commentout" && opt != "yast" ) {
+
+		if( is( value, string ) )
+		{
+		    SCR::Write( add(sectionpath, opt), value );
+		} else {
+		    // it must be boolean
+		    SCR::Write( add(sectionpath, opt), value ? "yes": "no" );
+		}
+		if( value != nil ) SCR::Write( add(sectiontypepath, opt), type );
+	    }
+	});
+    });
+    
+    WriteLDAPSettings();
+}
+
+/**
+ * Get all samba-server settings from the first parameter
+ * (For use by autoinstallation.)
+ * @param settings The YCP structure to be imported.
+ * @return boolean True on success
+ */
+global define boolean Import (map settings) ``{
+
+    if( size( settings ) == 0 ) return true;
+    
+    Samba::Import( settings );
+    
+    // read global settings
+    Samba::setWorkgroup( settings["global","workgroup"]:Samba::workgroup );
+    server_string = settings["global","server_string"]:server_string;
+    role = name2role[ settings["global", "role" ]: "Standalone server" ]:nil;
+    share_homes = settings["global","share_homes"]: share_homes;
+    share_printers = settings["global","share_printers"]: share_printers;
+
+    string value = settings["global","backend"]: nil;
+    if( value == "LDAP" ) SAM = `ldap ;
+    else SAM = `smbpasswd;
+
+    LDAP_server = settings["global","LDAP_server"]: LDAP_server;
+    LDAP_admin_dn = settings["global","LDAP_admin_dn"]: LDAP_admin_dn;
+    LDAP_suffix = settings["global","LDAP_suffix"]: LDAP_suffix;
+    
+    globals_configured = true;
+
+    // read shares
+    shares = listmap( map key, settings["shares"]:[], ``{
+	return( [ key["share"]:"unknown", 
+	    listmap( map opts, key["options"]: [], ``{
+		return [ opts["key"]:"unknown", opts["value"]: nil ];
+	    } ) ] );
+    });
+    
+    // read printers
+    printer_status = listmap( map key, settings["printers"]:[], ``{
+	return( [ key["printer"]:"unknown", key["status"]: true ] );
+    });
+    
+    shares_configured = true;
+    
+    return true;
+}
+
+/**
+ * Dump the samba-server settings to a single map
+ * (For use by autoinstallation.)
+ * @return map Dumped settings (later acceptable by Import ())
+ */
+global define map Export () ``{
+
+    map samba = Samba::Export();
+    
+    map globals = union( samba["global"]:$[], $[
+	"workgroup": Samba::workgroup,
+	"server_string": server_string,
+	"role": role2name[ role ]: nil,
+	"share_homes": share_homes,
+	"share_printers" : share_printers,
+	"backend" : SAM == `smbpasswd ? "smbpasswd" : "LDAP",
+	"LDAP_server" : LDAP_server,
+	"LDAP_admin_dn": LDAP_admin_dn,
+	"LDAP_suffix" : LDAP_suffix
+    ]);
+    
+    list r_shares = union( samba["shares"]:$[],  maplist( string share, map options, shares, ``{
+	return $[ 
+	    "share" : share, 
+	    "options" : maplist( string key, any value, options, ``{
+		return $[ "key": key, "value" : value ];
+	    })
+	];
+    }) );
+    
+    list printers = maplist( string printer, boolean status, printer_status, ``{
+	return $[ "printer": printer, "status" : status ];
+    });
+
+    return $[ "global": globals, "shares" : r_shares, "printers" : printers ];
+}
+
+/**
+ * Create a textual summary and a list of unconfigured options
+ * @return summary of the current configuration
+ */
+global define string Summary() ``{
+    
+    string nc = Summary::NotConfigured ();
+    
+    // summary header
+    summary = Summary::AddHeader(summary, _("Global configuration"));
+    
+    if( globals_configured ) {
+	// summary item: an option is turned on
+	summary = Summary::AddLine(summary, sformat(_("Workgroup/Domain: %1"), Samba::workgroup ) );
+	
+	if( role == `disabled ) 
+	    summary = Summary::AddLine(summary, _("Samba server is <i>disabled</i>") );
+	else
+	    summary = Summary::AddLine(summary, sformat(_("Role: %1"), roleName(role) ) );
+	summary = Summary::AddLine(summary, sformat(_("Description: %1"), server_string) );
+	summary = Summary::AddLine(summary, sformat( _("User information backend: %1"), 
+	    (SAM == `smbpasswd ? "smbpasswd" : "LDAP") ) );
+	if( SAM == `ldap ) {
+	    summary = Summary::AddLine(summary, sformat(_("LDAP server: %1"), LDAP_server ) );
+	    summary = Summary::AddLine(summary, sformat(_("LDAP suffix: %1"), LDAP_suffix ) );
+	    summary = Summary::AddLine(summary, sformat(_("LDAP administration DN: %1"), LDAP_admin_dn ) );
+	}
+    } else {
+	summary = Summary::AddLine(summary, nc );
+    }
+    
+    summary = Summary::AddHeader(summary, _("Shares configuration"));
+    
+    if( shares_configured ) {
+	if( size( shares ) == 0 ) {
+	    summary = Summary::AddLine(summary, _("none") );
+	} else {
+	    summary = Summary::OpenList(summary);
+	    foreach( string share, map options, shares, ``{
+		if( options["path"]:nil != nil )
+		    summary = Summary::AddListItem( summary, sformat( "%1 (<i>%2</i>)", share, options["path"]:"" ) );
+		else
+		    summary = Summary::AddListItem( summary, share );
+		
+		if( options["comment"]:nil != nil )
+		    summary = Summary::AddLine( summary, options["comment"]:"" );
+	    });
+	    summary = Summary::CloseList(summary);
+	}
+    } else {
+	summary = Summary::AddLine(summary, nc );
+    }
+
+    return summary;
+}
+
+/** Turn on/off SAMBA server */
+global define boolean enableServer( boolean on ) ``{
+    Runlevel::ServiceAdjust( "nmb", on ? "enable": "disable" );
+    Runlevel::ServiceAdjust( "smb", on ? "enable": "disable" );
+    
+    if( write_only ) return true;
+    
+    boolean reload = false;
+    
+    if( on ) {
+    
+	// check, if the services run
+	if( Runlevel::ServiceStatus( "nmb" ) != 0 ) {
+	    // the service does not run
+	    if( Runlevel::RunInitScript( "nmb", "start" ) != 0 ) {
+		Report::Error( _("Cannot start 'nmb' service.") );
+		return false;
+	    }
+	} else reload = true;
+	if( Runlevel::ServiceStatus( "smb" ) != 0 ) {
+	    // the service does not run
+	    if( Runlevel::RunInitScript( "smb", "start" ) != 0 ) {
+		Report::Error( _("Cannot start 'smb' service.") );
+		return false;
+	    }
+	} else reload = true;
+    
+	if( reload ) ReloadSettings();
+    } 
+    else 
+    {
+	// turn services off
+	if( Runlevel::ServiceStatus( "nmb" ) == 0 ) {
+	    if( Runlevel::RunInitScript( "nmb", "stop" ) != 0 ) {
+		Report::Error( _("Cannot stop 'nmb' service.") );
+		return false;
+	    }
+	}
+
+	if( Runlevel::ServiceStatus( "smb" ) == 0 ) {
+	    if( Runlevel::RunInitScript( "smb", "stop" ) != 0 ) {
+		Report::Error( _("Cannot stop 'smb' service.") );
+		return false;
+	    }
+	}
+    }
+    
+    return true;
+
+}
+
+global define void setDescription( string description ) ``{
+    if( server_string != description ) {
+	server_string = description;
+	modified = true;
+    }
+}
+
+global  define void enablePrinters( boolean on ) ``{
+    if( share_printers != on ) {
+	share_printers = on;
+
+	// if they should be turned off and there is no such share, done
+	if( !on ) disableAllPrinters();
+	else {
+	    enableShare( "printers", true );
+	    enableAllSystemPrinters();
+	}
+
+	modified = true;
+    }
+}
+
+global define void enableAllSystemPrinters() ``{
+    foreach(  map values, Printer::printcap, ``{
+	printer_status[ values["name"]:"unknown" ] = true;
+	share_printers = true;
+    });
+}
+
+global define void enableHomes( boolean on ) ``{
+    if( share_homes != on ) {
+	share_homes = on;
+
+	// if they should be turned off and there is no such share, done
+	if( ! on && ! haskey( shares, "homes" ) ) return;
+	
+	if( ! haskey( shares, "homes" ) ) {
+	    // add a reasonable default
+	    shares["homes"] = default_homes;
+	}
+	
+	shares["homes", "commentout"] = !on;
+    
+	modified = true;
+    }
+}
+
+/** Share the netlogon scripts. */
+global define void enableLogon( boolean on ) ``{
+    domain_logons = on;
+    
+    // if there is [netlogon] share
+    if( haskey(shares, "netlogon") ) {
+	shares["netlogon", "commentout"] = on;
+    } else 
+    // there is no [netlogon], but should be
+    if( on ) {
+	shares["netlogon"] = $[
+	    "comment": "Network Logon Service",
+            "path": "/var/lib/samba/netlogon",
+            "write list": "root",
+	    "commentout": false
+	];
+    }
+}
+
+global define void configureShare( string share, map options ) ``{
+    change( shares, share, options );
+}
+
+/** This will not create machine accounts on the fly!!! */
+global define boolean setAsPDC() ``{
+    security = "user";
+    domain_logons = true;
+    preferred_master = "yes";
+    domain_master = "yes";
+    local_master = true;
+    add_user_script = "/usr/sbin/useradd -g machines -c Machine -d /dev/null -s /bin/false  %m$";
+    
+    return true;
+}
+
+global define boolean setAsBDC() ``{
+    domain_master = "false";
+    domain_logons = true;
+    security = "user";
+    
+    return true;
+}
+
+global define boolean setAsStandalone() ``{
+    domain_logons = false;
+
+    return true;
+}
+
+global define boolean setRole( symbol new_role ) ``{
+
+    // if no change, success
+    if( role == new_role ) return true;
+    
+    modified = true;
+    
+    role = new_role;
+    
+    if( role == `pdc ) return setAsPDC();
+    else if( role == `bdc ) return setAsBDC();
+    else if( role == `standalone ) return setAsStandalone();
+    
+    return true;
+}
+
+global define void setLDAPServer( string server ) ``{
+    LDAP_server = server;
+    modified = true;
+}
+
+global define void setLDAPAdminDN( string dn ) ``{
+    LDAP_admin_dn = dn;
+    modified = true;
+}
+
+global define void setLDAPSuffix( string suffix ) ``{
+    LDAP_suffix = suffix;
+    modified = true;
+}
+
+global define void setSAMBackend( symbol backend ) ``{
+    if( SAM == backend ) return;
+    SAM = backend;
+    modified = true;
+}
+
+/** Switch of smbpasswd/LDAP - stores configuration!!!
+*/
+global define boolean switchSAMBackend( symbol backend ) ``{
+    // if the backend is already switched, do nothing
+    if( backend == (SCR::Read( .sysconfig.samba.SAMBA_SAM ) == "ldap"? `ldap : `smbpasswd) )
+	return true;
+	
+    SAM = backend;
+    
+    WriteLDAPSettings();
+    // flush the settings from INI agent
+    SCR::Write( .etc.smb, nil );
+
+    if( !WriteSAMBackend() ) return false;
+    return ReloadSettings();
+}
+
+global define boolean WriteSAMBackend() ``{
+    // write the sysconfig setting
+    if( !SCR::Write( .sysconfig.samba.SAMBA_SAM, SAM == `ldap ? "ldap" : "classic" ) )
+	return false;
+    SCR::Write( .sysconfig.samba, nil );
+    
+    if( write_only ) return true;
+
+    integer ret = SCR::Execute( .target.bash, "/sbin/SuSEconfig --module samba" );
+    
+    if( ret != 0 ) {
+	y2error( "SuSEconfig --module samba failed: %1", ret );
+	return false;
+    }
+    
+    return true;
+}
+    
+global define boolean ReloadSettings() ``{
+    integer ret = SCR::Execute( .target.bash, "/usr/sbin/rcsmb reload" );
+    
+    if( ret != 0 ) {
+	y2error( "/usr/sbin/rcsmb reload failed: %1", ret );
+    }
+    
+    return ret == 0;
+}
+
+global define void ReadLDAPSettings() ``{
+    LDAP_server = SCR::Read( .etc.smb.value.global."ldap server" );
+    LDAP_admin_dn = SCR::Read( .etc.smb.value.global."ldap admin dn" );
+    LDAP_suffix = SCR::Read( .etc.smb.value.global."ldap suffix" );
+
+    if( LDAP_server == nil || LDAP_admin_dn == nil ) {
+	// we miss some information, ask LDAP for defaults
+        Ldap::Read();
+	if( LDAP_server == nil ) 
+	    LDAP_server = Ldap::server;
+	// TODO: ask LDAP client about default configuration DN
+	if( LDAP_admin_dn == nil )
+	    LDAP_admin_dn = "";
+	// TODO: ask LDAP client about default search DN
+	if( LDAP_suffix == nil )
+	    LDAP_suffix = "";
+    }
+}
+
+global define void WriteLDAPSettings() ``{
+    // delete if not neccessary
+    if( LDAP_server == "" ) LDAP_server = nil;
+    if( LDAP_admin_dn == "" ) LDAP_admin_dn = nil;
+    if( LDAP_suffix == "" ) LDAP_suffix = nil;
+    
+    // otherwise comment out if necessary
+    SCR::Write( .etc.smb.value.global."ldap server", LDAP_server );
+    SCR::Write( .etc.smb.value.global."ldap admin dn", LDAP_admin_dn );
+    if( SAM == `ldap ) {
+	if( LDAP_server != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap server", 0 );
+	if( LDAP_admin_dn != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap admin dn", 0 );
+	if( LDAP_suffix != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap suffix", 0 );
+    } else {
+	// write the LDAP settings as comments
+	if( LDAP_server != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap server", 1 );
+	if( LDAP_admin_dn != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap admin dn", 1 );
+	if( LDAP_suffix != nil )
+	    SCR::Write( .etc.smb.value_type.global."ldap suffix", 1 );
+    }
+}
+
+/**
+ * Switches backend to LDAP first.
+ * @return nil for success, na error message otherwise
+ */
+global define string setLDAPAdminPassword( string password ) ``{
+    switchSAMBackend( `ldap );
+    
+    // TODO: this will not work for passwords containing "
+    string cmd = "smbpasswd -w \""+password+"\"";
+    map result = SCR::Execute( .target.bash_output, cmd );
+    
+    // check the exit code, return nil on success
+    if( result["exit"]:1 == 0 ) return nil;
+    
+    // otherwise return stderr
+    return result["stderr"]:_("Unknown error");
+}
+
+global define boolean testLDAPS( string server, string search_base ) ``{
+    map result = SCR::Execute( .target.bash_output, "ldapsearch -x -H ldaps://"+server+" -b "+search_base );
+    y2debug( "LDAPS test search result: %1", result );
+    if( result["exit"]:-1 != 0 ) {
+	Report::Warning( sformat( _("It seems like there is no functional
+SSL LDAP server at %1.
+
+It is recommended to run Samba with LDAP using SSL.
+If you still want to turn SSL off, add \"ldap ssl = false\"
+to your \"smb.conf\" file manually."), server ) );
+	return false;
+    }
+    
+    return true;
+}
+
+global define void disableAllPrinters() ``{
+    // disable each share with printable = true
+    foreach( string share, map options, shares, ``{
+	if( options["printable"]:false ) enableShare( share, false );
+    });
+}
+
+global define void enablePrinterNames( list enable_names ) ``{
+    
+    list system_printers = printers2names( Printer::printcap );
+    
+    y2debug( "System printers are: %1", system_printers );
+    y2debug( "Enable: %1", enable_names );
+    
+    // first, check, if we can use [printers]
+    boolean printers = true;
+    foreach( string name, system_printers, ``{
+	// each system printer must be enabled and not disabled
+	if( (printer_status[name]:false) && !contains( enable_names, name ) ) {
+	    printers = false;
+	    y2debug( "[printers] can't be used, because of %1", name );
+	}
+    });
+    
+    enableShare( "printers", printers );
+    // if we can use [printers]
+    if( printers ) {
+	// filter out printers enabled by [printers]
+	enable_names = filter( string name, enable_names, ``( !contains( system_printers, name ) ) );
+	// remove yast-defined shares
+	shares = filter( string name, map options, shares, ``( ! (options["yast"]:false) ) );
+    }
+    
+    // update the status of these printers
+    foreach( string name, system_printers, ``{
+	printer_status[ name ] = printers;
+	// if printers are used, do not use the shares themselves
+	if( printers ) {
+	    enableShare( name, false );
+	}
+    });
+    
+    // work on enable_names
+    y2error( "Now need to work on %1", enable_names );
+    foreach( string name, enable_names, ``{
+	if( haskey( shares, name ) ) {
+	    if( shares[name, "printable"]:false == true ) {
+		printer_status[ name ] = true;
+		enableShare( name, true );
+		y2error( "Enabling printer %1", name );
+	    }
+	    else 
+	    {
+		// a share with the same name, but without printable!!!
+		y2error( "Share '%1' is not printable: %2", name, shares[name]:$[] );
+		Report::Error( sformat( _("There is already a share '%',
+but it is not configured
+as a printer.\n
+YaST2 will not modify this share."), name ) );
+	    }
+	}
+	else 
+	{
+	    y2debug( "Adding a share for printer %1", name );
+	    // no share, create one
+	    shares[ name ] = eval(default_printer_share);
+	    printer_status[ name ] = true;
+	    enableShare( name, true );
+	}
+    });
+    
+    modified = true;
+}
+
+global define boolean removeShare( string name ) ``{
+    // if there is no such share, done
+    if( !haskey( shares, name ) ) return false;
+
+    removed_shares[name]  = shares[share]: nil;
+
+    shares = remove( shares, name );
+    
+    // update the printer lists
+    if( haskey( printer_status, name ) ) printer_status = remove( printer_status, name );
+	
+    modified = true;
+    
+    //success
+    return true;
+}
+
+global define boolean addShare( string name, map options ) ``{
+    // share already exists
+    if( haskey( shares, name ) ) return false;
+    
+    shares[name] = options;
+    
+    modified = true;
+    
+    // success
+    return true;
+}
+
+global define boolean enableShare( string name, boolean on ) ``{
+
+    // if there is no such share, exit
+    if( !haskey( shares, name ) ) return false;
+    
+    // [printers] is coupled with "load printers"
+    if( name == "printers" ) load_printers = on;
+    
+    shares[ name, "commentout" ] = !on;
+    
+    modified = true;
+    
+    return true;
+}
+
+global define boolean updateShare( string name, map options ) ``{
+
+    // share does not exists
+    if( !haskey( shares, name ) ) return false;
+    
+    shares[name] = options;
+    
+    modified = true;
+    
+    return true;
+}
+
+global define string roleName( symbol role ) ``{
+    locale s = role2name[role]:"";
+    return eval(s);
+}
+				    
+/* EOF */
+}

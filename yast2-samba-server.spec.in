@@ -1,0 +1,30 @@
+@HEADER-COMMENT@
+# neededforbuild yast2-devel-packages samba-client
+
+@HEADER@
+Requires:	yast2 samba samba-client
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of samba-server
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+%dir @yncludedir@/samba-server
+@yncludedir@/samba-server/*
+@clientdir@/samba-server.ycp
+@clientdir@/samba-server_*.ycp
+@moduledir@/SambaServer.ycp
+@configdir@/samba-server.y2cc
+%doc @docdir@

@@ -1,0 +1,61 @@
+/**
+ * File:	include/samba-server/routines.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Miscelanous functions for configuration of samba-server.
+ * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "samba-server";
+
+/********************************** non UI routines ************************/
+
+global define boolean normalize_boolean( string value, boolean default ) ``{
+    if( value == nil ) return default;
+    string s = toupper( value );
+    return ( s == "YES" || s == "1" || s == "TRUE" );
+}
+
+global define string normalize_string( string value, string default ) ``{
+    if( value == nil ) return default;
+    string s = toupper( value );
+    if ( s == "YES" || s == "1" || s == "TRUE" ) return "yes";
+    if ( s == "NO" || s == "0" || s == "FALSE" ) return "no";
+    return value;
+}
+
+global define boolean yes_or_auto( string value ) ``{
+    return value == "yes" || toupper( value ) == "AUTO";
+}
+
+global define list shares2items( map shares ) ``{
+    integer index = 0;
+    return maplist( string name, map descr, shares, ``{ index = index+1; return `item( `id(index), descr["commentout"]:false ? _("Disabled"): _("Enabled") , name, descr["path"]:"", descr["comment"]:"" ); }  );
+}
+
+global define boolean shareEnabled( map options ) ``{
+    boolean result = !( options["commentout"]:false );
+    
+    if( result ) result = normalize_boolean(options["available"]:"yes", true);
+    
+    return result;
+}
+
+global define list printers2items( map printers ) ``{
+    return maplist( string name, boolean value, printers, ``{
+	return `item( `id( name ), name , value );
+    });
+}
+
+global define list printers2names( list printer_names ) ``{
+    return maplist( map printer, printer_names, ``{
+	// translators: a default name if a printer does not have a name
+	return printer["name"]:_("Uknown");
+    });
+}
+
+/* EOF */
+}
