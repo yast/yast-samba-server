@@ -5,10 +5,10 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT( [], nil );
-    
+    TESTSUITE_INIT( [ $[ "target" : $[ "tmpdir" : "/tmp" ] ] ], nil );
+
     import "SambaServer";
-    
+
     DUMP(SambaServer::role);
 
     TEST( ``( SambaServer::setAsBDC() ), [], nil );

@@ -4,16 +4,11 @@
 // $Id$
 
     include "testsuite.ycp";
-    
-    TESTSUITE_INIT( [ $[
-	    "target" : $[
-		"tmpdir" : "/tmp"
-	    ]
-	]
-    ], nil );
-    
+
+    TESTSUITE_INIT( [ $[ "target" : $[ "tmpdir" : "/tmp" ] ] ], nil );
+
     import "SambaServer";
-    
+
     DUMP(SambaServer::role);
 
     TEST( ``( SambaServer::setAsPDC() ), [], nil );

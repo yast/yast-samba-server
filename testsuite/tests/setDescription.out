@@ -1,5 +1,3 @@
-Read	.target.tmpdir nil
-Log	Failed to set temporary directory: nil
 Read	.target.size "/etc/install.inf" nil
 Read	.etc.install_inf.Sourcemounted nil
 Read	.etc.install_inf.AutoYaST nil
@@ -13,7 +11,8 @@ Read	.etc.install_inf.Braille nil
 Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
-Read	.target.tmpdir nil
+Read	.target.tmpdir "/tmp"
+Read	.target.tmpdir "/tmp"
 Execute	.target.bash "/usr/lib/YaST2/bin/version" 0
 Read	.sysconfig.language.RC_LANG nil
 Log	Failed reading <.sysconfig.language.RC_LANG>
