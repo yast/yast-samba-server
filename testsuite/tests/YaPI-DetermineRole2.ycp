@@ -58,5 +58,8 @@
         ],nil);
     import "YaPI::Samba";
 
+    import "Mode";
+    Mode::test = true;
+
     DUMP(YaPI::Samba::DetermineRole());
 }

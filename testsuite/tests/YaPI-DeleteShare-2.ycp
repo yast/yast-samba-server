@@ -74,5 +74,8 @@
         ],nil);
     import "YaPI::Samba";
 
+    import "Mode";
+    Mode::test = true;
+
     DUMP(YaPI::Samba::DeleteShare("nonexistent"));
 }

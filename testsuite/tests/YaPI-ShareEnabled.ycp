@@ -86,6 +86,9 @@
         ],nil);
     import "YaPI::Samba";
 
+    import "Mode";
+    Mode::test = true;
+
     DUMP(YaPI::Samba::GetShareEnabled( "lp"));
     DUMP(YaPI::Samba::GetShareEnabled( "lp2"));
 }
