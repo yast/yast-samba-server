@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 15 21:34:51 CEST 2003 - nashif@suse.de
+
+- Call correct function name in autoinst mode
+- 2.8.13
+
+-------------------------------------------------------------------
 Mon Sep 15 19:09:34 CEST 2003 - msvec@suse.cz
 
 - updated testsuite
