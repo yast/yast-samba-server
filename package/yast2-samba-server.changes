@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec 23 13:05:58 CET 2004 - mlazar@suse.cz
+
+- fixed LDAP support
+- added Samba LDAP Settings tab
+- added Samba LDAP Expert Settings dialog
+
+-------------------------------------------------------------------
 Fri Dec 10 13:15:17 CET 2004 - mlazar@suse.cz
 
 - abort button works now

@@ -1,0 +1,497 @@
+/**
+ * File:	include/samba-server/ldap-widget.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Dialogs definitions
+ * Authors:	Martin Lazar <mlazar@suse.cz>
+ *
+ * $Id$
+ *
+ * This file contains CWM widgets related to Samba LDAP Settings:
+ *  - Samba LDAP Settings Essential Widget
+ *  - Samba LDAP Settings Suffixes Widget
+ *  - Samba LDAP Settings Timeouts Widget
+ *  - Samba LDAP Settings Misc Widget
+ */
+
+{
+
+textdomain "samba-server";
+
+import "URL";
+import "Popup";
+
+import "Ldap";
+
+import "SambaConfig";
+import "SambaBackend";
+import "SambaBackendLDAP";
+
+include "samba-server/helps.ycp";
+
+symbol SambaLDAPExpertSettingsDialog();
+
+
+list<string> widget_names = nil;
+map<string,any> widget_descr = nil;
+
+// helper functions
+
+void init_ldap_str(string id)
+{
+    UI::ChangeWidget(`id(id), `Value, SambaConfig::GlobalGetStr(id, SambaBackendLDAP::GetSambaDefaultValue(id)));
+}
+
+void init_ldap_int(string id)
+{
+    UI::ChangeWidget(`id(id), `Value, SambaConfig::GlobalGetInteger(id, tointeger(SambaBackendLDAP::GetSambaDefaultValue(id))));
+}
+
+void init_ldap_combo(string id, list m)
+{
+    string val = tolower(SambaConfig::GlobalGetStr(id, SambaBackendLDAP::GetSambaDefaultValue(id)));
+    string subid = nil;
+    foreach(list l, (list<list>)m, {
+	if (subid == nil) {
+	    if (tolower(l[0]:"") == val) {
+		subid = l[0]:"";
+	    }
+	}
+    });
+    UI::ChangeWidget(`id(id), `Value, subid);
+}
+
+void store_ldap_str(string id)
+{
+    string val = (string)UI::QueryWidget(`id(id), `Value);
+    // do not store default values
+    if (val == SambaBackendLDAP::GetSuseDefaultValue(id) &&
+	val == SambaBackendLDAP::GetSambaDefaultValue(id))
+    {
+	val = nil;
+    }
+    SambaConfig::GlobalSetStr(id, val);
+}
+
+void store_ldap_int(string id)
+{
+    integer val = (integer)UI::QueryWidget(`id(id), `Value);
+    // do not store default values
+    if (val == tointeger(SambaBackendLDAP::GetSuseDefaultValue(id)) &&
+	val == tointeger(SambaBackendLDAP::GetSambaDefaultValue(id)))
+    {
+	val = nil;
+    }
+    SambaConfig::GlobalSetInteger(id, val);
+}
+
+
+// Samba LDAP Settings Essential Widget
+//////////////////////////////////////////////////////////////////////
+
+boolean SambaLDAPTryConnect()
+{
+    string passwd1 = (string)UI::QueryWidget(`id(`passwd1), `Value);
+    string passwd2 = (string)UI::QueryWidget(`id(`passwd1), `Value);
+    if (passwd1 != passwd2) {
+	Popup::Warning(_("Passwords does not match"));
+	return false;
+    }
+    
+    string admin_dn = (string)UI::QueryWidget(`id("ldap admin dn"), `Value);
+    
+    string url = nil;
+    if ((boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value)) {
+	url = (string)UI::QueryWidget(`id(`ldap_passdb_backend_url), `Value);
+	if (url == "") {
+	    // translators: popup warning message about empty text entry
+	    Popup::Warning(_("You have to specify passdb backend server"));
+	    return false;
+	}
+	string err = SambaBackendLDAP::TryBind(url, admin_dn, passwd);
+	if (err != nil) {
+	    Ldap::LDAPErrorMessage("bind", err);
+	    return false;
+	}
+    }
+    
+    if ((boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value)) {
+	string idmap_url = (string)UI::QueryWidget(`id(`ldap_idmap_backend_url), `Value);
+	if (idmap_url == "") {
+	    // translators: popup warning message about empty text entry
+	    Popup::Warning(_("You have to specify idmap backend server"));
+	    return false;
+	}
+	if (url != idmap_url) {
+	    string err = SambaBackendLDAP::TryBind(idmap_url, admin_dn, passwd);
+	    if (err != nil) {
+	        Ldap::LDAPErrorMessage("bind", err);
+	        return false;
+	    }
+	}
+    }
+    
+    return true;
+}
+
+
+void SambaLDAPSettingsEssentialWidgetInit(string key)
+{
+    init_ldap_str("ldap suffix");
+
+    init_ldap_str("ldap admin dn");
+    UI::ChangeWidget(`id(`passwd1), `Value, SambaBackendLDAP::GetAdminPassword());
+    UI::ChangeWidget(`id(`passwd2), `Value, SambaBackendLDAP::GetAdminPassword());
+    
+    map<string,string> passdb_url = SambaBackendLDAP::GetPassdbServerUrl();
+    UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Value, passdb_url == nil ? "default?" : URL::Build(passdb_url));
+    UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Enabled, passdb_url != nil);
+    UI::ChangeWidget(`id(`ldap_passdb_backend_enable), `Value, passdb_url != nil);
+
+    map<string,string> idmap_url = SambaBackendLDAP::GetIdmapServerUrl();
+    UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Value, idmap_url == nil ? "default?" : URL::Build(idmap_url));
+    UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Enabled, idmap_url != nil);
+    UI::ChangeWidget(`id(`ldap_idmap_backend_enable), `Value, idmap_url != nil);
+    
+    foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_expert_settings], {
+	UI::ChangeWidget(`id(id), `Enabled, idmap_url!=nil || passdb_url!=nil);
+    });
+    
+}
+
+symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
+{
+    any id=event_descr["ID"]:nil;
+    
+    if (id == `passwd1 || id == `passwd2) {
+	string passwd1 = (string)UI::QueryWidget(`id(`passwd1), `Value);
+	string passwd2 = (string)UI::QueryWidget(`id(`passwd2), `Value);
+	if (passwd1 != passwd2) {
+	    // translators: inform text
+	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords do not match"))));
+	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, false);
+	} else if (passwd1 == SambaBackendLDAP::GetAdminPassword()) {
+	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label("")));
+	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, true);
+	} else {
+	    // translators: inform text
+	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords match"))));
+	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, true);
+	}
+    } else if (id == `ldap_passdb_backend_enable || id == `ldap_idmap_backend_enable) {
+	boolean passdb = (boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value);
+	UI::ChangeWidget(`id(`ldap_passdb_backend_url), `Enabled, passdb);
+
+        boolean idmap = (boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value);
+	UI::ChangeWidget(`id(`ldap_idmap_backend_url), `Enabled, idmap);
+
+	foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_expert_settings], {
+	    UI::ChangeWidget(`id(id), `Enabled, idmap || passdb);
+	});
+    } else if (id == `ldap_expert_settings) {
+	SambaLDAPExpertSettingsDialog();
+    } else if (id == `ldap_try_connect) {
+	SambaLDAPTryConnect()
+    }
+
+    return nil;
+}
+
+boolean SambaLDAPSettingsEssentialWidgetValidate(string key, map event)
+{
+    boolean passdb = (boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value);
+    boolean idmap = (boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value);
+    if (!passdb && !idmap) {
+	return true;
+    }
+
+    if (!SambaLDAPTryConnect()) {
+	return false;
+    }
+
+    return true;
+}
+
+void SambaLDAPSettingsEssentialWidgetStore(string key, map event_descr)
+{
+    store_ldap_str("ldap admin dn");
+    store_ldap_str("ldap suffix");
+
+    string passwd = (string)UI::QueryWidget(`id(`passwd1), `Value);
+    SambaBackendLDAP::SetAdminPassword(passwd);
+
+    boolean passdb = (boolean)UI::QueryWidget(`id(`ldap_passdb_backend_enable), `Value);
+    boolean idmap = (boolean)UI::QueryWidget(`id(`ldap_idmap_backend_enable), `Value);
+    
+    list<string> backends = [];
+    if (passdb) {
+	string passdb_url = (string)UI::QueryWidget(`id(`ldap_passdb_backend_url), `Value);
+	backends = filter(string be, SambaBackend::GetPassdbBackends(), {return SambaBackend::GetName(be) != "ldapsam";});
+	backends = (list<string>)merge(["ldapsam:"+passdb_url], backends);
+    } else {
+	backends = filter(string be, SambaBackend::GetPassdbBackends(), {return SambaBackend::GetName(be) != "ldapsam";});
+    }
+    if(size(backends)==0) backends = [ "tdbsam" ];
+    SambaBackend::SetPassdbBackends(backends);
+
+    if (idmap) {
+	string idmap_url = (string)UI::QueryWidget(`id(`ldap_idmap_backend_url), `Value);
+	SambaConfig::GlobalSetStr("idmap backend", "ldap:" + idmap_url);
+    } else {
+	SambaConfig::GlobalSetStr("idmap backend", nil);
+    }
+}
+
+map CreateSambaLDAPSettingsEssentialWidget()
+{
+    term basedn = `VBox(
+	// translators: text entry label
+	`TextEntry(`id("ldap suffix"), _("&Search Base DN:")));
+    term auth = `Frame(_("Authentication"), `VBox(
+	// translators: text enrty label
+	`TextEntry(`id("ldap admin dn"), _("&Administration DN:")),
+	// TODO: if Mode::config() => no ask for pssword
+	// translators: password enrty label
+	`Password(`id(`passwd1), `opt(`notify), _("Administration Password:")),
+	// translators: reenter password enrty label
+	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (Again):")),
+	`ReplacePoint(`id("passwd_label"), `Label("")),
+	`Empty(`opt(`vstretch))));
+    term passdb = 
+	// translators: frame title (passdb == password database)
+	`Frame(_("Passdb Backend"), `VBox(
+	    // translators: check box label
+	    `Left(`CheckBox(`id(`ldap_passdb_backend_enable), `opt(`notify), _("Use LDAP &Password Backend"))),
+	    // translators: text entry label
+	    `TextEntry(`id(`ldap_passdb_backend_url), _("LDAP Server URL")),
+	    `Empty(`opt(`vstretch))));
+
+    term idmap = 
+        // translators: frame title (idmap = user id mapping)
+	`Frame(_("Idmap Backend"), `VBox(
+	    // translators: check box label
+	    `Left(`CheckBox(`id(`ldap_idmap_backend_enable), `opt(`notify), _("Use LDAP &Idmap Backend"))),
+	    // translators: text entry label
+	    `TextEntry(`id(`ldap_idmap_backend_url), _("LDAP Server URL")),
+	    `Empty(`opt(`vstretch))));
+
+	
+    term essential_widget = `Top(`HBox(
+	`HSpacing(1),
+	`VBox(
+	    `VWeight(1, `Empty()),
+	    `VSquash(`HBox(
+		`HWeight(1, `VBox(passdb, idmap)),
+		`HSpacing(1),
+		`HWeight(1, auth))),
+	    `VWeight(1, `Empty()),
+	    basedn,
+	    `VWeight(8, `Empty()),
+	    `Right(`ComboBox(`id(`ldap_combo), _("Advanced Settings..."), [
+		`item(`id(`ldap_expert_settings), _("E&xpert LDAP Settings")),
+		`item(`id(`ldap_suse_defaults), _("Default Values")),
+		`item(`id(`ldap_try_connect), _("Try Connect"))))),
+	`HSpacing(1)));
+
+    return $[
+	"widget": `custom,
+	"custom_widget": essential_widget,
+	"init": SambaLDAPSettingsEssentialWidgetInit,
+	"handle": SambaLDAPSettingsEssentialWidgetHandle,
+	"store": SambaLDAPSettingsEssentialWidgetStore,
+	"validate_type": `function,
+	"validate_function": SambaLDAPSettingsEssentialWidgetValidate,
+	"help": HELPS["samba_ldap_setting_auth_widget"]:""
+    ];
+
+}
+
+
+// Sambs LDAP Settings Suffixes Widget
+//////////////////////////////////////////////////////////////////////
+
+void SambaLDAPSettingsSuffixesWidgetInit(string key) ``{
+    init_ldap_str("ldap user suffix");
+    init_ldap_str("ldap group suffix");
+    init_ldap_str("ldap machine suffix");
+    init_ldap_str("ldap idmap suffix");
+}
+
+void SambaLDAPSettingsSuffixesWidgetStore(string key, map event_descr)
+{
+    store_ldap_str("ldap user suffix");
+    store_ldap_str("ldap group suffix");
+    store_ldap_str("ldap machine suffix");
+    store_ldap_str("ldap idmap suffix");
+}
+
+map CreateSambaLDAPSettingsSuffixesWidget()
+{
+    // translators: frame label
+    term suffixes_widget = `Frame(_("Suffixes"), `VBox(
+	    // translators: text entry label
+	    `Left(`TextEntry(`id("ldap user suffix"), _("&User Suffix:"))),
+	    // translators: text entry label
+	    `Left(`TextEntry(`id("ldap group suffix"), _("&Group Suffix:"))),
+	    // translators: text entry label
+	    `Left(`TextEntry(`id("ldap machine suffix"), _("&Machine Suffix:"))),
+	    // translators: text entry label
+	    `Left(`TextEntry(`id("ldap idmap suffix"), _("&Idmap Suffix:")))));
+
+    return $[
+	"widget": `custom,
+	"custom_widget": suffixes_widget,
+	"init": SambaLDAPSettingsSuffixesWidgetInit,
+	"store": SambaLDAPSettingsSuffixesWidgetStore,
+	"help": HELPS["samba_ldap_setting_suffixes_widget"]:""
+    ];
+}
+
+
+// Samba LDAP Settings Timeouts Widget
+///////////////////////////////////////////////////////////////////////////
+
+void SambaLDAPSettingsTimeoutsWidgetInit(string key) ``{
+    init_ldap_int("ldap timeout");
+    init_ldap_int("ldap replication sleep");
+}
+
+void SambaLDAPSettingsTimeoutsWidgetStore(string key, map event_descr)
+{
+    store_ldap_int("ldap timeout");
+    store_ldap_int("ldap replication sleep");
+}
+
+map CreateSambaLDAPSettingsTimeoutsWidget()
+{
+    // translators: frame label
+    term timeouts_widget = `Frame(_("Timeouts"), `VBox(
+    	    // translators: integer field label
+	    `Left(`IntField(`id("ldap replication sleep"), _("&Replication Sleep:"), 0, 999999, 3)),
+    	    // translators: integer field label
+	    `Left(`IntField(`id("ldap timeout"), _("&Timeout:"), 0, 999999, 3))));
+
+    return $[
+	"widget": `custom,
+	"custom_widget": timeouts_widget,
+	"init": SambaLDAPSettingsTimeoutsWidgetInit,
+	"store": SambaLDAPSettingsTimeoutsWidgetStore,
+	"help": HELPS["samba_ldap_settings_timeouts_widget"]:""
+    ];
+}
+
+// Samba LDAP Settings Security Widget
+///////////////////////////////////////////////////////////////////////////
+
+// translators: combo box value
+list<list> ldap_ssl_values = [ ["Off", _("No")], 
+// translators: combo box value
+["Start_tls", _("TLS")], 
+// translators: combo box value
+["On", _("SSL")] ];
+
+void SambaLDAPSettingsSecurityWidgetInit(string key) ``{
+    init_ldap_combo("ldap ssl", ldap_ssl_values);
+}
+
+void SambaLDAPSettingsSecurityWidgetStore(string key, map event_descr)
+{
+    store_ldap_str("ldap ssl");
+}
+
+map CreateSambaLDAPSettingsSecurityWidget()
+{
+    // translators: frame label
+    term widget = `Frame(_("Security"), `VBox(
+	// translators: combo box label
+	`Left(`ComboBox(`id("ldap ssl"), _("&Use SSL/TLS:"),
+		maplist(list l, ldap_ssl_values, {return `item(`id(l[0]:""),l[1]:"");})))));
+
+    return $[
+	"widget": `custom,
+	"custom_widget": widget,
+	"init": SambaLDAPSettingsSecurityWidgetInit,
+	"store": SambaLDAPSettingsSecurityWidgetStore,
+	"help": HELPS["samba_ldap_settings_security_widget"]:""
+    ];
+}
+
+
+// Samba LDAP Settings Misc Widget
+///////////////////////////////////////////////////////////////////////////
+
+// translators: combo box value
+list<list> ldap_yes_no_values = [ ["Yes", _("Yes")], 
+// translators: combo box value
+["No", _("No")] ];
+// translators: combo box value (updata password? Yes/No/Only = Only update the LDAP password and let the LDAP server do the rest)
+list<list> ldap_yes_no_only_values = (list<list>)merge(ldap_yes_no_values, [["Only", _("Only")] ]);
+
+void SambaLDAPSettingsMiscWidgetInit(string key) ``{
+    init_ldap_str("ldap filter");
+    init_ldap_combo("ldap delete dn", ldap_yes_no_values);
+    init_ldap_combo("ldap passwd sync", ldap_yes_no_only_values);
+}
+
+void SambaLDAPSettingsMiscWidgetStore(string key, map event_descr)
+{
+    store_ldap_str("ldap filter");
+    store_ldap_str("ldap delete dn");
+    store_ldap_str("ldap passwd sync");
+}
+
+map CreateSambaLDAPSettingsMiscWidget()
+{
+    // translators: frame label
+    term misc_widget = `Frame(_("Other settings"), `VBox(
+	// translators: text entry label
+	`Left(`TextEntry(`id("ldap filter"), _("Search &Filter:"))),
+	// translators: combo box label
+	`Left(`ComboBox(`id("ldap delete dn"), _("&Deletes DN:"),
+		maplist(list l, ldap_yes_no_values, {return `item(`id(l[0]:""),l[1]:"");}))),
+	// translators: combo box label
+	`Left(`ComboBox(`id("ldap passwd sync"), _("&Sync Passwords:"),
+		maplist(list l, ldap_yes_no_only_values, {return `item(`id(l[0]:""),l[1]:"");})))));
+
+    return $[
+	"widget": `custom,
+	"custom_widget": misc_widget,
+	"init": SambaLDAPSettingsMiscWidgetInit,
+	"store": SambaLDAPSettingsMiscWidgetStore,
+	"help": HELPS["samba_ldap_settings_misc_widget"]:""
+    ];
+}
+
+symbol SambaLDAPExpertSettingsDialog()
+{
+    map widget_descr = $[
+	"SUFFIXES": CreateSambaLDAPSettingsSuffixesWidget(),
+	"TIMEOUTS": CreateSambaLDAPSettingsTimeoutsWidget(),
+	"SECURITY": CreateSambaLDAPSettingsSecurityWidget(),
+	"MISC": CreateSambaLDAPSettingsMiscWidget()
+    ];
+    
+    term contents = `VBox(
+	`HBox(
+	    `HSpacing(1),
+	    `HWeight(1, `VBox("SECURITY", "SUFFIXES", `Empty(`opt(`vstretch)))),
+	    `HSpacing(1),
+	    `HWeight(1, `VBox("TIMEOUTS", "MISC", `Empty(`opt(`vstretch)))),
+	    `HSpacing(1)),
+	`VStretch());
+    
+    Wizard::CreateDialog();
+    symbol ret = CWM::ShowAndRun($[
+	"widget_names": ["SUFFIXES", "TIMEOUTS", "SECURITY", "MISC"],
+	"widget_descr": widget_descr,
+	"contents": contents,
+	"caption": _("Caption"),
+	"back_button": Label::CancelButton(),
+	"next_button": Label::AcceptButton(),
+	"abort_button": nil
+    ]);
+    UI::CloseDialog();
+
+    return ret;
+}
+
+}

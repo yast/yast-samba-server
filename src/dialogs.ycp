@@ -37,6 +37,9 @@ import "CWMServiceStart";
 include "samba-server/helps.ycp";
 include "samba-server/dialogs-items.ycp";
 
+include "samba-server/ldap-widget.ycp";
+
+
 string return_tab = "startup";
 
 string pdc = _("&Primary Domain Controller (PDC)");
@@ -330,6 +333,7 @@ symbol SharesWidgetHandle(string key, map event_descr)
     return nil;
 }
 
+
 void AddTrustedDomain ()
 {
     term contents = `VBox (
@@ -605,6 +609,8 @@ symbol AddShareDialog () ``{
     return ret;
 }
 
+
+
 any Installation_Conf_Tab () {
 
     term shares_widget = `HBox(
@@ -734,6 +740,11 @@ any Installation_Conf_Tab () {
 		"header": _("&Trusted Domains"),
 		"contents": `VBox("TRUSTED DOMAINS"),
 		"widget_names": ["TRUSTED DOMAINS"]
+	    ],
+	    "ldap_settings_tab": $[
+		"header": _("&LDAP Settings"),
+		"contents": `VBox("LDAP ESSENTIAL"),
+		"widget_names": ["LDAP ESSENTIAL"]
 	    ]
 	]);
     }
@@ -793,13 +804,14 @@ any Installation_Conf_Tab () {
 	    "init": TrustedDomainsWidgetInit,
 	    "handle": TrustedDomainsWidgetHandle,
 	    "help": HELPS["smb_conf_tab_trusted_domains"]:"",
-	]
+	],
+	"LDAP ESSENTIAL": CreateSambaLDAPSettingsEssentialWidget(),
     ];
 
     map widget_descr = $[
 	"tab": CWMTab::CreateWidget($[
 	    "tab_order": ProductFeatures::ui_mode != "simple" ?
-		["startup", "shares", "identity", "trusted_domains_tab"] :
+		["startup", "shares", "identity", "trusted_domains_tab", "ldap_settings_tab"] :
 		["startup", "shares", "identity"],
 	    "tabs": tabs_descr,
 	    "widget_descr": tabs_widget_descr,
@@ -858,115 +870,6 @@ symbol PassdbDialog () {
     return CWM::Run (w, $[`abort: confirmAbort]);
 }
 
-/**
- * Allow user to type in a password in a popup.
- *
- * @param text	a text to be displayed above the password text entry
- * @return string entered password or nil on cancel
- */
-define string passwordPopup( string text ) ``{
-    UI::OpenDialog(
-    	    `VBox( 
-    		`Password(`id(`passwd), text),
-    		`HBox( 
-		    `PushButton(`id(`ok), `opt(`default), Label::OKButton() ), 
-		    `PushButton(`id(`cancel), Label::CancelButton() ) 
-		)
-    	    )
-        );
-    
-    any ret = UI::UserInput();
-
-    string passwd = nil;
-    if (ret == `ok)
-    {
-	passwd = (string) UI::QueryWidget(`id(`passwd), `Value);
-    }
-
-    UI::CloseDialog();
-    
-    return passwd;
-}
-
-
-/**
- * LDAP Dialog
- * @return dialog result
- */
-symbol LDAPDialog () ``{
-
-    /* Samba-server advanced dialog caption */
-    string caption = _("LDAP Samba Server Options");
-
-    /* Samba-server advanced dialog contents */
-    term contents = 
-    `VBox(
-	// text entry label
-	`TextEntry( `id( `ldap_suffix ), _("Search &Base DN:"), SambaConfig::GlobalGetStr("ldap suffix", "")),
-	// text entry label
-	`TextEntry( `id( `ldap_admin_dn ), _("&Administration DN:"), SambaConfig::GlobalGetStr("ldap admin dn", "")),
-	Mode::config() ? `Empty() : 
-	    `HBox(
-		// push button label
-		`PushButton( `id( `ldap_password ), _("Set LDAP Administration &Password") )
-	    )
-    );
-
-    Wizard::SetContentsButtons(caption, contents, HELPS["Advanced"]:"",
-	    Label::BackButton(), Label::OKButton());
-
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-	
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if (confirmAbort()) break;
-	    continue;
-	}
-	else if(ret == `ldap_password ) {
-	    // Translators: popup query for a password
-	    string passwd = passwordPopup(_("Enter LDAP Administration Password"));
-	    // user cancelled
-	    if( passwd == nil ) continue;
-	    
-	    string admin_dn = (string) UI::QueryWidget( `id( `ldap_admin_dn ), `Value );
-	    string suffix = (string) UI::QueryWidget( `id( `ldap_suffix ), `Value );
-	    if (size(admin_dn) == 0 || size(suffix) == 0) 
-	    {
-		y2milestone ("Empty admin dn or suffix");
-		// FIXME: better message after freeze
-		Popup::Error( _("Cannot set the password.") );
-		continue;
-	    }
-	    
-	    // store the current bind DN
-	    SambaConfig::GlobalSetStr("ldap admin dn", admin_dn);
-	    
-	    string error = SambaBackendLDAP::SetAdminPassword(passwd);
-	    if (error != nil) {
-		Popup::Error(error);
-	    }
-	    // Translators: Information popup
-	    else Popup::Message( _("LDAP administration password was successfully changed.") );
-	}
-        else if(ret == `next ) {
-	    SambaConfig::GlobalSetStr("ldap admin dn", (string) UI::QueryWidget( `id( `ldap_admin_dn ), `Value ));
-	    SambaConfig::GlobalSetStr("ldap suffix", (string) UI::QueryWidget( `id( `ldap_suffix ), `Value ));
-            break;
-        }
-	else if(ret == `back ) {
-	    break;
-	}
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
-    
-    return (symbol) ret;
-}
 
 symbol EnsureRootAccountDialog () ``{
 

@@ -15,7 +15,8 @@ ynclude_DATA =			\
 	wizards.ycp		\
 	dialogs.ycp		\
 	dialogs-items.ycp	\
-	complex.ycp
+	complex.ycp		\
+	ldap-widget.ycp
 
 desktop_DATA =			\
 	samba-server.desktop

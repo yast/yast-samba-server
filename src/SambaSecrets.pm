@@ -98,9 +98,9 @@ sub GetLDAPBindPw {
     
     Read(0) or return undef unless $Secrets;
     my $passwd = $Secrets->{"SECRETS/LDAP_BIND_PW/$admin_dn"};
-    $passwd =~ s/\00// if defined $passwd;
+    $passwd =~ s/\\00// if defined $passwd;
     unless (defined $passwd) {
-	y2warning("Cannot find LDAP bind password");
+	y2warning("Cannot get LDAP bind password");
     }
     return $passwd;
 }

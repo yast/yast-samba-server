@@ -33,9 +33,6 @@ any MainSequence() {
         "share_edit"    : ``( EditShareDialog() ),
 	"share_add"	: ``( AddShareDialog() ),
         "passdb_edit"   : ``( PassdbDialog() ),
-        "ldap_edit"     : ``( LDAPDialog() ),
-	// another call of the same dialog (cause of handling the dialogs continuity)
-	"ldap_edit_uas"	: ``( LDAPDialog() ),
         "global_settings":``( GlobalSettingsDialog() ),
 	"ensure_root_account": ``( EnsureRootAccountDialog() ),
 	"ask_join_domain": ``( AskJoinDomainDialog() ),
@@ -59,7 +56,6 @@ any MainSequence() {
 	    `abort	: `abort,
 	    `add	: "share_add",
 	    `edit	: "share_edit",
-            `ldap   	: "ldap_edit",
             `passdb   	: "passdb_edit",
             `global_settings  	: "global_settings",
 	    `next	: "ask_join_domain",
@@ -95,23 +91,18 @@ any MainSequence() {
             `abort  	: `abort,
 	    `cancel 	: `cancel,
             `next   	: "conf_tab",
-	    `ldap	: "ldap_edit_uas",
-        ],
+//	    `ldap	: "ldap_edit_uas",
+        ]
 	// new calling for the dialog (it depends on where the call started)
-        "ldap_edit_uas"     :  $[
-	    `cancel	: `cancel,
-            `abort  	: `abort,
+//        "ldap_edit_uas"     :  $[
+//	    `cancel	: `cancel,
+//            `abort  	: `abort,
 	    // This changes the logic of dialogs continuity but the change seems to be logical
 	    // - we are returning to the dialog where we selected from two options:
 	    // "Test LDAP" or "Configure LDAP"
 	    // It makes much more sense for me :->
-	    `next	: "passdb_edit",
-        ],
-        "ldap_edit"     :  $[
-	    `cancel	: `cancel,
-            `abort  	: `abort,
-            `next   	: "conf_tab",
-        ],
+//	    `next	: "passdb_edit",
+//        ],
     ];
     
     // setup the abort function
