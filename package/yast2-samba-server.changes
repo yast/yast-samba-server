@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  3 12:11:00 CET 2005 - mlazar@suse.cz
+
+- fixed bugs in SambaAccount::Write()
+
+-------------------------------------------------------------------
 Thu Mar  3 11:53:33 CET 2005 - mlazar@suse.cz
 
 - fixed function SambaRole::getLocalSID()
