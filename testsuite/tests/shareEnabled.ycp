@@ -1,0 +1,25 @@
+{
+
+// test for SambaServer::shareEnabled
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+    
+    // test commentout
+    TEST( ``( shareEnabled( $[ "commentout" : true ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "commentout" : false ] ) ), [], nil );
+
+    // test available flag
+    TEST( ``( shareEnabled( $[ "available" : "yes" ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "no" ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "true" ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "false" ] ) ), [], nil );
+
+    // available and commentout
+    TEST( ``( shareEnabled( $[ "available" : "yes", "commentout": false ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "no", "commentout": false ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "true", "commentout": true ] ) ), [], nil );
+    TEST( ``( shareEnabled( $[ "available" : "false", "commentout": true ] ) ), [], nil );
+}

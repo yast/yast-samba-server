@@ -1,0 +1,24 @@
+{
+
+// test for SambaServer::setLDAPServer
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::setLDAPServer( "testing" );
+    DUMP(SambaServer::LDAP_server);
+    DUMP(SambaServer::modified);
+    
+    SambaServer::modified = false;
+    SambaServer::setLDAPServer( "testing" );
+    DUMP(SambaServer::LDAP_server);
+    // this time modified should not be set
+    DUMP(SambaServer::modified);
+
+    SambaServer::setLDAPServer( "nexttesting" );
+    DUMP(SambaServer::LDAP_server);
+    // modified again
+    DUMP(SambaServer::modified);
+}

@@ -1,0 +1,20 @@
+{
+
+// test for yes_or_auto( string )
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+
+    DUMP( yes_or_auto( "yes" ) );    
+    DUMP( yes_or_auto( "yEs" ) );    
+    DUMP( yes_or_auto( "1") );    
+    DUMP( yes_or_auto( "true" ) );    
+    DUMP( yes_or_auto( "TRue" ) );    
+    DUMP( yes_or_auto( "no") );    
+    DUMP( yes_or_auto( "0" ) );    
+    DUMP( yes_or_auto( "FALSE" ) );    
+    DUMP( yes_or_auto( "auto" ) );    
+    DUMP( yes_or_auto( "aUTo" ) );    
+}

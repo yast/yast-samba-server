@@ -1,0 +1,14 @@
+Dump	`standalone
+Dump	user
+Dump	Domain logons: false
+Dump	Domain master: auto
+Dump	Local master: false
+Dump	Preferred master: auto
+Return	true
+Dump	false
+Dump	`standalone
+Dump	user
+Dump	Domain logons: true
+Dump	Domain master: yes
+Dump	Local master: true
+Dump	Preferred master: yes

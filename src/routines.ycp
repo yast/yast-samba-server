@@ -47,7 +47,7 @@ global define string normalize_string( string value, string default ) ``{
  * @return boolean	true if it is yes or auto
  */
 global define boolean yes_or_auto( string value ) ``{
-    return value == "yes" || toupper( value ) == "AUTO";
+    return toupper( value ) == "AUTO" || normalize_boolean( value, false);
 }
 
 /**

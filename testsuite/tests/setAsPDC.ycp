@@ -1,0 +1,28 @@
+{
+
+// test for SambaServer::setAsPDC()
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    DUMP(SambaServer::role);
+    DUMP(Samba::security);
+    DUMP( sformat( "Domain logons: %1", SambaServer::domain_logons) );
+    DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
+    DUMP( sformat( "Local master: %1", SambaServer::local_master) );
+    DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
+    
+    Samba::modified = false;
+    TEST( ``( SambaServer::setAsPDC() ), [], nil );
+
+    DUMP(SambaServer::modified);
+    DUMP(SambaServer::role);
+    DUMP(Samba::security);
+
+    DUMP( sformat( "Domain logons: %1", SambaServer::domain_logons) );
+    DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
+    DUMP( sformat( "Local master: %1", SambaServer::local_master) );
+    DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
+}

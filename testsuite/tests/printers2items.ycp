@@ -1,0 +1,11 @@
+{
+
+// test for printers2items conversion
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+
+    DUMP( printers2items( $[ "lp" : true, "hp-dx" : false ] ) );    
+}

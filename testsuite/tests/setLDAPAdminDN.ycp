@@ -1,0 +1,24 @@
+{
+
+// test for SambaServer::setLDAPAdminDN
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::setLDAPAdminDN( "testing" );
+    DUMP(SambaServer::LDAP_admin_dn);
+    DUMP(SambaServer::modified);
+    
+    SambaServer::modified = false;
+    SambaServer::setLDAPAdminDN( "testing" );
+    DUMP(SambaServer::LDAP_admin_dn);
+    // this time modified should not be set
+    DUMP(SambaServer::modified);
+
+    SambaServer::setLDAPAdminDN( "nexttesting" );
+    DUMP(SambaServer::LDAP_admin_dn);
+    // modified again
+    DUMP(SambaServer::modified);
+}

@@ -1,0 +1,24 @@
+{
+
+// test for SambaServer::setSAMBackend
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::setSAMBackend( `ldap );
+    DUMP(SambaServer::SAM);
+    DUMP(SambaServer::modified);
+    
+    SambaServer::modified = false;
+    SambaServer::setSAMBackend( `ldap );
+    DUMP(SambaServer::SAM);
+    // this time modified should not be set
+    DUMP(SambaServer::modified);
+
+    SambaServer::setSAMBackend( `smbpasswd );
+    DUMP(SambaServer::SAM);
+    // modified again
+    DUMP(SambaServer::modified);
+}

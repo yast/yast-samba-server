@@ -1,0 +1,13 @@
+{
+
+// test for shares2items conversion
+// $Id$
+
+    include "testsuite.ycp";
+    
+    include "samba-server/routines.ycp";
+
+    TEST( ``(shares2items( $[ "homes" : $[ "path": "/bla", "comment": "Haha", "commentout": false], 
+	"netlogon" : $[ "path": "/bla", "comment": "BooHaha", "commentout": true]
+    ] ) ), [], nil );    
+}

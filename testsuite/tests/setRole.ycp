@@ -1,0 +1,32 @@
+{
+
+// test for SambaServer::setRole
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::setRole( `disabled );
+    DUMP(SambaServer::role);
+    DUMP(SambaServer::modified);
+    
+    SambaServer::modified = false;
+    SambaServer::setRole( `disabled );
+    DUMP(SambaServer::role);
+    // this time modified should not be set
+    DUMP(SambaServer::modified);
+
+    SambaServer::setRole( `standalone );
+    DUMP(SambaServer::role);
+    // modified again
+    DUMP(SambaServer::modified);
+
+    SambaServer::setRole( `bdc );
+    DUMP(SambaServer::role);
+    DUMP(SambaServer::modified);
+
+    SambaServer::setRole( `pdc );
+    DUMP(SambaServer::role);
+    DUMP(SambaServer::modified);
+}

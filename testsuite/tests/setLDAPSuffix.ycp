@@ -1,0 +1,24 @@
+{
+
+// test for SambaServer::setLDAPSuffix
+// $Id$
+
+    include "testsuite.ycp";
+    
+    import "SambaServer";
+    
+    SambaServer::setLDAPSuffix( "testing" );
+    DUMP(SambaServer::LDAP_suffix);
+    DUMP(SambaServer::modified);
+    
+    SambaServer::modified = false;
+    SambaServer::setLDAPSuffix( "testing" );
+    DUMP(SambaServer::LDAP_suffix);
+    // this time modified should not be set
+    DUMP(SambaServer::modified);
+
+    SambaServer::setLDAPSuffix( "nexttesting" );
+    DUMP(SambaServer::LDAP_suffix);
+    // modified again
+    DUMP(SambaServer::modified);
+}
