@@ -1,4 +1,4 @@
-# File:		modules/SambaLDAP.pm
+# File:		modules/SambaBackendLDAP.pm
 # Package:	Configuration of samba-server
 # Authors:	Stanislav Visnovsky <visnov@suse.cz>
 #		Martin Lazar <mlazar@suse.cz>

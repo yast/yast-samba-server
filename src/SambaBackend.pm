@@ -72,7 +72,7 @@ sub SetPassdbBackends {
 	    unshift @toEnable, {name=>$name, backend=>$backend, location=>$location};
 	    delete $toDisable{$name};
 	} else {
-	    y2warning("Unknown backend '$name'");
+	    y2warning("Unknown or unsupported backend '$name'");
 	}
     }
     foreach (keys %toDisable) {

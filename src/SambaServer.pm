@@ -33,7 +33,6 @@ YaST::YCP::Import("SuSEFirewall");
 YaST::YCP::Import("PackageSystem");
 
 YaST::YCP::Import("SambaRole");
-YaST::YCP::Import("SambaLDAP");
 YaST::YCP::Import("SambaConfig");
 YaST::YCP::Import("SambaService");
 YaST::YCP::Import("SambaBackend");
@@ -86,19 +85,31 @@ sub Read {
     my $caption = __("Initializing Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 3, [
-	    # translators: progress stage 1/5
+    Progress->New($caption, " ", 6, [
+	    # translators: progress stage 1/6
 	    __("Read global Samba settings"),
-	    # translators: progress stage 4/5
-	    __("Read the LDAP settings"),
-	    # translators: progress stage 5/5
+	    # translators: progress stage 2/6
+	    __("Read Samba secrets"),
+	    # translators: progress stage 3/6
+	    __("Read Samba services settings"),
+	    # translators: progress stage 4/6
+	    __("Read Samba accounts"),
+	    # translators: progress stage 5/6
+	    __("Read the backend settings"),
+	    # translators: progress stage 6/6
 	    __("Read the firewall settings")
 	], [
-	    # translators: progress step 1/5
+	    # translators: progress step 1/6
 	    __("Reading global Samba settings..."),
-	    # translators: progress step 4/5
-	    __("Reading the LDAP settings..."),
-	    # translators: progress step 5/5
+	    # translators: progress step 2/6
+	    __("Reading Samba secrets..."),
+	    # translators: progress step 3/6
+	    __("Reading Samba services settings..."),
+	    # translators: progress step 4/6
+	    __("Reading Samba accounts..."),
+	    # translators: progress step 5/6
+	    __("Reading the backend settings..."),
+	    # translators: progress step 6/6
 	    __("Reading the firewall settings..."),
 	    # translators: progress finished
 	    __("Finished")
@@ -106,33 +117,33 @@ sub Read {
 	""
     );
 
-    # read global settings
+    # 1: read global settings
     Progress->NextStage();
-    
     # check installed packages
     unless (Mode->test()) {
 	PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) or return 0;
     }
-
     SambaConfig->Read();
+    
+    # 2: read samba secrets
+    Progress->NextStage();
     SambaSecrets->Read();
+    
+    # 3: read services settings
+    Progress->NextStage();
     SambaService->Read();
-    SambaAccounts->Read();
-
-    $GlobalsConfigured = $self->Configured();
-
-    y2milestone("Service:". (SambaService->GetServiceAutoStart() ? "Enabled" : "Disabled"));
-    y2milestone("Role:". SambaRole->GetRoleName());
-
     # start nmbstatus in background
     SambaNmbLookup->Start() unless Mode->test();
+    
+    # 4: read accounts
+    Progress->NextStage();
+    SambaAccounts->Read();
 
-    # read LDAP settings
+    # 5: read backends settings
     Progress->NextStage();
     SambaBackend->Read();
-#    if(Abort()) return false;
-    
-    # read firewall setting
+
+    # 6: read firewall setting
     Progress->NextStage();
     my $po = Progress->set(0);
     SuSEFirewall->Read();
@@ -142,7 +153,11 @@ sub Read {
     # Read finished
     Progress->NextStage();
     $Modified = 0;
-    y2milestone("Read finished");
+
+    $GlobalsConfigured = $self->Configured();
+
+    y2milestone("Service:". (SambaService->GetServiceAutoStart() ? "Enabled" : "Disabled"));
+    y2milestone("Role:". SambaRole->GetRoleName());
     
     return 1;
 }
@@ -177,22 +192,30 @@ sub Write {
     my $caption = __("Saving Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 3, [
+    Progress->New($caption, " ", 5, [
 	    # translators: write progress stage
-	    _("Write the settings"),
+	    _("Write global settings"),
 	    # translators: write progress stage
 	    ( !SambaService->GetServiceAutoStart() ? _("Disable Samba services") 
 	    # translators: write progress stage
 		: _("Enable Samba services") ),
 	    # translators: write progress stage
+	    _("Write backend settings"),
+	    # translators: write progress stage
+	    _("Write samba accoutns"),
+	    # translators: write progress stage
 	    _("Save firewall settings")
 	], [
 	    # translators: write progress step
-	    _("Writing the settings..."),
+	    _("Writing global settings..."),
 	    # translators: write progress step
 	    ! SambaService->GetServiceAutoStart() ? _("Disabling Samba services...") 
 	    # translators: write progress step
 		: _("Enabling Samba services..."),
+	    # translators: write progress stage
+	    _("Writing backend settings..."),
+	    # translators: write progress stage
+	    _("Writing samba accoutns..."),
 	    # translators: write progress step
 	    _("Saving firewall settings..."),
 	    # translators: write progress step
@@ -201,6 +224,7 @@ sub Write {
 	""
     );
 
+    # 1: write settings
     # if nothing to write, quit (but show at least the progress bar :-)
     Progress->NextStage();
     return 1 unless $self->GetModified();
@@ -210,39 +234,33 @@ sub Write {
     if($backends{mysql}) {
 	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
     }
-
-    # write settings
-#    if (Abort()) return false;
-
     if (!SambaConfig->Write($write_only)) {
     	Report->Error(__("Cannot write settings to /etc/samba/smb.conf."));
 	return 0;
     }
     SCR->Execute(".target.bash", "touch " . DONE_ONCE_FILE);
     
-    # run SuSEconfig for samba
-#    if(Abort()) return false;
-
-    SambaBackend->Write();    
-    SambaTrustDom->Write();
-    SambaAccounts->Write();
-
+    # 2: write services settings
     Progress->NextStage();
     SambaService->Write();
 
-#    if(Abort()) return false;
+    # 3: write backends settings && write trusted domains
+    Progress->NextStage();
+    SambaBackend->Write();
+    SambaTrustDom->Write();
+    
+    # 4: write accounts
+    Progress->NextStage();
+    SambaAccounts->Write();
 
-    # save firewall settings
+    # 5: save firewall settings
     Progress->NextStage();
     my $po = Progress->set(0);
     SuSEFirewall->Write();
     Progress->set($po);
-#    if(Abort()) return false;
     
     # progress finished
     Progress->NextStage();
-
-#    if(Abort()) return false;
 
     $GlobalsConfigured = 1;
     $Modified = 0;

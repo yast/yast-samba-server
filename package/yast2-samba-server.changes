@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 15 11:23:01 CET 2005 - mlazar@suse.cz
+
+- SambaServer.pm: updated Read()/Write() progress bar
+- wizards, dialaog-items.ycp: clean-up
+
+-------------------------------------------------------------------
 Mon Mar 14 11:23:36 CET 2005 - mlazar@suse.cz
 
 - fixed progress status indicator in Read()/Write()

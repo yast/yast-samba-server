@@ -21,7 +21,6 @@
     import "SambaServer";
     import "SambaConfig";
     import "SambaBackend";
-    import "SambaBackendLDAP";
     
     include "samba-server/helps.ycp";
 
@@ -581,19 +580,6 @@ further information.
 	return opt_id;
     }
 
-    // test the LDAP
-    define void testLDAPServer (string server, string suffix) {
-        // translators: progress dialog text
-        UI::OpenDialog(`Label( _("Testing LDAP connection...") ) );
-        if( SambaBackendLDAP::TestLDAP( server, suffix ) )
-        {
-            // translators: test result popup message
-            Popup::Message( _("LDAP connection is OK.") );
-        }
-        UI::CloseDialog();
-    }
-
-
     define void initPassdb(string key) ``{
 	TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], key);
     }
@@ -607,27 +593,6 @@ further information.
 	    return nil;
 	}
 
-	// LDAP settings menu item selected, move to a different dialog	
-	if ( event_descr["ID"]:nil == `ldap )
-	{
-	    return `ldap;
-	}
-	
-	// test LDAP menu item selected, try the item
-	if ( event_descr["ID"]:nil == `ldap_test )
-	{
-	    string backend = passdb_backends[(string)UI::QueryWidget (`_tp_table, `CurrentItem)]: nil;
-	    
-	    if (SambaBackend::GetName(backend) != "ldapsam")
-	    {
-		// translators: the current item is not LDAP, LDAP connection cannot be tested.
-		Popup::Error (_("Select an LDAP back-end to test."));
-		return nil;
-	    }
-	    testLDAPServer( SambaBackend::GetLocation(backend), SambaConfig::GlobalGetStr("ldap suffix", ""));
-	    return nil;	    
-	}
-	
 	if ( event_descr["ID"]:nil == `back )
 	{
 	    passdb_backends = nil;
