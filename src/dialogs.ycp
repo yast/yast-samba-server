@@ -75,7 +75,7 @@ any Installation_Step1 () {
 
     string caption = _("Samba Installation") + " - " + _("Step 1 of 2");
 
-    list <string> workgroups = SambaNmbLookup::GetAvailableWorkgroups(nil);
+    list <string> workgroups = SambaNmbLookup::GetAvailableNeighbours(nil);
 
     // always add the currently configured workgroup
     string workgroup = SambaConfig::GlobalGetStr("workgroup", "");
@@ -660,7 +660,7 @@ any Installation_Conf_Tab () {
         `HSpacing(1),
 	`VBox(
 	    `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name"),
-		SambaNmbLookup::GetAvailableWorkgroups (nil)),
+		SambaNmbLookup::GetAvailableNeighbours(nil)),
 	    // translators: combobox label
 	    `ComboBox(`id("domain_controller"), `opt(`hstretch), _("Domain &Controller"),  roles),
 	    `VStretch()),
