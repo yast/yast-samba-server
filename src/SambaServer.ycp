@@ -2148,7 +2148,10 @@ boolean EnsureRootAccount ()
 	`HVSquash(
         `VBox(
 	    // FIXME: we need a Samba mentioned here (9.2)
-	    `Password(`id(`passwd1), _("&Enter a password for the root user:") + " (Samba)"),
+	    `Label ( _("For a proper function, Samba server needs an
+administrative account (root).
+It will be created now."),
+	    `Password(`id(`passwd1), _("&Enter a password for the Samba root user:") ,
             `Password(`id(`passwd2), _("Reenter the password for &verification:") ),
                 `HBox(
                     `PushButton(`id(`ok), `opt(`default), Label::OKButton() ),
