@@ -7,19 +7,14 @@
     
     import "SambaServer";
     
-    SambaServer::setRole( `disabled );
+    SambaServer::setRole( `standalone );
     DUMP(SambaServer::role);
     DUMP(SambaServer::modified);
     
     SambaServer::modified = false;
     SambaServer::setRole( `disabled );
     DUMP(SambaServer::role);
-    // this time modified should not be set
-    DUMP(SambaServer::modified);
-
-    SambaServer::setRole( `standalone );
-    DUMP(SambaServer::role);
-    // modified again
+    // this time modified should be set
     DUMP(SambaServer::modified);
 
     SambaServer::setRole( `bdc );

@@ -1,8 +1,6 @@
-Dump	`disabled
+Dump	`standalone
 Dump	true
 Dump	`disabled
-Dump	false
-Dump	`standalone
 Dump	true
 Dump	`bdc
 Dump	true

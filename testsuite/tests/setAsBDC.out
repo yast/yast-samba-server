@@ -1,4 +1,4 @@
-Dump	`standalone
+Dump	`disabled
 Dump	user
 Dump	Domain logons: false
 Dump	Domain master: auto
@@ -6,7 +6,7 @@ Dump	Local master: false
 Dump	Preferred master: auto
 Return	true
 Dump	false
-Dump	`standalone
+Dump	`disabled
 Dump	user
 Dump	Domain logons: true
 Dump	Domain master: false

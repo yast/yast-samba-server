@@ -75,8 +75,10 @@ global define symbol SambaServerAutoSequence() ``{
 
     UI::CloseDialog();
     
-    SambaServer::globals_configured = true;
-    SambaServer::shares_configured = true;
+    if( ret != `abort ) {
+	SambaServer::globals_configured = true;
+	SambaServer::shares_configured = true;
+    }
     
     return ret;
 }

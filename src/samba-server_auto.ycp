@@ -50,6 +50,8 @@ if(func == "Summary") {
 else if (func == "Reset") {
     SambaServer::Import($[]);
     ret = $[];
+    SambaServer::globals_configured = false;
+    SambaServer::shares_configured = false;
 }
 /* Change configuration (run AutoSequence) */
 else if (func == "Change") {

@@ -564,7 +564,7 @@ global define map AddSharePopup() ``{
 		// translators: error message
 		Popup::Error( _("Share path cannot be empty.") );
 		ret = nil;
-	    } else if( SCR::Read( .target.stat, pathvalue ) == $[] ) {
+	    } else if( ! Mode::config && SCR::Read( .target.stat, pathvalue ) == $[] ) {
 		// translators: question popup. A user entered non-existent path
 		// for a share
 		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.

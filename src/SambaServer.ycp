@@ -59,7 +59,7 @@ global string server_string = "Samba Server";
 /**
  * role of the server: `disabled, `standalone, `bdc, `pdc
  */
-global symbol role = `standalone;
+global symbol role = `disabled;
 
 /**
  * domain master
@@ -592,6 +592,8 @@ global define boolean Import (map settings) ``{
 
     if( size( settings ) == 0 ) return true;
     
+    y2error( "Importing: %1", settings );
+    
     Samba::Import( settings );
     
     // read global settings
@@ -662,8 +664,12 @@ global define map Export () ``{
     list printers = maplist( string printer, boolean status, printer_status, ``{
 	return $[ "printer": printer, "status" : status ];
     });
+    
+    map result = $[ "global" : globals ];
+    if( size(r_shares) > 0 ) result ["shares"] = r_shares;
+    if( size(printers) > 0 ) reuslt ["printers"] = printers; 
 
-    return $[ "global": globals, "shares" : r_shares, "printers" : printers ];
+    return result;
 }
 
 /**
@@ -884,7 +890,7 @@ global define void enableLogon( boolean on ) ``{
 }
 
 /** 
- * Configure as PDC.
+ * Configure as PDC. Does NOT set @ref role.
  *
  * @return boolean	true on success
  */
@@ -900,7 +906,7 @@ global define boolean setAsPDC() ``{
 }
 
 /** 
- * Configure as BDC.
+ * Configure as BDC. Does NOT set @ref role.
  *
  * @return boolean	true on success
  */
@@ -913,7 +919,7 @@ global define boolean setAsBDC() ``{
 }
 
 /** 
- * Configure as a standalone server (no domain logons)
+ * Configure as a standalone server (no domain logons) Does NOT set @ref role.
  *
  * @return boolean	true on success
  */
@@ -926,6 +932,7 @@ global define boolean setAsStandalone() ``{
 
 /** 
  * Configure for a given role. Calls @ref setAsPDC, @ref setAsBDC and @ref setAsStandalone
+ * Setup @ref role variable.
  *
  * @param  new_role	the new role
  * @return boolean	true on success
