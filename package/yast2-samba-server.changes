@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Fri Apr  2 14:42:00 CEST 2004 - visnov@suse.cz
 
-- properly detect enabled shares (#37941) 
+- properly detect enabled shares (#37941)
+- 2.9.14 
 
 -------------------------------------------------------------------
 Thu Apr  1 19:22:44 CEST 2004 - visnov@suse.cz
