@@ -50,6 +50,7 @@ symbol SambaServerSequence() ``{
 	]
     ];
 
+    Wizard::SetDesktopIcon("samba-server");
     Wizard::CreateDialog();
 
     symbol ret = Sequencer::Run(aliases, sequence);

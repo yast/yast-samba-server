@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar  8 17:37:35 CET 2004 - visnov@suse.cz
+
+- add icon into wizard
+
+-------------------------------------------------------------------
 Mon Mar  8 17:18:26 CET 2004 - visnov@suse.cz
 
 - pass correct values to share read/write (#35234)
