@@ -6,7 +6,7 @@
 # The following user parameters are handled inside this module
 #
 
-package UsersPluginSamba;
+package UsersPluginSambaGroups;
 
 use strict;
 
@@ -51,7 +51,8 @@ YaST::YCP::Import ("SCR");
     
 ##------------------------------------
 
-my $pluginName = "UsersPluginSamba"; 
+# TODO check for Mode::config???
+my $pluginName = "UsersPluginSambaGroups"; 
 
 # return names of provided functions
 BEGIN { $TYPEINFO{Interface} = ["function", ["list", "string"], "any", "any"];}
@@ -92,7 +93,8 @@ sub Summary {
     my $self	= shift;
     my $what	= "user";
     # summary
-    my $ret 	= _("Manage Samba Account of LDAP user");
+    my $ret 	= _("Manage Samba Attribute of LDAP groups");
+
     return $ret;
 }
 
@@ -100,8 +102,9 @@ sub Summary {
 # return name of YCP client defining YCP GUI
 BEGIN { $TYPEINFO{GUIClient} = ["function", "string", "any", "any"];}
 sub GUIClient {
+
     my $self	= shift;
-    return "users_plugin_samba";
+    return "users_plugin_samba_groups";
 }
 
 ##------------------------------------
@@ -110,10 +113,11 @@ sub GUIClient {
 BEGIN { $TYPEINFO{Restriction} = ["function",
     ["map", "string", "any"], "any", "any"];}
 sub Restriction {
+
     my $self	= shift;
     # this plugin applies only for LDAP users and groups
     return { "ldap"	=> 1,
-             "user"     => 1 };
+             "group"     => 1 };
 }
 
 # checks the current data map of user/group (2nd parameter) and returns
@@ -124,7 +128,7 @@ sub PluginPresent {
     my $config    = shift;
     my $data    = shift;
 
-    if ( grep /^sambasamaccount$/i, @{$data->{'objectclass'}} ) {
+    if ( grep /^sambagroupmapping$/i, @{$data->{'objectclass'}} ) {
         y2milestone( "SambaPlugin: Plugin Present");
         return 1;
     } else {
@@ -145,9 +149,11 @@ BEGIN { $TYPEINFO{Check} = ["function",
     "any"];
 }
 sub Check {
+
     my $self	= shift;
     my $config	= $_[0];
     my $data	= $_[1];
+    
     return "";
 }
 
@@ -176,16 +182,15 @@ sub AddBefore {
    
     if( ! $data->{'sambainternal'} ) {
         $data->{'sambainternal'} = {};
-        my $ret = $self->init_samba_sid( $config, $data );
-        if( $ret ) {
-            y2internal("Could not initialize samba sid");
-        }
     }
-
-    
-    my $ret = $self->update_object_classes( $config, $data );
+    my $ret = $self->init_samba_sid( $config, $data );
     if( $ret ) {
-        y2internal("Could not update objectclass attribute");
+        return $ret;
+    } else {
+    }
+    $ret = $self->update_object_classes( $config, $data );
+    if( $ret ) {
+        return $ret;
     }
     
     return $data;
@@ -215,7 +220,7 @@ sub EditBefore {
     my $self	= shift;
     my $config	= $_[0];
     my $data	= $_[1];
-    y2internal ("EditBefore Samba called");
+    #y2internal ("EditBefore Samba called");
     
     # First time call to Edit() 
     if( ! $data->{'sambainternal'} ) {
@@ -237,12 +242,11 @@ sub Edit {
     my $config	= $_[0];
     my $data	= $_[1];
 
-    y2internal ("Edit Samba called");
-    # y2internal ( Data::Dumper->Dump( [ $data ] ) );
+    #y2internal ( Data::Dumper->Dump( [ $data ] ) );
     # Has the plugin been removed?
     if( grep /^$pluginName$/, @{$data->{'plugins_to_remove'}} ) {
         $self->remove_plugin_data( $config, $data );
-        y2internal ( Data::Dumper->Dump( [ $data ] ) );
+        #y2internal ( Data::Dumper->Dump( [ $data ] ) );
         return $data;
     }
     
@@ -258,11 +262,7 @@ sub Edit {
     }
 
     $self->update_attributes ($config, $data);
-    if ( (! $data->{'sambalmpassword'})  ) {
-        y2milestone ("no samba password hashes present yet");
-    }
 
-    #y2internal ( Data::Dumper->Dump( [ $data ] ) );
     return $data;
 }
 
@@ -272,20 +272,20 @@ BEGIN { $TYPEINFO{InternalAttributes} = ["function",
     "any", "any"];
 }
 sub InternalAttributes {
-    return [ "sambainternal", "sambanoexpire", "sambadisabled"];
+    return [ "sambainternal"];
 }
 
 sub update_object_classes {
     my ($self, $config, $data) = @_;
 
-    my $oc = "sambaSamAccount";
+    my $oc = "sambaGroupMapping";
 
     # define the object class for new user/groupa
     if (defined $data->{"objectclass"} && ref $data->{"objectclass"} eq "ARRAY")
     {
         if ( ! grep /^$oc$/i, @{$data->{'objectclass'}} ) {
 	    push @{$data->{'objectclass'}}, $oc;
-            y2milestone("added ObjectClass $oc");
+            #y2milestone("added ObjectClass $oc");
         }
     }
     return undef;
@@ -293,25 +293,7 @@ sub update_object_classes {
 
 sub init_internal_keys {
     my ($self, $config, $data) = @_;
-    
-    if ( $data->{'sambaacctflags'} ) {
-        if ( ! defined( $data->{'sambadisabled'} ) ) {
-            y2internal("    UsersPluginSamba::init_internal_keys sambadisabled undefined ");
-            if ( $data->{'sambaacctflags'} =~ /^\[.*D.*\]/ ) {
-                $data->{'sambadisabled'} = "1";
-            } else {
-                $data->{'sambadisabled'} = "0";
-            }
-        }
-        if ( ! defined( $data->{'sambanoexpire'} ) ) {
-            y2internal("    UsersPluginSamba::init_internal_keys sambanoexpire undefined ");
-            if ( $data->{'sambaacctflags'} =~ /^\[.*X.*\]/ ) {
-                $data->{'sambanoexpire'} = "1";
-            } else {
-                $data->{'sambanoexpire'} = "0";
-            }
-        }
-    }
+    #y2internal("UsersPluginSamba::init_internal_keys");
     return undef;
 }
 
@@ -319,89 +301,21 @@ sub update_attributes {
     my ( $self, $config, $data ) = @_;
 
     my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
-    my $uidNumber = $data->{'uidnumber'};
-    if ( $uidNumber ) {
-        $data->{'sambasid'} = $SID."-". ( 2 * $uidNumber + $data->{'sambainternal'}->{'ridbase'} );
-    }
     my $gidNumber = $data->{'gidnumber'};
     if ( $gidNumber ) {
-        $data->{'sambaprimarygroupsid'} = $SID."-". (2 * $gidNumber + 
-                $data->{'sambainternal'}->{'ridbase'} + 1 );
+        $data->{'sambasid'} = $SID."-". (2 * $gidNumber + $data->{'sambainternal'}->{'ridbase'} + 1);
     }
-    $data->{'sambainternal'}->{'sambacleartextpw'} = $data->{'text_userpassword'};
-
-    my $ret = $self->update_samba_pwhash( $config, $data );
-    if( $ret ) {
-        return $ret;
+    if( ! $data->{'displayname'} ) {
+        $data->{'displayname'} = $data->{'cn'};
     }
-    $ret = $self->update_samba_acctflags( $config, $data );
-    if( $ret ) {
-        return $ret;
-    }
-
-}
-
-sub update_samba_acctflags {
-    my ($self, $config, $data) = @_;
-
-    my $acctflags = $data->{'sambaacctflags'} || "[U         ]";
-
-    $acctflags =~ s/^\[(\w+)\s*\]$/$1/g;
-    
-    if( defined( $data->{'sambadisabled'} ) && 
-            $data->{'sambadisabled'} eq "1" ) {
-        if ( $acctflags !~ /D/ ) {
-            $acctflags .= "D";
-        }
-    } elsif ( (! defined( $data->{'sambadisabled'})) 
-                || $data->{'sambadisabled'} eq "0" ) {
-        $acctflags =~ s/^(.*)D(.*)$/$1$2/g;
-    }
-    if( defined( $data->{'sambanoexpire'} ) 
-                && $data->{'sambanoexpire'} eq "1" ) {
-        if ( $acctflags !~ /X/ ) {
-            $acctflags .= "X";
-        }
-    } elsif ( (! defined( $data->{'sambanoexipre'})) 
-                || $data->{'sambanoexpire'} eq "0" ) {
-        $acctflags =~ s/^(.*)X(.*)$/$1$2/g;
-    }
-    
-    my $len = length($acctflags);
-    for( my $i=0; $i < ( 11 - $len ); $i++ ) {
-        $acctflags .= " ";
-    }
-    $data->{'sambaacctflags'} = "[". $acctflags ."]";
-    return undef;
-}
-
-sub update_samba_pwhash {
-    my ( $self, $config, $data ) = @_;
-    
-    if ( $data->{'sambainternal'}->{'sambacleartextpw'} ) {
-        my $update_timestamp = 0;
-        my ($lmHash, $ntHash) = ntlmgen($data->{'sambainternal'}->{'sambacleartextpw'});
-        if ( (!$data->{'sambalmpassword'}) || ($lmHash ne $data->{'sambalmpassword'}) ) {
-            $data->{'sambalmpassword'} = $lmHash;
-            $update_timestamp = 1;
-        }
-        if ( (! $data->{'sambantpassword'}) || ( $ntHash ne $data->{'sambantpassword'} ) ) {
-            $data->{'sambantpassword'} = $ntHash;
-            $update_timestamp = 1;
-        }
-        if ( $update_timestamp ) {
-            $data->{'sambapwdlastset'} = time ();
-            $data->{'sambapwdcanchange'} = $data->{'sambapwdlastset'};
-        }
-        $data->{'sambapwdmustchange'} = ( 1 << 31 ) - 1;
-    }
+    $data->{'sambagrouptype'} = "2";
     return undef;
 }
 
 sub init_samba_sid {
     my ( $self, $config, $data ) = @_;
-    if ( (! $data->{'sambainternal'}->{'sambalocalsid'}) || 
-         ($data->{'sambainternal'}->{'sambalocalsid'} eq "") ) {
+    #y2milestone("init samba sid ");
+    if ( (! $data->{'sambainternal'}->{'sambalocalsid'}) || ($data->{'sambainternal'}->{'sambalocalsid'} eq "") ) {
         my $base_dn = Ldap->GetDomain();
         my $res = SCR->Read(".ldap.search", { base_dn => $base_dn,
                                               scope => YaST::YCP::Integer(2),
@@ -414,7 +328,6 @@ sub init_samba_sid {
             my $ldaperr = SCR::Read(".ldap.error" );
             y2internal("$ldaperr->{'code'}");
             y2internal("$ldaperr->{'msg'}");
-            return "error reading samba sid";
         } else {
             #y2milestone( Data::Dumper->Dump( [$res] ));
             if ( $res->[0]->{'sambasid'}->[0] ) {
@@ -433,15 +346,28 @@ sub remove_plugin_data {
   
     my @updated_oc;
     foreach my $oc ( @{$data->{'objectclass'}} ) {
-        if ( lc($oc) ne "sambasamaccount" ) {
+        if ( lc($oc) ne "sambagroupmapping" ) {
             push @updated_oc, $oc;
         }
     }
-    delete( $data->{'sambanoexpire'});
-    delete( $data->{'sambadisabled'});
-    delete( $data->{'sambainternal'});
+#    delete( $data->{'sambainternal'});
+#    delete( $data->{'sambapwdmustchange'});
+#    delete( $data->{'sambapwdlastset'});
+#    delete( $data->{'sambapwdcanchange'});
+#    delete( $data->{'sambantpassword'});
+#    delete( $data->{'sambalmpassword'});
+#    delete( $data->{'sambaacctflags'});
+#    delete( $data->{'sambahomedrive'});
+#    delete( $data->{'sambahomepath'});
+#    delete( $data->{'sambaprofilepath'});
+#    delete( $data->{'sambalogonscript'});
+#    delete( $data->{'sambasid'});
+#    delete( $data->{'sambaprimarygroupssid'});
+#    delete( $data->{'sambanoexprire'});
+#    delete( $data->{'sambadisabled'});
 
     $data->{'objectclass'} = \@updated_oc;
+    return undef;
 }
 
 1;
