@@ -13,7 +13,6 @@
 package SambaService;
 
 use strict;
-use Switch 'Perl6';
 use Data::Dumper;
 
 use YaST::YCP qw(:DATA :LOGGING);
@@ -27,10 +26,10 @@ YaST::YCP::Import("Service");
 }
 
 # Data was modified?
-my $Modified = 0;
+our $Modified = 0;
 
 # Is smb and nmb service enabled? 
-my $Service = 0;
+our $Service = 0;
 
 # Data was modified?
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
@@ -51,7 +50,8 @@ BEGIN{$TYPEINFO{Import}=["function", "void", "any"]}
 sub Import {
     my ($self, $any) = @_;
     $any = "No" unless $any;
-    $self->SetServiceAutoStart(($any =~ /^(1|Enabled?|True|Yes)$/i) ? 1 : 0);
+    $Service = ($any =~ /^(1|Enabled?|True|Yes)$/i) ? 1 : 0;
+    $Modified = 0;
 }
 
 # Read
@@ -68,17 +68,20 @@ sub Read {
 BEGIN{$TYPEINFO{Write}=["function", "boolean"]}
 sub Write {
     my ($self) = @_;
+    my $error = 0;
+    return 1 unless $Modified;
     y2debug("Samba service if ". ($Service ? "enabled" : "disabled"));
-    Service->Adjust("nmb", $Service ? "enable" : "disable") or return 0;
-    Service->Adjust("smb", $Service ? "enable" : "disable") or return 0;
+    Service->Adjust("nmb", $Service ? "enable" : "disable") or $error = 1;
+    Service->Adjust("smb", $Service ? "enable" : "disable") or $error = 1;
     $Modified = 0;
-    return 1
+    return $error == 0;
 }
 
 # Adjust SAMBA server services (smb and nmb).
 BEGIN{$TYPEINFO{SetServiceAutoStart} = ["function", "void", "boolean"]}
 sub SetServiceAutoStart {
     my ($self, $on) = @_;
+    $on = 1 unless defined $on;
     unless (($on && $Service) || (!$on && !$Service)) {
 	$Service = $on ? 1 : 0;
 	$Modified = 1;
@@ -96,6 +99,7 @@ sub GetServiceAutoStart {
 BEGIN{$TYPEINFO{StartStopNow}=["function", "boolean", "boolean"]};
 sub StartStopNow {
     my ($self, $on) = @_;
+    my $error = 0;
     
     foreach("nmb", "smb") {
 	if ($on) {
@@ -104,13 +108,13 @@ sub StartStopNow {
 		# the service does not run => start it
 		unless (Service->Start($_)) {
 		    y2error("Service::Start($_) failed");
-		    return 0;
+		    $error = 1;
 		}
 	    } else {
 		# the service runs => relaod it
 		unless (Service->RunInitScript($_, "restart")) {
 		    y2error("Service::RunInitScript($_, 'restart') failed");
-		    return 0;
+		    $error = 1;
 		}
 	    }
 	} else {
@@ -118,13 +122,13 @@ sub StartStopNow {
 	    unless (Service->Status($_)) {
 		unless (Service->Stop($_)) {
 		    y2error("Service::Stop($_) failed");
-		    return 0;
+		    $error = 1;
 		}
 	    }
 	}
     }
     
-    return 1;
+    return $error == 0;
 }
 
 8;
