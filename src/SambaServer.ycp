@@ -34,6 +34,7 @@ include "samba-server/samba-options-local.ycp";
 include "samba-server/samba-options-global.ycp";
 include "samba-server/samba-synonym-map.ycp";
 
+global define boolean Modified();
 global define symbol DetermineRole();
 global define void ReadLDAPSettings();
 global define boolean WriteSettings();
