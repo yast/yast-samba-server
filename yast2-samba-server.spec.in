@@ -1,5 +1,5 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages samba-client
+# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-printer
 
 @HEADER@
 Requires:	yast2 samba samba-client

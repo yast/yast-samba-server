@@ -102,8 +102,18 @@ the replication.") );
 	    Samba::setWorkgroup( UI::QueryWidget( `id(`workgroup ), `Value ) );
 	    SambaServer::setDescription( UI::QueryWidget( `id( `server_description ), `Value ) );
 	    
-	    if( SambaServer::role != `disabled )
-		CheckWorkgroup( Samba::workgroup );
+	    if( SambaServer::role != `disabled ) {
+		symbol res = CheckWorkgroup( Samba::workgroup );
+		if( res == `domain && SambaServer::role == `pdc ) {
+		    if( ! Popup::ContinueCancel( sformat( _("You asked to set this Samba server
+to act as Primary Domain Controller.
+However, '%1' is a domain where already
+a Primary Domain Controller exists.
+The domain will not work coorectly, if there
+are two Primary domain controllers.\n
+Do you really want to continue?"), Samba::workgroup ) ) ) continue;
+		}
+	    }
 
             break;
         }
