@@ -2,6 +2,7 @@
 
 // test for SambaServer::ReloadSettings()
 // $Id$
+// testedfiles: Samba.ycp, SambaServer.ycp
 
     include "testsuite.ycp";
 

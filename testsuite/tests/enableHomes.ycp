@@ -2,6 +2,7 @@
 
 // test for SambaServer::enableHomes( enable )
 // $Id$
+// testedfiles: Samba.ycp SambaServer.ycp
 
     include "testsuite.ycp";
     

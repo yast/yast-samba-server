@@ -1,0 +1,57 @@
+{
+
+// test for YaPI::Samba::AddShare()
+// $Id$
+// testedfiles: SambaServer.ycp
+
+    include "testsuite.ycp";
+
+    TESTSUITE_INIT( [ 
+	$[ 
+	    "target" : $[ "tmpdir" : "/tmp" ],  
+	    "etc" : $[
+		"smb" : $[
+		    "value" : $[
+			"global" : $[
+			    "workgroup" : "Test",
+			    "security" : "user",
+			    "domain master" : "no",
+			    "domain logons" : "no",
+			    "local master" : "no",
+			    "preferred master" : "yes",
+			],
+		    ],
+		],
+		"printcap" : [],
+	    ],
+	    "passwd" : $[
+		"passwd" : $[
+		    "pluslines" : [],
+		]
+	    ],
+	],
+	$[],
+	$[
+    	    "target" : $[
+        	"bash_output" : $[],
+		"bash" : 1
+    	    ],
+	    "background" : $[
+		"run_output" : true,
+	    ],
+	    "passwd" : $[
+		"init" : true,
+	    ],
+	]
+    ], nil );
+
+    import "YaPI::Samba";
+    
+    import "Mode";
+    Mode::test = true;
+
+    DUMP(YaPI::Samba::AddShare( "test" , $[
+	"path" : "/home/test",
+	"printable" : "no"
+    ]));
+}

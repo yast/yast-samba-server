@@ -2,6 +2,7 @@
 
 // test for SambaServer::enableLogon( enable )
 // $Id$
+// testedfiles: Samba.ycp SambaServer.ycp
 
     include "testsuite.ycp";
     
@@ -20,19 +21,19 @@
     import "SambaServer";
     
     DUMP(SambaServer::shares);
-    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::global_config["domain logons"]:nil);
     DUMP(SambaServer::modified);
     
     Samba::modified = false;
-    TEST( ``( SambaServer::enableLogon(true) ), [], nil );
+    TEST( ``( SambaServer::enableNetlogon(true) ), [], nil );
 
     DUMP(SambaServer::shares);
-    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::global_config["domain logons"]:nil);
     DUMP(SambaServer::modified);
 
-    TEST( ``( SambaServer::enableLogon(false) ), [], nil );
+    TEST( ``( SambaServer::enableNetlogon(false) ), [], nil );
 
     DUMP(SambaServer::shares);
-    DUMP(SambaServer::domain_logons);
+    DUMP(SambaServer::global_config["domain logons"]:nil);
     DUMP(SambaServer::modified);
 }

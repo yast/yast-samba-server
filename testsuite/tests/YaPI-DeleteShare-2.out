@@ -1,0 +1,34 @@
+Read	.etc.smb.value.global."passdb backend" nil
+Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
+Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value.global."add machine script" nil
+Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value.global."netbios name" nil
+Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value.global."prefered master" nil
+Read	.target.stat "/etc/samba/secrets.tdb" nil
+Log	Cannot get the list of trusted domains
+Dir	.etc.smb.section: ["lp"]
+Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value."lp"."printable" "yes"
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value."lp"."directory" nil
+Read	.etc.smb.value."lp"."read list" nil
+Read	.etc.smb.value."lp"."write list" nil
+Read	.etc.smb.value."lp"."browseable" nil
+Read	.etc.smb.value."lp"."guest ok" nil
+Read	.etc.smb.value."lp"."valid users" nil
+Read	.etc.smb.value."lp"."printable" "yes"
+Read	.etc.smb.value."lp"."print ok" nil
+Read	.etc.smb.section_type."lp" 0
+Read	.etc.smb.value.global."ldap admin dn" nil
+Read	.etc.smb.value.global."ldap suffix" nil
+Dump	nil

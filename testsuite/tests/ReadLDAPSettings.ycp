@@ -2,6 +2,7 @@
 
 // test for SambaServer::ReadLDAPsettings()
 // $Id$
+// testedfiles: Samba.ycp, SambaServer.ycp
 
     include "testsuite.ycp";
 
@@ -24,9 +25,10 @@
 		"ldap suffix" : "dc=example,dc=com",
 		"ldap admin dn" : "uid=root,dc=example,dc=com",
             ] ] ] ] ,
+	    "passwd" : $[ "init" : true, "passwd" : $[ "pluslines" : [] ] ], 
         ],
 	$[],
-	$[]
+	$[ "passwd" : $[ "init" : true, "passwd" : $[ "pluslines" : [] ] ] ]
     ], nil );
     
     DUMP( SambaServer::LDAP_admin_dn );

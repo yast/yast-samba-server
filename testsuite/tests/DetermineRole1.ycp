@@ -2,6 +2,7 @@
 
 // test for SambaServer::DetermineRole() for PDC
 // $Id$
+// testedfiles: Samba.ycp, SambaServer.ycp
 
     include "testsuite.ycp";
 

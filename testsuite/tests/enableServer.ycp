@@ -2,6 +2,7 @@
 
 // test for Samba::EnableServer( boolean ) - enable/disable smb/nmb service
 // $Id$
+// testedfiles: Samba.ycp SambaServer.ycp
 
     include "testsuite.ycp";
 

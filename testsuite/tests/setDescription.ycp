@@ -2,6 +2,7 @@
 
 // test for SambaServer::setDescription
 // $Id$
+// testedfiles: Samba.ycp, SambaServer.ycp
 
     include "testsuite.ycp";
 
@@ -18,17 +19,17 @@
     import "SambaServer";
     
     SambaServer::setDescription( "testing" );
-    DUMP(SambaServer::server_string);
+    DUMP(SambaServer::getDescription ());
     DUMP(SambaServer::modified);
     
     SambaServer::modified = false;
     SambaServer::setDescription( "testing" );
-    DUMP(SambaServer::server_string);
+    DUMP(SambaServer::getDescription ());
     // this time modified should not be set
     DUMP(SambaServer::modified);
 
     SambaServer::setDescription( "nexttesting" );
-    DUMP(SambaServer::server_string);
+    DUMP(SambaServer::getDescription ());
     // modified again
     DUMP(SambaServer::modified);
 }

@@ -1,0 +1,102 @@
+{
+
+// test for Samba::EnableServer( boolean ) - enable/disable smb/nmb service
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    include "testsuite.ycp";
+
+    TESTSUITE_INIT( [
+        $[ "target" : $[ "tmpdir" : "/tmp" ] ],
+        $[],
+        $[
+            "target" : $[
+                "bash_output" : $[],
+            ],
+        ]
+    ], nil );
+    
+    import "YaPI::Samba";
+    
+    DUMP ("Enable disabled service");
+
+    // enable service, but it's disabled
+    TEST( ``( YaPI::Samba::EditService( true ) ), [ 
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    DUMP ("Disable disabled service");
+
+    // disable service, but it's already disabled
+    TEST( ``( YaPI::Samba::EditService( false ) ), [
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    DUMP ("Enable enabled service");
+
+    // enable service, but it's already enabled
+    TEST( ``( YaPI::Samba::EditService( true ) ), [ 
+	$[ 
+	    "init" : $[ 
+		"scripts" : $[ 
+		    "exists" : true,
+		    "runlevel" : $[
+			"smbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+			"nmbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+		    ],
+		],
+	    ],
+	    
+	],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    DUMP ("Disable enabled service");
+
+    // disable service, but it's enabled
+    TEST( ``( YaPI::Samba::EditService( false ) ), [
+	$[ 
+	    "init" : $[ 
+		"scripts" : $[ 
+		    "exists" : true,
+		    "runlevel" : $[
+			"smbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+			"nmbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+		    ],
+		],
+	    ],
+	    
+	],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+}

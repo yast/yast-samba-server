@@ -1,0 +1,3 @@
+Read	.etc.smb.value.global."passdb backend" "smbpasswd ldapsam:ldap://localhost"
+Write	.etc.smb.value.global."passdb backend" "ldapsam:ldap://localhost" true
+Dump	true

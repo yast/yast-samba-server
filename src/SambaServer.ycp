@@ -16,10 +16,14 @@ module "SambaServer";
 textdomain "samba-server";
 
 import "Samba";
+import "SambaServerPassdb";
+import "SambaSecrets";
 
+import "Ldap";
 import "Progress";
 import "Report";
-import "Runlevel";
+import "Service";
+import "URL";
 
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
@@ -34,6 +38,8 @@ global define boolean ReloadSettings();
 global define void disableAllPrinters();
 global define boolean enableShare( string name, boolean on );
 global define void enableAllSystemPrinters();
+global boolean EstablishTrustedDomain (string domain, string password);
+boolean EnsureRootAccount ();
 
 /**
  * list of required packages
@@ -73,36 +79,25 @@ global boolean shares_configured = false;
 global boolean write_only = false;
 
 global boolean ServerReallyAbort () {
-    import "SambaServerPassdb";
     return !(modified || Samba::modified || SambaServerPassdb::Modified ()) || Popup::ReallyAbort (true);
 }
 
 /** ================================ global data =============================*/
 
 /**
- * Server description
+ * role of the server: `standalone, `bdc, `pdc
  */
-global string server_string = "Samba Server";
+global symbol role = `standalone;
 
 /**
- * role of the server: `disabled, `standalone, `bdc, `pdc
+ * Is service enabled? 
  */
-global symbol role = `disabled;
+boolean service = false;
 
 /**
  * domain master
  */
 global string domain_master = "auto";
-
-/**
- * domain logons
- */
-global boolean domain_logons = false;
-
-/**
- * local master
- */
-global boolean local_master = false;
 
 /**
  * preferred master
@@ -171,6 +166,11 @@ global map<string, symbol> name2role = $[
 
 global string netbios_name = "";
 
+global map<string,any> global_config = $[];
+
+global map<string,boolean> trusted_domains = $[];
+global map<string,string> trusted_domains_password = $[];
+
 /** ============================= end of global data ==========================*/
 
 /**
@@ -202,7 +202,6 @@ map<string, any> default_printers = $[
    "comment": "All Printers",
    "path": "/var/tmp",
    "printable": true,
-   "create mask": "0600",
    "browseable": false,
    "available": "yes",
    "guest ok": "no",
@@ -227,13 +226,37 @@ map<string, any> default_homes = $[
     "valid users": "%S",
     "browseable" : false,
     "read only": "no",
-    "create mask": "0640",
-    "directory mask" : "0750",
     "guest ok" : false,
     "printable" : false
 ];
 
 /** ============================= end of defaults =============================*/
+
+map<string,boolean> GetTrustedDomains () {
+    map <string, string> secrets = SambaSecrets::Read ();
+    
+    if (secrets == nil )
+    {
+	y2warning ("Cannot get the list of trusted domains");
+	Report::Error ( _("Cannot read the list of trusted domains.") );
+
+	trusted_domains = $[];
+	return $[];
+    }
+    
+    map <string, boolean> res = $[];
+    
+    foreach (string key, string data, secrets,``{
+	if ( regexpmatch ( key, "SECRETS/\\$DOMTRUST.ACC/.+" ) )
+	{
+	    string domain = regexpsub (key, "SECRETS/\\$DOMTRUST.ACC/(.+)", "\\1");
+	    res [domain] = true;
+	}
+    });
+    
+    trusted_domains = res;
+    return res;
+}
 
 /**
  * Data was modified?
@@ -243,6 +266,154 @@ global define boolean Modified() ``{
     y2debug("modified=%1",modified);
     return modified;
 };
+
+void InstallSchema () {
+    import "NetworkDevices";
+    import "Hostname";
+    import "DNS";
+    import "YaPI::LdapServer";
+    
+    // check, if the local server is used
+    boolean local_server = false;
+    
+    list<string> backends = SambaServerPassdb::GetBackends ();
+    foreach (string backend, backends, ``{
+	string details = SambaServerPassdb::BackendDetails (backend);
+	string type = SambaServerPassdb::BackendSAM (backend);
+	if (type == "ldap" || type == "ldapsam")
+	{	    
+	    map url = URL::Parse (details);
+	    string host = url["host"]:"";
+	    if ( host == "127.0.0.1" 
+		|| host == "localhost" 
+		|| host == DNS::hostname 
+		|| host == Hostname::MergeFQ(DNS::hostname, DNS::domain)
+		|| size(NetworkDevices::Locate ("IPADDR", host))>0
+	    )
+	    {
+		local_server = true;
+		break;
+	    }
+	}
+    });
+    
+    boolean restart_server = false;
+
+    if (local_server)
+    {
+        y2milestone ("LDAP server is local, checking included schemas");
+        list<string> schemas = YaPI::LdapServer::ReadSchemaIncludeList ();
+	
+        if ( ! contains (schemas, "/etc/openldap/schema/samba3.schema") )
+        {
+            y2milestone ("Including the Samba3 schema");
+            schemas = add ( schemas, "/etc/openldap/schema/samba3.schema" );
+            YaPI::LdapServer::WriteSchemaIncludeList (schemas);
+	    
+	    restart_server = true;
+	    
+        }
+        else
+        {
+            y2milestone ("Samba3 schema is already included");
+        }
+	
+	// now, check indices
+	list<map<string, any> > indices = YaPI::LdapServer::ReadIndex (LDAP_suffix);
+	if (indices != nil)
+	{
+	    boolean sambaSID = false;
+	    boolean sambaPrimaryGroupSID = false;
+	    boolean sambaDomainName = false;
+	    
+	    foreach ( map<string,any> index, indices, ``{
+		list<string> attrs = splitstring ( index["attr"]:"", ",");
+		list<string> param = splitstring ( index["param"]:"", ",");
+		if ( contains (attrs, "sambaSID") && contains (param, "eq") )
+		{
+		    sambaSID = true;
+		}
+		if ( contains (attrs, "sambaPrimaryGroupSID") && contains (param, "eq") )
+		{
+		    sambaPrimaryGroupSID = true;
+		}
+		if ( contains (attrs, "sambaDomainName") && contains (param, "eq") )
+		{
+		    sambaDomainName = true;
+		}
+	    });
+	    
+	    if ( !sambaSID ) 
+	    {
+		y2milestone ("sambaSID index missing, adding");
+		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaSID", "param" : "eq" ] );
+	    }
+	    if ( !sambaPrimaryGroupSID ) 
+	    {
+		y2milestone ("sambaPrimaryGroupSID index missing, adding");
+		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaPrimaryGroupSID", "param" : "eq" ] );
+	    }
+	    if ( !sambaDomainName ) 
+	    {
+		y2milestone ("sambaDomainName index missing, adding");
+		YaPI::LdapServer::AddIndex ( LDAP_suffix, $[ "attr" : "sambaDomainName", "param" : "eq" ] );
+	    }
+	}
+    }
+    else
+    {
+        y2milestone ("LDAP server is remote, not checking if schemas are properly included");
+    }
+    
+    // setup ACLs
+    if (LDAP_admin_dn != nil && size(LDAP_admin_dn) > 0)
+    {
+	SCR::Write( .ldapserver.sambaACLHack, LDAP_admin_dn );
+    }
+
+    if (restart_server)
+    {
+	// restart server if running
+	if (Service::Status ("ldap") == 0)
+	{
+    	    Service::Restart ("ldap");
+	}
+    }
+}
+
+boolean  UsingCommonLDAP () {
+    // check the default passdb backend
+    string backend = select( SambaServerPassdb::GetBackends (), 0, "" );
+    
+    if (backend == "")
+    {
+	y2milestone ("Not using common LDAP: no default backend");
+	return false;
+    }
+    
+    string tmp = SambaServerPassdb::BackendSAM (backend);
+
+    // is it LDAP?
+    if ( tmp != "ldap" && tmp != "ldapsam" )
+    {
+	y2milestone ("Not using common LDAP: default not LDAP");
+	return false;
+    }
+    
+    tmp = SambaServerPassdb::BackendDetails (backend);
+    map url = URL::Parse (tmp);
+    
+    if (Ldap::server != url["host"]:nil)
+    {
+	y2milestone ("Not using common LDAP: different server (%1 vs %2)", Ldap::server, url["host"]:nil);
+	return false;
+    }
+    
+    boolean ret = Ldap::GetDomain () == LDAP_suffix;
+    
+    y2milestone ("Suffixes are same: %1", ret);
+    return ret;
+}
 
 /**
  * Read all samba-server settings
@@ -290,19 +461,23 @@ global define boolean Read() ``{
     
     string value = "";
     
-    import "SambaServerPassdb";
     SambaServerPassdb::Read ();
     
-    value = (string) SCR::Read( .etc.smb.value.global."server string" );
-    if( value != nil ) server_string = value;
+    // read the complete global section
+    list<string> options = (list<string>)SCR::Dir( .etc.smb.value.global );
+    foreach( string option, options, ``{
+	global_config[option] = SCR::Read( add(.etc.smb.value.global, option) );
+    });
+    
+    // fix the value of some options
+    global_config["domain logons"] = normalize_boolean ( global_config ["domain logons"]:"no", false );
+    global_config["local master"] = normalize_boolean ( global_config ["local master"]:"yes", true );
+
+    // read some settings in a special way    
     value = (string) SCR::Read( .etc.smb.value.global."add machine script" );
     if( value != nil ) add_machine_script = value;
     value = (string) SCR::Read( .etc.smb.value.global."domain master" );
     if( value != nil ) domain_master = value;
-    value = (string) SCR::Read( .etc.smb.value.global."domain logons" );
-    if( value != nil ) domain_logons = normalize_boolean( value, false );
-    value = (string) SCR::Read( .etc.smb.value.global."local master" ) ;
-    if( value != nil ) local_master = normalize_boolean( value, true );
     value = (string) SCR::Read( .etc.smb.value.global."netbios name" );
     if( value != nil ) netbios_name = value;
     // synonym: "prefered master"
@@ -326,12 +501,15 @@ Remove one of the options to resolve this conflict.
 	preferred_master, "prefered master", value ) );
     }
 
-    if( !Runlevel::ServiceEnabled( "smb" ) ) {
-	role = `disabled;
-    }
-    else role = DetermineRole();
+    service = Service::Enabled( "smb" );
 
+    role = DetermineRole();
+    
+    y2milestone( "Service: %1", service );
     y2milestone( "Found role: %1", role );
+    
+    // get trusted domains
+    GetTrustedDomains ();
 
     globals_configured = true;
     
@@ -375,7 +553,7 @@ Remove one of the options to resolve this conflict.
 	}
 	
 	result["read list"] = SCR::Read( add(p, "read list") );
-	result["write list"] = SCR::Read( add(p, "w338Grite list") );
+	result["write list"] = SCR::Read( add(p, "write list") );
 	result["browseable"] = normalize_boolean( (string) SCR::Read( add(p, "browseable") ), true);
 	result["guest ok"] = normalize_boolean( (string) SCR::Read( add(p, "guest ok") ), false);
 	result["valid users"] = SCR::Read( add(p, "valid users") );
@@ -479,6 +657,16 @@ global define boolean Write() ``{
     
     Samba::Write();
 
+    if (role != `pdc && service && ! Mode::config)
+    {
+	// test to join the workgroup
+        symbol workgroup_type = CheckWorkgroup( Samba::workgroup );
+
+        if( workgroup_type != `workgroup ) {
+            AskJoinDomain( Samba::workgroup, workgroup_type );
+	}
+    }
+    
     integer steps = 3;
 
     // We do not set help text here, because it was set outside
@@ -488,7 +676,7 @@ global define boolean Write() ``{
 	    // translators: write progress stage
 	    _("Run SuSEconfig"),
 	    // translators: write progress stage
-	    role == `disabled ? _("Disable Samba services") 
+	    !service ? _("Disable Samba services") 
 	    // translators: write progress stage
 		: _("Enable Samba services")
 	], [
@@ -497,7 +685,7 @@ global define boolean Write() ``{
 	    // translators: write progress step
 	    _("Running SuSEconfig..."),
 	    // translators: write progress step
-	    role == `disabled ? _("Disabling Samba services...") 
+	    ! service ? _("Disabling Samba services...") 
 	    // translators: write progress step
 		: _("Enabling Samba services..."),
 	    // translators: write progress step
@@ -506,8 +694,6 @@ global define boolean Write() ``{
 	""
     );
     
-    import "SambaServerPassdb";
-
     // if nothing to write, quit (but show at least the progress bar :-)
     if( ! modified && ! SambaServerPassdb::Modified ()) return true;
 
@@ -516,6 +702,31 @@ global define boolean Write() ``{
     Progress::NextStage();
 
     SambaServerPassdb::Write ();
+    
+    // revoke trusted domains if needed
+    foreach (string domain, boolean stay, trusted_domains, ``{
+	if (! stay)
+	{
+	    // try to revoke
+	    if ( (integer) SCR::Execute (.target.bash, 
+		"net rpc trustdom revoke " + domain) != 0 )
+	    {
+		import "Report";
+		Report::Error ( sformat (_("Cannot abandon trusted 
+domain relationship for '%1'.
+"), domain) );
+	    }
+	}
+	else if (Mode::autoinst)
+	{
+	    // try to establish the domains
+	    if ( !EstablishTrustedDomain (domain, trusted_domains_password[domain]:"") )
+	    {
+		import "Report";
+		Report::Error (_("Cannot establish trusted domain relationship.") + " " + domain);
+	    }
+	}
+    });
     
     // check, if we need samba-pdb package
     list<string> rpms = [];
@@ -533,13 +744,105 @@ global define boolean Write() ``{
 	import "Require";
 	Require::RequireAndConflictTarget( rpms, [],
     	    // notification about package needed 1/2
-	    _("<p>For the configured passdb backends, the <b>%1</b> package must be installed.</p>") +
+	    _("<p>For the configured passdb back-ends, the <b>%1</b> package must be installed.</p>") +
     	    // notification about package needed 2/2
 	    _("<p>Do you want to install it now?</p>"));
     }
     
     WriteSettings();
     WriteLDAPSettings();
+    
+    InstallSchema ();
+    
+    if (UsingCommonLDAP ())
+    {
+	// try to setup users plugin
+	string res = nil;
+	do {
+	    // implemented retry for LDAPInit
+	    res = Ldap::LDAPInit ();
+	    if ( res != "" )
+	    {
+		if (Mode::autoinst)
+		{
+		    Report::Error (res);
+		}
+		else
+		{
+		    if ( Popup::AnyQuestion ( Popup::NoHeadline(), res, Label::RetryButton(),
+			Label::CancelButton (), `focus_yes) )
+		    {
+			res = nil;
+		    }
+		}
+	    }
+	} while (res == nil);
+		
+	if ( res == "" )
+	{
+	    Ldap::LDAPAskAndBind (true);
+
+	    Ldap::InitSchema ();
+	    
+	    res = Ldap::ReadTemplates ();
+	    if (res != "")
+	    {
+		Report::Error (res);
+	    }
+	    else
+	    {
+		    string user_template_dn = nil;
+		    string group_template_dn = nil;
+		    
+		    map<string,map<string, any > > templates = 
+			(map<string,map<string, any > >)Ldap::GetTemplates ();
+		    foreach (string dn, map<string, any > content, templates, ``{
+			list<string> classes = content["objectclass"]:[];
+			
+			foreach (string class, classes, ``{
+			    if ( tolower(class) == "suseusertemplate" )
+			    {
+				user_template_dn = dn;
+				break;
+			    }
+			    else if ( tolower (class) == "susegrouptemplate" ) 
+			    {
+				group_template_dn = dn;
+				break;
+			    }
+			});
+		    });
+		    
+		    if ( user_template_dn != nil )
+		    {
+			// found the template
+			list<string> plugins = templates[user_template_dn, "suseplugin"]:[];
+			if ( !contains (plugins, "UsersPluginSamba") )
+			{
+			    plugins = add (plugins, "UsersPluginSamba");
+			    templates[user_template_dn, "suseplugin"] = plugins;
+			    y2milestone ("Updated user templates: %1", plugins);
+			    templates[user_template_dn, "modified"] = "edited";
+			}
+		    }
+		    if ( group_template_dn != nil )
+		    {
+			// found the template
+			list<string> plugins = templates[group_template_dn, "suseplugin"]:[];
+			if ( !contains (plugins, "UsersPluginSambaGroups") )
+			{
+			    plugins = add (plugins, "UsersPluginSambaGroups");
+			    templates[group_template_dn, "suseplugin"] = plugins;
+			    y2milestone ("Updated group templates: %1", plugins);
+			    templates[group_template_dn, "modified"] = "edited";
+			}
+		    }
+		    
+		    // store the result
+		    Ldap::WriteToLDAP (templates);
+	    }
+	}
+    }
 
     if( !SCR::Write( .etc.smb, nil ) ) {
 	// translators: error message
@@ -552,7 +855,14 @@ global define boolean Write() ``{
     if(Abort()) return false;
     Progress::NextStage ();
     
-    enableServer( role != `disabled );
+    enableServer( service );
+
+    if (service)
+    {
+	// if the service does not run, we can't add the user anyway
+	EnsureRootAccount ();    
+    }
+
     if( role == `bdc ) {
 	// Retrieve the domain SID for DOMAIN
 	map result = (map) SCR::Execute( .target.bash_output, "net rpc getsid" );
@@ -561,6 +871,11 @@ global define boolean Write() ``{
 	    // translators: error message
 	    Report::Error( _("Unable to retrieve SID for the domain."));
 	}
+    }
+    else
+    {
+	// ensure that SID gets created
+	SCR::Execute (.target.bash, "net getlocalsid" );
     }
 
     if(Abort()) return false;
@@ -577,9 +892,19 @@ global define boolean Write() ``{
  */
 global define boolean WriteSettings() ``{
 
-    // write global settings
-    SCR::Write( .etc.smb.value.global."server string", server_string );
+    // first, write the global settings complete
+    foreach( string option, any value, global_config, ``{
+	if ( is(global_config[option]:nil, boolean) )
+	{
+	    SCR::Write( add(.etc.smb.value.global, option), (boolean)value ? "yes" : "no" );
+	}
+	else
+	{
+	    SCR::Write( add(.etc.smb.value.global, option), value );
+	}
+    });    
     
+    // write global settings
     if (netbios_name == "")
     {
 	// if not set, try to delete
@@ -590,12 +915,9 @@ global define boolean WriteSettings() ``{
 	SCR::Write( .etc.smb.value.global."netbios name", netbios_name);
     }
 
-    SCR::Write( .etc.smb.value.global."server string", server_string );
     SCR::Write( .etc.smb.value.global."add machine script", add_machine_script );
     if( domain_master != "auto" ) 
 	SCR::Write( .etc.smb.value.global."domain master" , domain_master );
-    SCR::Write( .etc.smb.value.global."domain logons" , domain_logons ? "yes" : "no" );
-    SCR::Write( .etc.smb.value.global."local master", local_master ? "yes" : "no" ) ;
     SCR::Write( .etc.smb.value.global."preferred master" , preferred_master );
     if( !load_printers )
         SCR::Write( .etc.smb.value.global."load printers", load_printers ? "yes" : "no" );
@@ -646,6 +968,17 @@ global define boolean WriteSettings() ``{
     });
     
     WriteLDAPSettings();
+    
+    // commit the changes
+    boolean res = SCR::Write (.etc.smb, nil);
+    
+    if (res)
+    {
+	import "Directory";
+	SCR::Execute (.target.bash, "touch " + Directory::vardir + "/samba_server_done_once" );
+    }
+    
+    return res;
 }
 
 /**
@@ -656,26 +989,72 @@ global define boolean WriteSettings() ``{
  */
 global define boolean Import (map settings) ``{
 
-    if( size( settings ) == 0 ) return true;
-    
-    y2debug( "Importing: %1", settings );
-    
-    Samba::Import( settings );
-    
-    // read global settings
-    Samba::setWorkgroup( settings["global","workgroup"]:Samba::workgroup );
-    server_string = settings["global","server_string"]:server_string;
-    role = (symbol) (name2role[ settings["global", "role" ]: "Standalone server" ]:nil);
-    share_homes = settings["global","share_homes"]: share_homes;
-    share_printers = settings["global","share_printers"]: share_printers;
+    if( settings == $[] ) {
+	globals_configured = false;
+	shares_configured = false;
+	
+	global_config = $[];
+	role = `standalone;
+	service = false;
 
-    string value = (string) (settings["global","backend"]: nil);
-    // FIXME: we should support this somehow
-    // if( value == "LDAP" ) SAM = `ldap ;
-    //else SAM = `smbpasswd;
+	domain_master = "auto";
+	preferred_master = "auto";
+	add_machine_script = "";
+	share_homes = false;
+	share_printers = false;
+	load_printers = true;
+	LDAP_admin_dn = nil;
+	LDAP_suffix = nil;
+	shares = $[];
+	printer_status = $[];
+	netbios_name = "";
+	
+	SambaServerPassdb::SetBackends ([]);
+	
+	Samba::Import ($[]);
+	
+	trusted_domains = $[];
+	trusted_domains_password = $[];
+	
+	return true;
+    }
+    
+    y2milestone( "Importing: %1", settings );
 
-    LDAP_admin_dn = settings["global","LDAP_admin_dn"]: LDAP_admin_dn;
-    LDAP_suffix = settings["global","LDAP_suffix"]: LDAP_suffix;
+    string version = settings["version"]:"";
+    
+    Samba::Import( settings["client"]:$[] );
+    
+    global_config = listmap( map opts, settings["global"]: [], ``{
+		return $[ opts["key"]:"unknown": opts["value"]: nil ];
+    } );
+    
+    role = (symbol) (name2role[ settings["role" ]: "File and printer sharing" ]:`standalone);
+    share_homes = global_config["share_homes"]: share_homes;
+    share_printers = global_config["share_printers"]: share_printers;
+    netbios_name = global_config["netbios name"]: "";
+    
+    if (haskey (global_config, "workgroup") )
+    {
+	Samba::setWorkgroup (  global_config ["workgroup"]:"" );
+    }
+    
+    SambaServerPassdb::SetBackends ( splitstring ( global_config["passdb backends"]:"", " ") );
+
+    LDAP_admin_dn = global_config["LDAP admin dn"]: LDAP_admin_dn;
+    LDAP_suffix = global_config["LDAP suffix"]: LDAP_suffix;
+    
+    service = settings["service"]:false;
+    
+    list< map<string,string> > trusted = settings["trusteddomains"]: [];
+    
+    foreach (map<string,string> domain, trusted, ``{
+	if (haskey (domain, "domain") )
+	{
+	    trusted_domains[ domain["domain"]:"" ] = true;
+	    trusted_domains_password[ domain["domain"]:"" ] = domain["password"]:"";
+	}
+    });
     
     globals_configured = true;
 
@@ -687,12 +1066,7 @@ global define boolean Import (map settings) ``{
 	    } ) ] );
     });
     
-    // read printers
-    printer_status = listmap( map key, settings["printers"]:[], ``{
-	return( $[ key["printer"]:"unknown": key["status"]: true ] );
-    });
-    
-    shares_configured = true;
+    shares_configured = haskey (settings, "shares");
     
     return true;
 }
@@ -704,18 +1078,21 @@ global define boolean Import (map settings) ``{
  */
 global define map Export () ``{
 
-    map samba = Samba::Export();
+    map result = $[ "client" : Samba::Export() ];
+    
+    result["version"] = "2.9";
+    
+    string passdb = mergestring (SambaServerPassdb::GetBackends (), " ");
 
-    // TODO: passdb backends    
-    map globals = union( samba["global"]:$[], $[
-	"workgroup": Samba::workgroup,
-	"server_string": server_string,
-	"role": role2name[ role ]: nil,
-	"share_homes": share_homes,
-	"share_printers" : share_printers,
-	"LDAP_admin_dn": LDAP_admin_dn,
-	"LDAP_suffix" : LDAP_suffix
-    ]);
+    if ( size(passdb) > 0 )
+    {
+	global_config[ "passdb backend" ] = passdb;
+    }
+    
+    if ( size(netbios_name) > 0 )
+    {
+	global_config[ "netbios name" ] = netbios_name;
+    }
     
     list r_shares =  maplist( string share, map<string,any> options, shares, ``{
 	return $[ 
@@ -726,13 +1103,30 @@ global define map Export () ``{
 	];
     });
     
-    list printers = maplist( string printer, boolean status, printer_status, ``{
-	return $[ "printer": printer, "status" : status ];
+    if (size (global_config) > 0 )
+    {    
+	result[ "global" ]  = maplist( string key, any value, global_config, ``{
+		return $[ "key" : key, "value" : value ];
+	} );
+    }
+
+    if( size(r_shares) > 0 ) result ["shares"] = r_shares;
+    
+    list trusted = [];
+    foreach (string domain, boolean stay, trusted_domains, ``{
+	if (stay)
+	{
+	    trusted = add (trusted, $[ "domain" : domain, "password" : trusted_domains_password[domain]:"" ] );
+	}
     });
     
-    map result = $[ "global" : globals ];
-    if( size(r_shares) > 0 ) result ["shares"] = r_shares;
-    if( size(printers) > 0 ) result ["printers"] = printers; 
+    if (size (trusted) > 0)
+    {
+	result ["trusteddomains"] = trusted;
+    }
+    
+    result ["service"] = service;
+    result ["role"] = role2name[ role ]: "Standalone server";
 
     return result;
 }
@@ -754,23 +1148,13 @@ global define string Summary() ``{
 	// summary item: configured workgroup/domain
 	summary = Summary::AddLine(summary, sformat(_("Workgroup or Domain: %1"), Samba::workgroup ) );
 	
-	if( role == `disabled ) {
+	if( ! service ) {
 	    // summary item: status of the samba service
 	    summary = Summary::AddLine(summary, _("Samba server is <i>disabled</i>") );
 	} else {
 	    // summary item: selected role for the samba server
 	    summary = Summary::AddLine(summary, sformat(_("Role: %1"), roleName(role) ) );
 	}
-	
-	// summary item: samba server description
-	summary = Summary::AddLine(summary, sformat(_("Description: %1"), server_string) );
-	// FIXME: summary item: selected user information backend
-	summary = Summary::AddLine(summary, sformat( _("User Information Back-Ends: %1"), 
-		"FIXME") );
-	// summary item
-	summary = Summary::AddLine(summary, sformat(_("LDAP Suffix: %1"), LDAP_suffix != nil ? LDAP_suffix : nc ) );
-	// summary item
-	summary = Summary::AddLine(summary, sformat(_("LDAP Administration DN: %1"), LDAP_admin_dn != nil ? LDAP_admin_dn : nc ) );
     } else {
 	summary = Summary::AddLine(summary, nc );
     }
@@ -802,6 +1186,18 @@ global define string Summary() ``{
     return summary;
 }
 
+global void setServiceEnabled( boolean on ) {
+    if ( on != service )
+    {
+	service = on;
+	modified = true;
+    }
+}
+
+global boolean ServiceEnabled () {
+    return service;
+}
+
 /** 
  * Turn on/off SAMBA server services (smb and nmb).
  *
@@ -809,8 +1205,16 @@ global define string Summary() ``{
  * @return boolean 	true on success
  */
 global define boolean enableServer( boolean on ) ``{
-    Runlevel::ServiceAdjust( "nmb", on ? "enable": "disable" );
-    Runlevel::ServiceAdjust( "smb", on ? "enable": "disable" );
+    if (on)
+    {
+	Service::Enable( "nmb" );
+	Service::Enable( "smb" );
+    }
+    else
+    {
+	Service::Disable( "nmb" );
+	Service::Disable( "smb" );
+    }
     
     if( write_only ) return true;
     
@@ -819,17 +1223,17 @@ global define boolean enableServer( boolean on ) ``{
     if( on ) {
     
 	// check, if the services run
-	if( Runlevel::ServiceStatus( "nmb" ) != 0 ) {
+	if( Service::Status( "nmb" ) != 0 ) {
 	    // the service does not run
-	    if( Runlevel::RunInitScript( "nmb", "start" ) != 0 ) {
+	    if( ! Service::Start( "nmb" ) ) {
 		// translators: error message
 		Report::Error( _("Cannot start 'nmb' service.") );
 		return false;
 	    }
 	} else reload = true;
-	if( Runlevel::ServiceStatus( "smb" ) != 0 ) {
+	if( Service::Status( "smb" ) != 0 ) {
 	    // the service does not run
-	    if( Runlevel::RunInitScript( "smb", "start" ) != 0 ) {
+	    if( ! Service::Start( "smb" ) ) {
 		// translators: error message
 		Report::Error( _("Cannot start 'smb' service.") );
 		return false;
@@ -841,16 +1245,16 @@ global define boolean enableServer( boolean on ) ``{
     else 
     {
 	// turn services off
-	if( Runlevel::ServiceStatus( "nmb" ) == 0 ) {
-	    if( Runlevel::RunInitScript( "nmb", "stop" ) != 0 ) {
+	if( Service::Status( "nmb" ) == 0 ) {
+	    if( ! Service::Stop( "nmb" ) ) {
 		// translators: error message
 		Report::Error( _("Cannot stop 'nmb' service.") );
 		return false;
 	    }
 	}
 
-	if( Runlevel::ServiceStatus( "smb" ) == 0 ) {
-	    if( Runlevel::RunInitScript( "smb", "stop" ) != 0 ) {
+	if( Service::Status( "smb" ) == 0 ) {
+	    if( ! Service::Stop( "smb" ) ) {
 		// translators: error message
 		Report::Error( _("Cannot stop 'smb' service.") );
 		return false;
@@ -868,10 +1272,20 @@ global define boolean enableServer( boolean on ) ``{
  * @param description a new description
  */
 global define void setDescription( string description ) ``{
-    if( server_string != description ) {
-	server_string = description;
+    if( global_config["server string"]:nil != description ) {
+	global_config["server string"] = description;
 	modified = true;
     }
+}
+
+/**
+ * Get the server description string.
+ *
+ * @return the string or nil, if not set
+ */
+global string getDescription ()
+{
+    return global_config["server string"]:(string)nil;
 }
 
 /** 
@@ -932,8 +1346,8 @@ global define void enableHomes( boolean on ) ``{
  *
  * @param on 		should be enabled?
  */
-global define void enableLogon( boolean on ) ``{
-    domain_logons = on;
+global define void enableNetlogon( boolean on ) ``{
+    global_config["domain logons"] = true;
     
     // if there is [netlogon] share
     if( haskey(shares, "netlogon") ) {
@@ -952,6 +1366,19 @@ global define void enableLogon( boolean on ) ``{
     modified = true;
 }
 
+global void AdaptMachineScript () {
+    if ( SambaServerPassdb::LDAPDefault () )
+    {
+	add_machine_script = "/sbin/yast /usr/share/YaST2/data/add_machine.ycp %m$";
+    }
+    else
+    {
+	add_machine_script = "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$";
+    }
+    
+    global_config ["add machine script"] = add_machine_script;
+}
+
 /** 
  * Configure as PDC. Does NOT set @ref role.
  *
@@ -959,12 +1386,15 @@ global define void enableLogon( boolean on ) ``{
  */
 global define boolean setAsPDC() ``{
     Samba::security = "user";
-    domain_logons = true;
+    global_config[ "domain logons"] = true;
     preferred_master = "yes";
     domain_master = "yes";
-    local_master = true;
-    add_machine_script = "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$";
+    global_config[ "local master"] = true;
+    
+    AdaptMachineScript ();
+    
     Samba::setDomainMembershipLevel( "pdc");
+    role = `pdc;
     
     return true;
 }
@@ -976,9 +1406,11 @@ global define boolean setAsPDC() ``{
  */
 global define boolean setAsBDC() ``{
     domain_master = "false";
-    domain_logons = true;
+    global_config ["domain logons"] = true;
     Samba::security = "user";
     Samba::setDomainMembershipLevel( "bdc");
+    
+    role = `bdc;
     
     return true;
 }
@@ -990,8 +1422,10 @@ global define boolean setAsBDC() ``{
  */
 global define boolean setAsStandalone() ``{
     domain_master = "false";
-    domain_logons = false;
+    global_config ["domain logons"] = false;
     Samba::setDomainMembershipLevel( "member");
+    
+    role = `standalone;
 
     return true;
 }
@@ -1074,17 +1508,35 @@ global define void ReadLDAPSettings() ``{
     LDAP_admin_dn = (string) SCR::Read( .etc.smb.value.global."ldap admin dn" );
     LDAP_suffix = (string) SCR::Read( .etc.smb.value.global."ldap suffix" );
 
-    if( LDAP_admin_dn == nil ) {
-	import "Ldap";
+    // we miss some information, ask LDAP for defaults
+    import "Ldap";
+    Ldap::Read();
 
-	// we miss some information, ask LDAP for defaults
-        Ldap::Read();
+    if( LDAP_admin_dn == nil ) {
 	// ask LDAP client about default configuration DN
 	if( LDAP_admin_dn == nil )
-	    LDAP_admin_dn = Ldap::GetMainConfigDN ();
+	    LDAP_admin_dn = Ldap::bind_dn;
 	// ask LDAP client about default search DN
 	if( LDAP_suffix == nil )
 	    LDAP_suffix = Ldap::GetDomain();
+    }
+    
+    // ensure LDAP suffixes and idmap backend
+    if ( global_config["ldap machine suffix"]:nil == nil)
+    { 
+	global_config["ldap machine suffix"] = "ou=Computers";
+    }
+    if ( global_config["ldap idmap suffix"]:nil == nil)
+    {
+	global_config["ldap idmap suffix"] = "ou=Idmap";
+    }
+    if ( global_config["idmap backend"]:nil == nil)
+    {
+	// check, if we use LDAP backend
+	if ( SambaServerPassdb::LDAPDefault () )
+	{
+	    global_config["idmap backend"] = select( SambaServerPassdb::GetBackends (), 0, "");
+	}
     }
 }
 
@@ -1096,9 +1548,141 @@ global define void WriteLDAPSettings() ``{
     if( LDAP_admin_dn == "" ) LDAP_admin_dn = nil;
     if( LDAP_suffix == "" ) LDAP_suffix = nil;
     
+    if( LDAP_suffix != nil )
+    {
+	global_config ["ldap suffix"] = LDAP_suffix;
+    }
+    
     // otherwise comment out if necessary
     SCR::Write( .etc.smb.value.global."ldap admin dn", LDAP_admin_dn );
     SCR::Write( .etc.smb.value.global."ldap suffix", LDAP_suffix );
+    
+    if ( !haskey (global_config, "idmap  backend") && SambaServerPassdb::LDAPDefault () )
+    {
+	global_config["idmap backend"] = select( SambaServerPassdb::GetBackends (), 0, "");	
+    }
+    
+    // create ldap machine and idmap suffix
+if ( haskey (global_config, "ldap suffix")
+	&& SambaServerPassdb::LDAPDefault ())
+{
+list<string> subSuffixList = [ "machine", "idmap" ];
+
+// FIXME: this will not use the correct server for idmap, it will use the same
+// one as passdb backend
+foreach (string subSuffix, subSuffixList, ``{
+	string ldapParamName = "ldap " + subSuffix + " suffix";
+    if ( haskey(global_config, ldapParamName)) 
+    {
+	// find our host - first LDAP backend
+	list<string> backends = SambaServerPassdb::GetBackends ();
+	string backend = backends[0]:""; // we know it's LDAP, because it's default
+	map url = URL::Parse (SambaServerPassdb::BackendDetails (backend));
+	string host = (string) url["host"]:nil;
+
+	// check existence of machine and idmap suffix
+	SCR::Execute (.ldap, $[ "hostname" : host ]);
+	
+	string dn = global_config[ldapParamName]:"" + ","+global_config["ldap suffix"]:"";
+	list res = (list)SCR::Read (.ldap.search, $["base_dn" : dn, "scope": 0, "not_found_ok" : true]);
+	
+	if ( size(res) == 0 )
+	{
+	    // try to create a reasonable object to add
+	    list<string> dn_parts = splitstring (
+		global_config[ldapParamName]:"",
+		" ");
+		
+	    if ( size(dn_parts) != 1 )
+	    {
+		y2warning (subSuffix + " suffix is too complicated: %1", dn_parts);
+		return;
+	    }
+	    
+	    dn_parts = splitstring ( dn_parts[0]:"", "=" );
+	    map to_add = $[];
+	    
+	    string class = tolower( dn_parts[0]:"" );
+	    if ( class == "ou" )
+	    {
+    		to_add[ "objectclass" ] = [ "top", "organizationalunit"];
+		to_add[ "ou" ] = dn_parts[1]:"";
+	    }
+	    else
+	    {
+		y2warning (subSuffix + " suffix is too complicated: %1", class);
+		return;
+	    }
+	    
+	    // try to bind
+	    map <string, string> secrets = SambaSecrets::Read ();
+    
+	    if (secrets == nil )
+	    {
+		y2warning ("Cannot get LDAP password");
+		return;
+	    }
+    
+	    string password = nil;
+    
+	    foreach (string key, string data, secrets,``{
+		if ( regexpmatch ( key, "SECRETS/LDAP_BIND_PW/"+LDAP_admin_dn ) )
+		{
+		    password = regexpsub (data, "(.*)\\\\00", "\\1");
+		}
+	    });
+	    
+	    if (password == nil)
+	    {
+		y2warning ("Cannot find LDAP bind password, skipping " + subSuffix + " suffix creation");
+		return;
+	    }
+	    
+	    if ( SCR::Execute (.ldap.bind
+		, $["bind_dn" : LDAP_admin_dn, "bind_pw" :password]) != true)
+	    {
+		map error = (map)SCR::Read (.ldap.error);
+		y2warning ("Cannot bind for creating " + subSuffix + " suffix" + "\n"+ error["msg"]:"");
+		return;
+	    }
+	    
+	    
+	    
+	    SCR::Write (.ldap.add, $[ "dn" : dn ], to_add);
+        }
+    }
+}); // end of foreach subSuffixList
+}
+    // try to lookup user/group suffix   
+    if (UsingCommonLDAP ())
+    {
+	string res = Ldap::LDAPInit ();
+	if ( res != "" )
+	{
+	    // forget it
+	    return;
+	}
+	Ldap::ReadConfigModules ();
+	map< string, map<string,any> > conf = (map< string, map<string,any> >)Ldap::GetConfigModules ();
+	
+	y2debug ("Config modules: %1", conf );
+	foreach ( string dn, map<string,any> c, conf, ``{
+	    list<string> classes = c["objectclass"]:[];
+	    classes = maplist( string val, classes, ``(tolower(val)) );
+	    if ( contains (classes, "suseuserconfiguration") && ! haskey (global_config, "ldap user suffix"))
+	    {
+		list<string> parts = splitstring (c["susedefaultbase",0]:"", ",");
+		global_config ["ldap user suffix"] = parts[0]:"";
+		SCR::Write (.etc.smb.value.global."ldap user suffix", parts[0]:nil);
+	    }
+	    else if ( contains (classes, "susegroupconfiguration") && ! haskey (global_config, "ldap group suffix"))
+	    {
+		list<string> parts = splitstring (c["susedefaultbase",0]:"", ",");
+		global_config ["ldap group suffix"] = parts[0]:"";
+		SCR::Write (.etc.smb.value.global."ldap group suffix", parts[0]:nil);
+	    }
+	});
+    }
 }
 
 /**
@@ -1108,6 +1692,40 @@ global define void WriteLDAPSettings() ``{
  * @return string 	nil for success, error message otherwise
  */
 global define string setLDAPAdminPassword( string password ) ``{
+    // first, try to do a bind
+
+    // find our host - first LDAP backend
+    list<string> backends = SambaServerPassdb::GetBackends ();
+    string host = nil;
+    foreach ( string backend, backends, ``{
+	string type = tolower(SambaServerPassdb::BackendSAM (backend));
+	if ( type == "ldap" || type == "ldapsam" )
+	{
+	    map url = URL::Parse (SambaServerPassdb::BackendDetails (backend));
+	    host = (string) url["host"]:nil;
+	    break;
+	}
+    });
+
+    // there is the backend    
+    if ( host != nil )
+    {
+	y2milestone ("host for checking: %1", host);
+	SCR::Execute (.ldap, $[ "hostname" : host ]);
+	if ( SCR::Execute (.ldap.bind
+	    , $["bind_dn" : LDAP_admin_dn, "bind_pw" :password]) != true)
+	{
+	    map error = (map)SCR::Read (.ldap.error);
+	    // translators: Setting LDAP bind password failed.
+	    return _("Cannot set the password.") + "\n"+ error["msg"]:"";
+	}
+    }
+    
+    // write the LDAP settings now, otherwise secrets.tdb would contain
+    // a wrong entry (#40866)
+    WriteLDAPSettings ();
+    SCR::Write ( .etc.smb, nil );
+    
     string cmd = "smbpasswd -w '"+password+"'";
     map result = (map) SCR::Execute( .target.bash_output, cmd );
     
@@ -1260,6 +1878,14 @@ global define boolean removeShare( string name ) ``{
     return true;
 }
 
+global define map<string,any> getShare (string name)
+{
+    // share does not exist
+    if( ! haskey( shares, name ) ) return nil;
+    
+    return shares[name]:nil;
+}
+
 /**
  * Adds a new share.
  * 
@@ -1339,10 +1965,14 @@ global define string roleName( symbol role ) ``{
 global define symbol DetermineRole() ``{
     if( Samba::security == "user" )
     {
-	if( domain_logons && yes_or_auto( domain_master ) && yes_or_auto( preferred_master ) && local_master ) {
+	if( global_config["domain logons"]:false 
+	    && yes_or_auto( domain_master ) 
+	    && yes_or_auto( preferred_master ) 
+	    && global_config["local master"]:true ) {
 	    return `pdc;
 	}
-	else if( ! yes_or_auto(domain_master) && domain_logons )
+	else if( ! yes_or_auto(domain_master) 
+	    && global_config["domain logons"]:false )
 	{
 	    return `bdc;
 	}
@@ -1354,15 +1984,219 @@ global define symbol DetermineRole() ``{
     
     return `standalone;
 }
+
 /**
  * Return required packages for auto-installation
  * @return map of packages to be installed and to be removed
  */
 global define map<string,list<string> > AutoPackages() ``{
-	return ($["install": required_packages, "remove": []]);
-
+    return ($["install": required_packages, "remove": []]);
 }
 
+
+global map<string, map<string,any> > ProposeRole(string workgroup) {
+    Samba::CheckNmbstatus();
+    
+    // by default, propose PDC
+    map<string, map<string,any> > ret = $[
+	"pdc" : $[
+	    "propose" : true,
+	    "possible" : true,
+	    "message" : "",
+	],
+	"bdc" : $[
+	    "propose" : false,
+	    "possible" : true,
+	    "message" : "",
+	],
+	"standalone" : $[
+	    "propose" : false,
+	    "possible" : true,	// this should be available alwyas
+	    "message" : "",
+	],
+    ];
+    
+    boolean has_pdc = false;
+    boolean has_bdc = false;
+    boolean samba_pdc = true;
+    
+    if ( haskey (Samba::nmbstatus_output,workgroup) )
+    {
+	has_pdc = Samba::nmbstatus_output[workgroup, "PDC"]:nil != nil;
+	has_bdc = Samba::nmbstatus_output[workgroup, "BDC"]:nil != nil;
+	# FIXME: samba_pdc 
+    }
+    
+    y2milestone( "In proposal: has_pdc: %1, has_bdc: %2, samba_pdc: %3",
+	has_pdc, has_bdc, samba_pdc);
+    
+    // now, propose
+    if (has_pdc)
+    {
+	// we can't be PDC
+	ret["pdc", "propose"] = false;
+	ret["pdc", "possible"] = false;
+	ret["pdc", "message" ] = _("Not available because PDC is present.");
+	ret["bdc", "propose"] = samba_pdc;
+	if (!samba_pdc)
+	{
+	    ret["bdc", "possible"] = false;
+	    ret["bdc", "message"] = _("Not available because PDC is not a Samba server.");
+	}
+	ret["standalone", "propose"] = ! samba_pdc;
+    }
+    else if (has_bdc)
+    {
+	ret["pdc","propose"] = false;
+	ret["pdc","message"] = _("At least one BDC, but no PDC found.");
+	
+	if (!samba_pdc)
+	{
+	    ret["bdc", "possible"] = false;
+	    ret["bdc", "message"] = _("Not available because PDC is not a Samba server.");
+	}
+	ret["standalone", "propose"] = ! samba_pdc;
+    }
+    
+    return ret;
+}
+
+global boolean EstablishTrustedDomain (string domain, string password)
+{
+    if (Mode::config)
+    {
+	trusted_domains[domain] = true;
+	trusted_domains_password [domain] = password;
+	
+	modified = true;
+	return true;
+    }
+    else
+    {
+	y2milestone ("Establishing trust domain relationship for '%1'", domain);
+    
+	if ( 0 == (integer) SCR::Execute (.target.bash, 
+	    "net rpc trustdom establish " + domain + " -Uroot%" +  password ) )
+	{
+	    trusted_domains [domain] = true;
+	    modified = true;
+	    return true;
+	}
+    }
+    
+    return false;
+}
+
+global boolean CreateRootAccount (string password)
+{
+    string tmp = (string)SCR::Read (.target.tmpdir) + "/inp";
+    
+    if (! SCR::Write ( .target.string, tmp, password + "\n" + password + "\n" ) )
+    {
+	y2error ("Failed to prepare pdbedit input");
+	return false;
+    }
+    
+    string cmd = "cat " + tmp + " | pdbedit -a -t -u root";
+
+    y2milestone ("Running: %1", cmd);
+	
+    if (SCR::Execute (.target.bash, cmd) != 0)
+    {
+	y2error ("Failed to execute pdbedit");
+	return false;
+    }
+        
+    return true;
+}
+
+global boolean ExistsAccount (string username)
+{
+    map output = (map)SCR::Execute (.target.bash_output, "rpcclient -U% localhost -c enumdomusers" );
+    y2milestone ("Found users: %1", output);
+    
+    if (output["exit"]:-1 == 0)
+    {
+	list<string> lines = splitstring ( output["stdout"]:"", "\n");
+	boolean found = false;
+	foreach (string line, lines, ``{
+	    if ( issubstring (line, "user:["+username+"]") )
+	    {
+		found = true;
+		break;
+	    }
+	});
+	
+	return found;
+    }
+    
+    y2error ("Failed to lookup existing users");
+    return false;
+}
+
+boolean EnsureRootAccount ()
+{
+    if ( ExistsAccount ("root") || Mode::autoinst || Mode::test) 
+    {
+	return true;
+    }
+    
+    // try to create it
+    
+    // first, ask for password
+    UI::OpenDialog(
+	`HVSquash(
+        `VBox(
+	    // FIXME: we need a Samba mentioned here (9.2)
+	    `Password(`id(`passwd1), _("&Enter a password for the root user:") + " (Samba)"),
+            `Password(`id(`passwd2), _("Reenter the password for &verification:") ),
+                `HBox(
+                    `PushButton(`id(`ok), `opt(`default), Label::OKButton() ),
+                    `PushButton(`id(`cancel), Label::CancelButton() )
+                )
+            )
+	));
+
+    any ret = nil;
+    string passwd = nil;
+    
+    do {
+	ret = UI::UserInput();
+    
+	if (ret == `cancel)
+	{
+	    // user skipped
+	    UI::CloseDialog();
+	    return true;
+	}
+	
+	// ret is `ok
+        string passwd1 = (string) UI::QueryWidget(`id(`passwd1), `Value);
+        string passwd2 = (string) UI::QueryWidget(`id(`passwd2), `Value);
+	
+	if ( passwd1 != passwd2 )
+	{
+	    Popup::Error (_("The first and the second version\nof the password don't match!\nPlease try again."));
+
+	    ret = nil;
+	}
+	else
+	{
+	    passwd = passwd1;
+	}
+    } while (ret == nil);
+
+
+    UI::CloseDialog();
+
+    if (!CreateRootAccount (passwd))
+    {
+	Popup::Error ( sformat(_("Cannot create account for user %1."), "root" ) );
+	return false;
+    }
+    
+    return true;
+}
 
 /* EOF */
 }

@@ -1,8 +1,8 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-pam yast2-printer yast2-country yast2-installation yast2-perl-bindings perl-gettext
+# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-pam yast2-printer yast2-country yast2-installation yast2-perl-bindings perl-gettext perl-Crypt-SmbHash yast2-ldap-server perl-X500-DN perl-Digest-SHA1 perl-Parse-RecDescent yast2-network
 
 @HEADER@
-Requires:	yast2-perl-bindings yast2 yast2-ldap-client yast2-samba-client yast2-pam yast2-printer
+Requires:	yast2-perl-bindings yast2 yast2-ldap-client yast2-samba-client yast2-pam yast2-printer perl-Crypt-SmbHash yast2-ldap-server yast2-network 
 
 BuildArchitectures:	noarch
 
@@ -23,8 +23,8 @@ Summary:	Configuration of samba-server
 %defattr(-,root,root)
 %dir @yncludedir@/samba-server
 @yncludedir@/samba-server/*
-@clientdir@/samba-server.ycp
-@clientdir@/samba-server_*.ycp
+@ydatadir@/*.ycp
+@clientdir@/*.ycp
 @moduledir@/*
 @desktopdir@/samba-server.desktop
 %doc @docdir@

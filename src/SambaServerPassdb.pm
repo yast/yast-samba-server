@@ -65,7 +65,7 @@ sub Read {
     
     if ( defined $ret )
     {
-	@backends = split (/[\s,]+/, $ret);
+	@backends = split (/[\s]+/, $ret);
     }
 
     $modified = 0;
@@ -169,6 +169,21 @@ sub BackendString
     }
 }
     
+
+BEGIN { $TYPEINFO{LDAPDefault} = ["function", "boolean" ]; }
+sub LDAPDefault {
+    my $self = shift;
+    
+    my $default = $backends[0];
+    
+    if ( defined $default )
+    {
+	my $sam = $self->BackendSAM ($default);
+	return Boolean ($sam eq "ldap" || $sam eq "ldapsam");
+    }
+    
+    return Boolean (0);    
+}
 
 42
 

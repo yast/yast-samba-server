@@ -1,0 +1,74 @@
+Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value.global."password server" nil
+Read	.etc.smb.value.global."idmap uid" nil
+Read	.etc.smb.value.global."winbind uid" nil
+Read	.etc.smb.value.global."idmap gid" nil
+Read	.etc.smb.value.global."winbind gid" nil
+Read	.init.scripts.exists "winbind" nil
+Log	Service winbind does not exist.
+Read	.init.scripts.exists "nmb" nil
+Log	Service nmb does not exist.
+Execute	.background.run_output "/usr/bin/nmbstatus" true
+Read	.etc.smb.value.global."passdb backend" nil
+Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
+Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value.global."add machine script" nil
+Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value.global."netbios name" nil
+Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value.global."prefered master" nil
+Read	.init.scripts.exists "smb" nil
+Log	Service smb does not exist.
+Read	.target.stat "/etc/samba/secrets.tdb" nil
+Log	Cannot get the list of trusted domains
+Dir	.etc.smb.section: []
+Read	.etc.smb.value.global."ldap admin dn" nil
+Read	.etc.smb.value.global."ldap suffix" nil
+Read	.etc.nsswitch_conf."passwd" ""
+Read	.etc.nsswitch_conf."group" ""
+Read	.etc.nsswitch_conf."passwd_compat" nil
+Read	.etc.nsswitch_conf."group_compat" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."ssl" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_passwd" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_shadow" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_group" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."pam_password" nil
+Read	.sysconfig.ldap.BASE_CONFIG_DN nil
+Read	.sysconfig.ldap.FILE_SERVER nil
+Read	.sysconfig.ldap.BIND_DN nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."binddn" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_map_attribute" nil
+Read	.init.scripts.exists "autofs" nil
+Log	Service autofs does not exist.
+Execute	.passwd.init $["base_directory":"/etc"] true
+Read	.passwd.passwd.pluslines []
+Write	.etc.smb.value.global."add machine script" "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$" true
+Write	.etc.smb.value.global."domain logons" "yes" true
+Write	.etc.smb.value.global."domain master" "no" true
+Write	.etc.smb.value.global."ldap idmap suffix" "ou=Idmap" true
+Write	.etc.smb.value.global."ldap machine suffix" "ou=Computers" true
+Write	.etc.smb.value.global."local master" "yes" true
+Write	.etc.smb.value.global."preferred master" "yes" true
+Write	.etc.smb.value.global."security" "user" true
+Write	.etc.smb.value.global."workgroup" "Test" true
+Write	.etc.smb.value.global."netbios name" nil true
+Write	.etc.smb.value.global."add machine script" "/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$" true
+Write	.etc.smb.value.global."domain master" "yes" true
+Write	.etc.smb.value.global."preferred master" "yes" true
+Write	.etc.smb.value.global."encrypt passwords" "yes" true
+Read	.etc.smb.value.global."os level" nil
+Write	.etc.smb.value.global."os level" 65 true
+Write	.etc.smb.value.global."ldap admin dn" nil true
+Write	.etc.smb.value.global."ldap suffix" nil true
+Write	.etc.smb nil true
+Execute	.target.bash "touch /var/lib/YaST2/samba_server_done_once" 1
+Dump	true

@@ -16,5 +16,6 @@ missing
 mkinstalldirs
 stamp-h
 samba-server.pot
+samba-users.pot
 autom4te.cache
 Makefile.am.common

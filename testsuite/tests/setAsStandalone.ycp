@@ -2,6 +2,7 @@
 
 // test for SambaServer::setAsStandalone()
 // $Id$
+// testedfiles: Samba.ycp SambaServer.ycp
 
     include "testsuite.ycp";
 
@@ -20,9 +21,9 @@
     
     DUMP(SambaServer::role);
     DUMP(Samba::security);
-    DUMP( sformat( "Domain logons: %1", SambaServer::domain_logons) );
+    DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
     DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
-    DUMP( sformat( "Local master: %1", SambaServer::local_master) );
+    DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
     DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
     
     Samba::modified = false;
@@ -32,8 +33,8 @@
     DUMP(SambaServer::role);
     DUMP(Samba::security);
 
-    DUMP( sformat( "Domain logons: %1", SambaServer::domain_logons) );
+    DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
     DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
-    DUMP( sformat( "Local master: %1", SambaServer::local_master) );
+    DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
     DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
 }

@@ -1,6 +1,6 @@
 /**
  * File:
- *	users_plugin_ldap_all.ycp
+ *	users_plugin_samba.ycp
  *
  * Package:
  *	Configuration of Users
@@ -14,7 +14,7 @@
 
 
 {
-    textdomain "users"; // use own textdomain for new plugins
+    textdomain "samba-users"; // use own textdomain for new plugins
 
     import "Label";
     import "Popup";
@@ -57,16 +57,12 @@
 	// define the dialog for this plugin and return it's contents
 
 	string caption	= UsersPluginSamba::Name (config, $[]);
-        if (data["what"]:"" == "edit_user" ) {
-            data = UsersPluginSamba::EditBefore (config, data);
-        } else if ( data["what"]:"" == "add_user" ) {
-            data = UsersPluginSamba::AddBefore (config, data);
-        }
 
-
-
-	// helptext 1/3
-	string help_text = _("");
+	// helptext
+	string help_text = _("<p>Here, edit the setting of the user's samba account.</p>") +
+            _("<p>If do not enter custom values for ") +
+            _("<b>\"Home Drive\"</b>, <b>\"Home Path\"</b>, <b>\"Profile Path\"</b> and <b>\"Logon Script\"</b> ") +
+            _("the default values as defined in your local Samba Configuration will be used.</p>");
 
         term contents = `Empty();
         boolean disabled = false;
@@ -76,18 +72,18 @@
         disabled = ( data["sambadisabled"]:"0" == "1" )? true : false;
         contents = `HBox(`HSpacing (1.5), `VBox(
             `VSpacing(0.5),
-	    `Frame ( _("Homedrive"),
+	    `Frame ( _("Home Drive"),
 		     `VBox(
 			   `TextEntry(`id(`homeDrive), "", data["sambahomedrive"]:"" ),
-			   `Left(`CheckBox( `id(`defhomeDrive ), `opt(`notify), "Use default values",
+			   `Left(`CheckBox( `id(`defhomeDrive ), `opt(`notify), _("Use Default Values"),
 				      size (data["sambahomedrive"]:"") <= 0
 					    ))
 			   )
 		     ),
-	    `Frame ( _("Homepath"),
+	    `Frame ( _("Home Path"),
 		     `VBox(
 			   `TextEntry(`id(`homePath), "", data["sambahomepath"]:"" ),
-			   `Left(`CheckBox( `id(`defhomePath ), `opt(`notify), "Use default values",
+			   `Left(`CheckBox( `id(`defhomePath ), `opt(`notify), _("Use Default Values"),
 				      size (data["sambahomepath"]:"") <= 0
 					    ))
 			   )
@@ -95,20 +91,20 @@
 	    `Frame ( _("Profile Path"),
 		     `VBox(
 			   `TextEntry(`id(`profilePath), "", data["sambaprofilepath"]:"" ),
-			   `Left(`CheckBox( `id(`defprofilePath ), `opt(`notify), "Use default values",
+			   `Left(`CheckBox( `id(`defprofilePath ), `opt(`notify), _("Use Default Values"),
 					    size (data["sambaprofilepath"]:"") <= 0))
 			   )
 		     ),
 	    `Frame ( _("Logon Script"),
 		     `VBox(
 			   `TextEntry(`id(`logonScript), "", data["sambalogonscript"]:"" ),
-			   `Left(`CheckBox( `id(`deflogonScript ), `opt(`notify), "Use default values",
+			   `Left(`CheckBox( `id(`deflogonScript ), `opt(`notify), _("Use Default Values"),
 					    size (data["sambalogonscript"]:"") <= 0))
 			   )
 		     ),
-            `VSpacing (1.5),	    
+            `VSpacing (1.5),
             `Left(`CheckBox(`id(`disable), _("Samba Account Disabled"), disabled )),
-            `Left(`CheckBox(`id(`noExpire), _("No password expiration"), noExpire )),
+            `Left(`CheckBox(`id(`noExpire), _("No Password Expiration"), noExpire )),
             `VSpacing (0.5)
             ),
             `HSpacing (1.5)

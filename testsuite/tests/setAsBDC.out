@@ -1,28 +1,14 @@
-Read	.target.size "/etc/install.inf" nil
-Read	.etc.install_inf.Sourcemounted nil
-Read	.etc.install_inf.AutoYaST nil
-Read	.etc.install_inf.Repair nil
-Read	.etc.install_inf.Demo nil
-Read	.etc.install_inf.Textmode nil
-Read	.etc.install_inf.Manual nil
-Read	.target.string "/proc/cmdline" nil
-Read	.etc.install_inf.Console nil
-Read	.etc.install_inf.Braille nil
-Read	.etc.install_inf.VNC nil
-Read	.etc.install_inf.UseSSH nil
-Read	.etc.install_inf.InstMode nil
-Read	.target.tmpdir "/tmp"
-Dump	`disabled
+Dump	`standalone
 Dump	user
-Dump	Domain logons: false
+Dump	Domain logons: nil
 Dump	Domain master: auto
-Dump	Local master: false
+Dump	Local master: nil
 Dump	Preferred master: auto
 Return	true
 Dump	false
-Dump	`disabled
+Dump	`bdc
 Dump	user
 Dump	Domain logons: true
 Dump	Domain master: false
-Dump	Local master: false
+Dump	Local master: nil
 Dump	Preferred master: auto

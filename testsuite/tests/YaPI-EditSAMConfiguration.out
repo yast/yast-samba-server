@@ -1,0 +1,26 @@
+Read	.etc.smb.value.global."ldap admin dn" "uid=fool,dc=another"
+Read	.etc.smb.value.global."ldap suffix" "dc=another"
+Read	.etc.nsswitch_conf."passwd" nil
+Read	.etc.nsswitch_conf."group" nil
+Read	.etc.nsswitch_conf."passwd_compat" nil
+Read	.etc.nsswitch_conf."group_compat" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."ssl" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_passwd" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_shadow" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_base_group" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."pam_password" nil
+Read	.sysconfig.ldap.BASE_CONFIG_DN nil
+Read	.sysconfig.ldap.FILE_SERVER nil
+Read	.sysconfig.ldap.BIND_DN nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."binddn" nil
+Read	.etc.ldap_conf.v."/etc/ldap.conf"."nss_map_attribute" nil
+Read	.init.scripts.exists "autofs" nil
+Log	Service autofs does not exist.
+Execute	.passwd.init $["base_directory":"/etc"] true
+Read	.passwd.passwd.pluslines []
+Write	.etc.smb.value.global."ldap admin dn" "uid=fool,dc=test,dc=domain" true
+Write	.etc.smb.value.global."ldap suffix" "dc=test,dc=domain" true
+Dump	nil

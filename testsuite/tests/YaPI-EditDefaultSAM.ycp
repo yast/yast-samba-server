@@ -1,0 +1,62 @@
+{
+
+// test for YaPI::Samba::EditDefaultSAM()
+// $Id$
+
+    include "testsuite.ycp";
+
+    TESTSUITE_INIT( [ 
+	$[ 
+	    "target" : $[ "tmpdir" : "/tmp" ],  
+	    "etc" : $[
+		"smb" : $[
+		    "value" : $[
+			"global" : $[
+			    "workgroup" : "Test",
+			    "security" : "user",
+			    "domain master" : "no",
+			    "domain logons" : "no",
+			    "local master" : "no",
+			    "preferred master" : "yes",
+			    "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
+			],
+			"lp" : $[
+			    "comment" : "testing printer",
+			    "path" : "/var/spool/lp",
+			    "printable" : "yes",
+			]
+		    ],
+		    "section" : $[
+			"lp" : $[],
+		    ],
+		    "section_type" : $[
+			"lp" : 0,
+		    ],
+		],
+		"printcap" : [],
+	    ],
+	    "passwd" : $[
+		"passwd" : $[
+		    "plusline" : "",
+		]
+	    ],
+	],
+	$[],
+	$[
+    	    "target" : $[
+        	"bash_output" : $[],
+		"bash" : 1
+    	    ],
+	    "background" : $[
+		"run_output" : true,
+	    ],
+	    "passwd" : $[
+		"init" : true,
+	    ],
+	]
+    ], nil );
+
+    import "YaPI::Samba";
+
+    DUMP(YaPI::Samba::EditDefaultSAM("ldapsam:ldap://localhost"));
+}

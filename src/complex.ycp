@@ -19,6 +19,7 @@ import "SambaServerPassdb";
 
 include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
+include "samba-client/routines.ycp";
 
 /**
  * Return a modification status

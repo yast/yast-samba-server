@@ -1,0 +1,69 @@
+{
+
+// test for YaPI::Samba::EditShare()
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    include "testsuite.ycp";
+
+    TESTSUITE_INIT( [ 
+	$[ 
+	    "target" : $[ "tmpdir" : "/tmp" ],  
+	    "etc" : $[
+		"smb" : $[
+		    "value" : $[
+			"global" : $[
+			    "workgroup" : "Test",
+			    "security" : "user",
+			    "domain master" : "no",
+			    "domain logons" : "no",
+			    "local master" : "no",
+			    "preferred master" : "yes",
+			],
+			"lp" : $[
+			    "comment" : "testing printer",
+			    "path" : "/var/spool/lp",
+			    "printable" : "yes",
+			]
+		    ],
+		    "section" : $[
+			"lp" : $[],
+		    ],
+		    "section_type" : $[
+			"lp" : 0,
+		    ],
+		],
+		"printcap" : [],
+	    ],
+	    "passwd" : $[
+		"passwd" : $[
+		    "pluslines" : [],
+		]
+	    ],
+	],
+	$[],
+	$[
+    	    "target" : $[
+        	"bash_output" : $[],
+		"bash" : 1
+    	    ],
+	    "background" : $[
+		"run_output" : true,
+	    ],
+	    "passwd" : $[
+		"init" : true,
+	    ],
+	]
+    ], nil );
+
+    import "YaPI::Samba";
+    import "Mode";
+    
+    Mode::test = true;
+
+    DUMP(YaPI::Samba::EditShare( "lp", $[
+	"comment" : "now it's a production printer",
+	"path" : "/var/spool/lp",
+	"printable" : "yes",
+    ]));
+}

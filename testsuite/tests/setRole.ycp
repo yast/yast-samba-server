@@ -2,6 +2,7 @@
 
 // test for SambaServer::setRole
 // $Id$
+// testedfiles: Samba.ycp, SambaServer.ycp
 
     include "testsuite.ycp";
 
@@ -17,12 +18,12 @@
     
     import "SambaServer";
     
-    SambaServer::setRole( `standalone );
+    SambaServer::setRole( `pdc );
     DUMP(SambaServer::role);
     DUMP(SambaServer::modified);
     
     SambaServer::modified = false;
-    SambaServer::setRole( `disabled );
+    SambaServer::setRole( `standalone );
     DUMP(SambaServer::role);
     // this time modified should be set
     DUMP(SambaServer::modified);

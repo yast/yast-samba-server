@@ -2,7 +2,7 @@
  * File:	include/samba-server/wizards.ycp
  * Package:	Configuration of samba-server
  * Summary:	Wizards definitions
- * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ * Authors:	Stanislav Visnovsky <stanislav.visnovsky@suse.cz>
  *
  * $Id$
  */
@@ -11,27 +11,135 @@
 
 textdomain "samba-server";
 
+import "Sequencer";
 import "Wizard";
-import "Label";
-import "SambaServer";
+import "Mode";
+import "Directory";
 
-include "samba-server/dialogs.ycp";
 include "samba-server/complex.ycp";
+include "samba-server/dialogs.ycp";
 
-symbol MainSequence();
+/**
+ * Main workflow of the samba-server configuration
+ * @return sequence result
+ */
+any MainSequence() {
 
+    map aliases = $[
+	"inst_step1"	: ``( Installation_Step1() ),
+	"inst_step2"	: ``( Installation_Step2() ),
+	"conf_tab"	: ``( Installation_Conf_Tab() ),
+        "share_edit"    : ``( EditShareDialog() ),
+	"share_add"	: ``( AddShareDialog() ),
+        "passdb_edit"   : ``( PassdbDialog() ),
+        "ldap_edit"     : ``( LDAPDialog() ),
+	// another call of the same dialog (cause of handling the dialogs continuity)
+	"ldap_edit_uas"	: ``( LDAPDialog() ),
+        "global_settings"     :   ``( GlobalSettingsDialog() ),
+    ];
+
+    map sequence = $[
+	"ws_start"	: "inst_step1",
+	"inst_step1"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "inst_step2"
+	],
+	"inst_step2"	: $[
+	    `back	: "inst_step1",
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"conf_tab"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `add	: "share_add",
+	    `edit	: "share_edit",
+            `ldap   	: "ldap_edit",
+            `passdb   	: "passdb_edit",
+            `global_settings  	: "global_settings",
+	    `next	: `finish,
+	],
+	"global_settings" : $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"share_edit"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"share_add"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+        "passdb_edit"   : $[
+            `abort  	: `abort,
+	    `cancel 	: `cancel,
+            `next   	: "conf_tab",
+	    `ldap	: "ldap_edit_uas",
+        ],
+	// new calling for the dialog (it depends on where the call started)
+        "ldap_edit_uas"     :  $[
+	    `cancel	: `cancel,
+            `abort  	: `abort,
+	    // This changes the logic of dialogs continuity but the change seems to be logical
+	    // - we are returning to the dialog where we selected from two options:
+	    // "Test LDAP" or "Configure LDAP"
+	    // It makes much more sense for me :->
+	    `next	: "passdb_edit",
+        ],
+        "ldap_edit"     :  $[
+	    `cancel	: `cancel,
+            `abort  	: `abort,
+            `next   	: "conf_tab",
+        ],
+    ];
+    
+    // setup the abort function
+    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
+    
+    // check if the main config file is modified already
+    map res = (map)SCR::Execute (.target.bash_output, "rpm -V samba-client | grep '/etc/samba/smb\.conf'" );
+    boolean config_changed = false;
+    
+    if (res["exit"]:0 == 0 && size( res["stdout"]:"" ) > 0 )
+    {
+	config_changed = true;
+	y2milestone ("Config file has beed changed already" );
+    }
+    
+    // run wizard only first time and not in autoyast
+    if (SCR::Read( .target.stat, Directory::vardir + "/samba_server_done_once" ) != $[]
+	|| Mode::config || config_changed
+    )
+    {
+	sequence["ws_start"] = "conf_tab";
+	
+	if (!Mode::config)
+	{
+	    return_tab = "shares";	
+	}
+    }
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    return ret;
+}
 
 /**
  * Whole configuration of samba-server
  * @return sequence result
  */
-symbol SambaServerSequence() ``{
-    import "Sequencer";
+any SambaServerSequence() {
 
     map aliases = $[
-	"read"	: [ ``( ReadDialog() ), true ],
+	"read"  : [ ``( ReadDialog() ), true ],
 	"main"	:   ``( MainSequence() ),
-	"write"	: [ ``( WriteDialog() ), true ]
+	"write" : [ ``( WriteDialog() ), true ]
     ];
 
     map sequence = $[
@@ -41,8 +149,9 @@ symbol SambaServerSequence() ``{
 	    `next	: "main"
 	],
 	"main" : $[
+	    `cancel	: `abort,
 	    `abort	: `abort,
-	    `next	: "write"
+	    `finish	: "write"
 	],
 	"write" : $[
 	    `abort	: `abort,
@@ -51,9 +160,8 @@ symbol SambaServerSequence() ``{
     ];
 
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon("samba-server");
 
-    symbol ret = Sequencer::Run(aliases, sequence);
+    any ret = Sequencer::Run(aliases, sequence);
 
     UI::CloseDialog();
     return ret;
@@ -64,80 +172,20 @@ symbol SambaServerSequence() ``{
  * For use with autoinstallation.
  * @return sequence result
  */
-symbol SambaServerAutoSequence() ``{
-    // translators: inicialization dialog caption
+any SambaServerAutoSequence() {
+
+    /* Initialization dialog caption */
     string caption = _("Samba Server Configuration");
-    // translators: inicialization dialog contents
-    term contents = `Label(_("Initializing ..."));
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 
-    symbol ret = MainSequence();
+    any ret = MainSequence();
 
     UI::CloseDialog();
-    
-    if( ret != `abort ) {
-	SambaServer::globals_configured = true;
-	SambaServer::shares_configured = true;
-    }
-    
-    return ret;
-}
-
-/**
- * Main workflow of the samba-server configuration
- * @return sequence result
- */
-symbol MainSequence() ``{
-    import "Sequencer";
-
-    map aliases = $[
-	"samba_role"		:   ``( RoleDialog() ),
-	"enable_shares"		:   ``( OverallSharesDialog() ),
-	"passdb_edit"		:   ``( PassdbDialog() ),
-	"shared_directories"	:   ``( ShareDirsDialog() ),
-	"share_edit"		:   ``( EditShareDialog() ),
-	"ldap_edit"		:   ``( LDAPDialog() ),
-    ];
-
-    map sequence = $[
-	"ws_start"	: "samba_role", 
-	"enable_shares"	: $[
-		`abort	: `abort,
-		`next	: `next,
-		`other_shares	: "shared_directories",
-	],
-	"samba_role"	: $[
-		`abort	: `abort,
-		`next	: "enable_shares",
-		`advanced	: "passdb_edit",
-	],
-	"shared_directories"	: $[
-		`abort	: `abort,
-		`edit	: "share_edit",
-		`next	: "enable_shares",
-	],
-	"passdb_edit"	: $[
-		`abort	: `abort,
-		`next	: "samba_role",
-		`ldap	: "ldap_edit",
-	],
-	"share_edit"	: $[
-		`abort	: `abort,
-		`next	: "shared_directories",
-	],
-	"ldap_edit"	:  $[
-		`abort	: `abort,
-		`next	: "passdb_edit",
-	],
-    ];
-    
-    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
-
-    symbol ret = Sequencer::Run(aliases, sequence);
-
     return ret;
 }
 

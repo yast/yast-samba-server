@@ -9,6 +9,8 @@ client_DATA =			\
 	samba-server_auto.ycp	
 
 ynclude_DATA =			\
+	samba-options-global.ycp	\
+	samba-options-local.ycp		\
 	helps.ycp		\
 	wizards.ycp		\
 	dialogs.ycp		\
@@ -21,7 +23,17 @@ desktop_DATA =			\
 module_DATA =			\
 	SambaServer.ycp		\
 	SambaServerWidgets.ycp	\
-	SambaServerPassdb.pm
+	SambaServerPassdb.pm	\
+	SambaSecrets.pm		\
+	TabWidget.ycp
+
+YaPI_perldir = @moduledir@/YaPI
+
+YaPI_perl_DATA = \
+        YaPI/Samba.pm
+
+ydata_DATA =                     \
+	add_machine.ycp
 
 samba-server:
 	ln -sf . samba-server
@@ -30,7 +42,7 @@ ycpchook = samba-server
 
 YCPCFLAGS = -I.
 
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
+EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA) $(YaPI_perl_DATA) $(ydata_DATA)
 
 include $(top_srcdir)/Makefile.am.common
  

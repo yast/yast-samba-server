@@ -1,7 +1,8 @@
-/* File:	include/samba-server/dialogs.ycp
+/**
+ * File:	include/samba-server/dialogs.ycp
  * Package:	Configuration of samba-server
  * Summary:	Dialogs definitions
- * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ * Authors:	Stanislav Visnovsky <stanislav.visnovsky@suse.cz>
  *
  * $Id$
  */
@@ -10,362 +11,841 @@
 
 textdomain "samba-server";
 
-import "CWM";
+import "String";
 import "Label";
-import "Mode";
-import "Popup";
+import "Wizard";
 import "Samba";
 import "SambaServer";
 import "SambaServerWidgets";
-import "Wizard";
+import "TabWidget";
+import "CWM";
 
 include "samba-server/helps.ycp";
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
-map AddSharePopup();
+string return_tab = "startup";
 
-/**
- * SAMBA role dialog
- * @return dialog result
- */
-symbol RoleDialog () ``{
+any Installation_Step1 () {
 
-    /* Samba-server role dialog caption */
-    string caption = _("Samba Server Role");
-    
-    Wizard::SetContents( caption, `VBox(
-	`RadioButtonGroup( `id(`server_status), `VBox(
-	    // radio button label
-    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("&Disable Samba Server") ) ),
-	    // radio button label
-    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("&Enable Samba Server") ) )
-	)),
-	`VSpacing(),
-	`HBox(
-	    `HSpacing(3),
-	    // radio button group label
-	    `Frame( _("Sharing Type"), `VBox(
-		`RadioButtonGroup( `id(`samba_role), `VBox(
-		    `Left( `RadioButton( `id(`standalone), `opt(`notify), _("File and Printer Sharing"), true ) ),
-		    `Left( `RadioButton( `id(`bdc), `opt(`notify), dgettext ("samba-server", SambaServer::roleName( `bdc )) ) ),
-		    `Left( `RadioButton( `id(`pdc), `opt(`notify), dgettext ("samba-server", SambaServer::roleName( `pdc )) ) )
-	        ) ),
-	    
-		`VBox(
-		    WorkgroupWidget(),
-		    // text entry label
-		    `TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string ),
-		    // text entry label
-		    `TextEntry(`id(`netbios_name), _("Server &NetBIOS Name:"), SambaServer::netbios_name )
-	        ) 
-	    ) ),
-	    `HSpacing(3)
-	),
-	// push button label
-	`PushButton( `id( `advanced ), _("&Authentication Details") )
-	) , 
-	HELPS["RoleDialog"]:"", false, true
-    );
-    
-    y2milestone ("Workgroup: %1", Samba::workgroup);
-    
-    UI::ChangeWidget( `id( SambaServer::role ), `Value, true );
-    if( SambaServer::role == `disabled ) 
+    string caption = _("Samba Installation") + " - " + _("Step 1 of 2");
+
+    list <string> workgroups = maplist( string key,
+	boolean value, Samba::PreprocessAvailableWorkgroups (), ``(key));
+
+    // always add the currently configured workgroup
+    if ( size(Samba::workgroup) > 0 && ! contains (workgroups, Samba::workgroup) )
     {
-	// if it is disabled, set the radio button of the would-be enabled role
-	UI::ChangeWidget( `id( SambaServer::DetermineRole() ), `Value, true );
-    }
-
-    any ret = nil;
-    while(true) {
-
-	// enable widgets according to the current role
-	boolean ew = !((boolean) UI::QueryWidget( `id( `disabled ), `Value ));
-	
-	UI::ChangeWidget( `id( `enabled ), `Value, ew );
-
-	UI::ChangeWidget( `id( `pdc ), `Enabled, ew );
-	UI::ChangeWidget( `id( `bdc ), `Enabled, ew );
-	UI::ChangeWidget( `id( `standalone ), `Enabled, ew );
-	UI::ChangeWidget( `id( `workgroup ), `Enabled, ew );
-	UI::ChangeWidget( `id( `server_description ), `Enabled, ew );
-	UI::ChangeWidget( `id( `advanced ), `Enabled, ew );
-	UI::ChangeWidget( `id( `browse ), `Enabled, ew );
-	UI::ChangeWidget( `id( `netbios_name ), `Enabled, ew );
-	
-	ret = UI::UserInput();
-	
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(SambaServer::AbortFunction()) break;
-	    else continue;
-	}
-	else if(ret == `browse ) {
-            string new_workgroup = BrowseWorkgroups();
-
-            if( new_workgroup != nil ) {
-                // fill in the new workgroup name
-                UI::ChangeWidget( `id(`workgroup), `Value, new_workgroup );
-            }
-            continue;
-	}
-        else if(ret == `next || ret == `advanced ) {
-	    symbol role = `disabled;
-
-	    // if not disabled, choose the role
-	    if( ew ) {
-		role = (symbol) UI::QueryWidget( `id( `samba_role ), `CurrentButton ) ;
-	    }
-	    
-	    // warning about replication for BDC
-	    if( role == `bdc ) {
-		// translators: BDC requires replication of important data but YaST does not support this
-		Popup::Warning(_("The backup domain controller role
-requires a replication of data about
-users and other aspects from a 
-primary domain controller. 
-However, YaST2 cannot set up
-the replication.
-
-The primary domain 
-controller must be a Samba server.
-") );		
-	    }
-
-	    // update the widgets
-	    UI::ChangeWidget( `id( role ), `Value, true );
-
-	    // store the new settings
-	    if( ! SambaServer::setRole( role ) ) {
-		// role switch was unsuccessful, continue editing
-		ret = nil;
-		continue;
-	    }
-
-	    Samba::setWorkgroup( (string) UI::QueryWidget( `id(`workgroup ), `Value ) );
-	    SambaServer::setDescription( (string) UI::QueryWidget( `id( `server_description ), `Value ) );
-	    string nb  = (string) UI::QueryWidget( `id( `netbios_name ), `Value );
-	    
-	    if (nb != SambaServer::netbios_name)
-	    {
-		SambaServer::netbios_name = nb;
-		SambaServer::modified = true;
-	    }
-	    
-	    if( SambaServer::role == `next ) {
-		symbol res = CheckWorkgroup( Samba::workgroup );
-		if( res != `workgroup && SambaServer::role == `pdc ) {
-		    // translators: continue/cancel popup. Warning, that there is already a PDC present.
-		    if( ! Popup::ContinueCancel( sformat( _("You set this Samba server
-to act as primary domain controller.
-However, a primary domain controller
-already exists in domain '%1'.
-The domain will not work correctly if there
-are two primary domain controllers.
-
-Really continue?
-"), Samba::workgroup ) ) ) continue;
-		}
-		
-		// save the settings
-//		SambaServer::WriteSAMBackend();
-//		SambaServer::ReloadSettings();
-		
-		// ask to join the domain
-		AskJoinDomain( Samba::workgroup, res );
-	    }
-
-            break;
-        }
+	workgroups = add ( workgroups, Samba::workgroup );
     }
     
-    return (symbol) ret;
-}
-
-/**
- * OverallSharesDialog dialog
- * @return dialog result
- */
-symbol OverallSharesDialog () ``{
-
-    // skip the dialog, if the service is disabled
-    if( SambaServer::role == `disabled ) return `next;
-
-    /* Samba-server overall shares dialog caption */
-    string caption = _("Shared Resources");
-    
-    /* Samba-server overall shares dialog contents */
-    term contents = 
-	`HVSquash(
-	// frame label for global sharing check boxes
-	`Frame( _("Available Shares"), 
-	`VBox( 
-	    // check box to share the home directories
-	    `Left(`CheckBox( `id( `homes ), _("Share &Homes"), SambaServer::share_homes ) ),
-	    `HBox( 
-		// check box to share the printers
-		`Left(`CheckBox( `id( `printers ), `opt( `notify ),  _("Share &Printers"), SambaServer::share_printers ) ),
-		// push button
-		`PushButton( `id( `select_printers ), _("&Select...") ),
-		`HStretch()
+    term contents =
+	`VBox (
+	    `VSquash (
+		`Left( `Label ( _("Select one of the available workgroups or domains or enter your own.") ) )
 	    ),
-	// push button
-    	`PushButton( `id( `other_shares ), _("&Advanced...")  )
-	)
-    ) );
+	    `VSpacing ( 1 ),
+	    `VSquash (
+		`Left ( `ComboBox ( `id( "workgroups" ), `opt( `editable ), _("&Workgroup or Domain Name"), workgroups ) )
+	    ),
+	    `VStretch ()
+	);
 
-    Wizard::SetContentsButtons(caption, contents, HELPS["OverallShares"]:"",
-	    Label::BackButton(), Label::FinishButton());
-
-    any ret = nil;
-    while(true) {
+    Wizard::SetContents ( caption, contents, HELPS["inst_step1"]:"", false, true);
+	
+    Wizard::HideBackButton ();
     
-	UI::ChangeWidget( `id( `select_printers ), `Enabled, UI::QueryWidget( `id( `printers ), `Value ) );
-    
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(SambaServer::AbortFunction()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back || ret == `other_shares ) {
-	    SambaServer::enableHomes( (boolean) UI::QueryWidget( `id( `homes ), `Value ) );
-	    SambaServer::enablePrinters( (boolean) UI::QueryWidget( `id( `printers ), `Value ) );
-            break;
-        }
-	else if(ret == `select_printers ) {
-	    UI::OpenDialog(
-		`VBox( 
-		    // translators: printer selection box
-		    `MultiSelectionBox( `id( `printer_list ), _("Select Available Printers:") ,
-		    printers2items( SambaServer::printer_status ) ),
-		    `HBox( 
-			`PushButton( `id( `ok ), `opt(`default), Label::OKButton()),
-			`PushButton( `id( `cancel ), Label::CancelButton())
-		    )
-		)
-	    );
-	    
-	    ret = UI::UserInput();
-	    if( ret == `ok ) {
-		// update the list of selected printers
-		SambaServer::enablePrinterNames( 
-		    (list<string>) UI::QueryWidget( `id( `printer_list ), `SelectedItems )
-		);
-	    }
-	    
-	    UI::CloseDialog();
-	    continue;
-	}
+    if ( size(Samba::workgroup) > 0 )
+    {
+	UI::ChangeWidget ( `id ("workgroups"), `Value, Samba::workgroup );
     }
-    
-    Wizard::RestoreNextButton();
-
-    return (symbol) ret;
-}
-
-/**
- * ShareDirsDialog dialog
- * @return dialog result
- */
-symbol ShareDirsDialog () ``{
-
-    list items = shares2items( SambaServer::shares );
-    
-    /* Samba-server shared directories dialog caption */
-    string caption = _("Shared Directories");
-
-    /* Samba-server shared directories dialog contents */
-    term contents = 
-    `VBox(
-	`Table(`id( `table ), `header(
-	    // table column header
-	    _("Status"), 
-	    // table column header
-	    _("Name"), 
-	    // table column header
-	    _("Path"), 
-	    // table column header
-	    _("Comment") ), items ),
-	`HBox(
-	    `PushButton( `id(`add), Label::AddButton() ),
-	    `PushButton( `id(`edit), Label::EditButton() ),
-	    `PushButton( `id(`delete), Label::DeleteButton() ),
-	    `HStretch(),
-	    // push button label
-	    `PushButton( `id(`toggle), _("&Toggle Status") )
-	)
-    );
-
-    Wizard::SetContentsButtons(caption, contents, HELPS["ShareDirs"]:"",
-	    Label::BackButton(), Label::OKButton());
 
     any ret = nil;
     while(true) {
-    
-	UI::ChangeWidget( `id(`edit), `Enabled, size(SambaServer::shares)>0 );
-	UI::ChangeWidget( `id(`delete), `Enabled, size(SambaServer::shares)>0 );
-	UI::ChangeWidget( `id(`toggle), `Enabled, size(SambaServer::shares)>0 );
-
 	ret = UI::UserInput();
-        integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(SambaServer::AbortFunction()) break;
-	    else continue;
-	}
-	else if(ret == `edit ) {
-	    SambaServerWidgets::shareToEdit = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	if ( ret == `next || ret == `cancel || ret == `abort) {
 	    break;
 	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-	else if(ret == `toggle ) {
-	    string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
-	    SambaServer::enableShare( share, (SambaServer::shares[share, "commentout"]:false) );
-	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
-	    UI::ChangeWidget( `id(`table), `CurrentItem, id );
+	else {
+	    y2error( "unexpected retcode: %1", ret );
 	    continue;
 	}
-	else if(ret == `add ) {
-	    map result = AddSharePopup();
-	    if( result != nil ) SambaServer::addShare( result["name"]:"" ,
-		$[
-		    "comment": result["comment"]:"",
-		    "path": result["path"]:""
-		] );
-	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
-	    continue;
-	}
-	// translators: confirmation popup
-	else if(ret == `delete)
+    }
+    
+    if ( ret == `next )
+    {
+	string sel = (string)UI::QueryWidget( `id ("workgroups"), `Value );
+	y2milestone ("Setting workgroup '%1'",sel);
+	Samba::setWorkgroup (sel);
+	SambaServer::global_config ["workgroup"] = sel;
+    }
+    
+    Wizard::RestoreBackButton ();
+
+    return ret;
+}
+
+any Installation_Step2 () {
+
+    string caption = _("Samba Installation") + " - " + _("Step 2 of 2");
+    
+    map<string, map<string,any> > proposal = SambaServer::ProposeRole (Samba::workgroup);
+    
+    y2milestone ("Proposal: %1", proposal);
+
+    term contents =
+	`VBox (
+	    `VSquash (
+		`Left ( `Label ( _("Current Domain Name:") + " " + Samba::workgroup) )
+	    ),
+	    `VSpacing ( 1 ),
+	    `VSquash (
+		`Frame ( _("Type Selection for SAMBA Server"),
+		    `VBox (
+			`RadioButtonGroup( `id ( "samba_server_type" ),
+			    `VBox (
+				`VSpacing ( 1 ),
+				`Left( `Label ( _("The available options in the configuration dialogs
+depend on the settings in this selection.
+") ) ),
+				`Left( `RadioButton( 
+				    `id (`pdc)
+				    , _("&Primary Domain Controller (PDC)")
+				    , proposal["pdc","propose"]:false ) ),
+				`HBox (
+				    `HSpacing ( 4 ),
+				    `Left( `Label ( proposal["pdc","message"]:"" ) )
+				),
+				`Left( `RadioButton( 
+				    `id (`bdc)
+				    , _("B&ackup Domain Controller (BDC)")
+				    , proposal["bdc","propose"]:false ) ),
+				`HBox (
+				    `HSpacing ( 4 ),
+				    `Left( `Label ( proposal["bdc","message"]:"" ) )
+				),
+				`Left( `RadioButton( 
+				    `id (`standalone)
+				    , _("No Domain &Controller")
+				    , proposal["standalone","propose"]:false ) ),
+				`VSpacing ( 1 )
+			    )
+			)
+		    )
+		)
+	    ),
+	    `VStretch ()
+	);
+
+    Wizard::SetContents ( caption, contents, HELPS["inst_step2"]:"",
+	true, true );
+	
+    UI::ChangeWidget ( `id (`pdc), `Enabled, proposal["pdc","possible"]:true );
+    UI::ChangeWidget ( `id (`bdc), `Enabled, proposal["bdc","possible"]:true );
+
+    any ret = nil;
+    while(true) {
+	ret = UI::UserInput();
+	if ( ( ret == `abort || ret == `cancel ) && ! SambaServer::AbortFunction () )
 	{
-	    // confirmation dialog before deleting a share
-	    if  (Popup::ContinueCancel( sformat( _("Really 
+	    continue;
+	}
+	if ( ret == `back || ret == `next || ret == `abort || ret == `cancel ) {
+	    if ( ret == `next )
+	    {
+		// store the value
+		SambaServer::setRole ( (symbol) UI::QueryWidget (
+		    `id ( "samba_server_type" ),
+		    `CurrentButton
+		));
+	    }
+	    break;
+	}
+	else {
+	    y2error( "unexpected retcode: %1", ret );
+	    continue;
+	}
+    }
+
+    return ret;
+}
+
+/************************* initial wizard end **************************/
+
+void ServiceWidgetInit (map<string, any> descr, any key)
+{
+    symbol status = SambaServer::ServiceEnabled () ? `enable: `disable;
+    UI::ChangeWidget ( `id ( status ), `Value, true );
+}
+
+void ServiceWidgetStore (map<string, any> descr, any key)
+{
+    SambaServer::setServiceEnabled ( 
+	UI::QueryWidget ( `id ("samba_server_type"), `CurrentButton ) == `enable 
+    );
+}
+
+void IdentityWidgetInit (map<string, any> descr, any key)
+{
+    UI::ChangeWidget ( `id ( "workgroup_domainname" ), `Value, Samba::workgroup );
+    UI::ChangeWidget ( `id ( "domain_controller" ), `Value, SambaServer::role );
+    
+    boolean wins = normalize_boolean (SambaServer::global_config["wins support"]: (string)nil, false);
+
+    UI::ChangeWidget ( `id ( "wins_server_support"), `Value, wins );
+    UI::ChangeWidget ( `id ( "remote_wins_server"), `Value, ! wins );
+    UI::ChangeWidget ( `id( "wins_server_name" ), `Enabled, ! wins );
+	    
+    UI::ChangeWidget ( `id( "wins_server_name" ), `Value
+	, SambaServer::global_config ["wins server"]:"" );
+
+    UI::ChangeWidget ( `id( "netbios_hostname" ), `Value, SambaServer::netbios_name );
+}
+
+void IdentityWidgetStore (map<string, any> descr, any key)
+{
+    string sel = (string)UI::QueryWidget( `id ("workgroup_domainname"), `Value );
+    y2milestone ("Setting workgroup '%1'",sel);
+    Samba::setWorkgroup (sel);
+    SambaServer::global_config ["workgroup"] = sel;
+
+    symbol role = (symbol)UI::QueryWidget ( `id ( "domain_controller" ), `Value );
+    y2milestone ("Setting role '%1'",role);
+    SambaServer::setRole (role);
+    
+    if ( (boolean)UI::QueryWidget ( `id ( "wins_server_support"), `Value ) ) 
+    {
+	y2milestone ("Enabling wins support");
+	SambaServer::global_config ["wins support"] = "yes";
+    }
+    else
+    {
+	SambaServer::global_config ["wins support"] = "no";
+	SambaServer::global_config ["wins server"] = 
+	    (string)UI::QueryWidget ( `id( "wins_server_name" ), `Value );
+	y2milestone ("Disabling wins support, using server '%1'", SambaServer::global_config ["wins server"]:nil );
+    }
+
+    string value = (string)UI::QueryWidget ( `id( "netbios_hostname" ), `Value );
+    
+    // warn about the change
+    if (! Mode::config && size(SambaServer::netbios_name)>0 && value != SambaServer::netbios_name)
+    {
+	Popup::Warning ( warnings["netbios"]:"" );
+    }
+    SambaServer::netbios_name = value;
+    SambaServer::modified = true;
+}
+
+symbol IdentityWidgetHandle (string key, map event_descr)
+{
+    if ( event_descr["ID"]:nil == "wins_server_support" 
+	|| event_descr["ID"]:nil == "remote_wins_server")
+    {
+	UI::ChangeWidget ( `id( "wins_server_name" ), `Enabled, event_descr["ID"]:nil == "remote_wins_server" );
+    }
+
+    else if( contains ( [ `ldap, `passdb, `global_settings], event_descr["ID"]:`cancel ) ) {
+	return_tab = "identity";
+	return event_descr["ID"]:`next;
+    }
+    return nil;
+}
+
+
+void SharesWidgetInit (map<string, any> descr, any key)
+{
+    list items = shares2items( SambaServer::shares );
+    
+    UI::ChangeWidget ( `id( `table ), `Items, items );
+    UI::ChangeWidget( `id(`edit), `Enabled, size(SambaServer::shares)>0 );
+    UI::ChangeWidget( `id(`delete), `Enabled, size(SambaServer::shares)>0 );
+    UI::ChangeWidget( `id(`toggle), `Enabled, size(SambaServer::shares)>0 );
+}
+
+symbol SharesWidgetHandle (string key, map event_descr)
+{
+    symbol ret = (symbol) event_descr["ID"]:nil;
+
+    integer id = (integer) UI::QueryWidget(`id(`table), `CurrentItem);
+
+    if(ret == `edit && id != nil ) {
+	SambaServerWidgets::shareToEdit = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	return_tab = "shares";
+	return `edit;
+    }
+    else if(ret == `toggle && id != nil) {
+	string share = (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil );
+	SambaServer::enableShare( share, (SambaServer::shares[share, "commentout"]:false) );
+	UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
+	UI::ChangeWidget( `id(`table), `CurrentItem, id );
+	SambaServer::modified = true;
+    }
+    else if(ret == `add ) {
+	return_tab = "shares";
+	return `add;
+    }
+    else if(ret == `ldap || ret == `passdb ) {
+	return_tab = "identity";
+	return ret;
+    }
+    else if(ret == `delete && id != nil)
+    {
+	// confirmation dialog before deleting a share
+	if  (Popup::ContinueCancel( sformat( _("Really 
 delete share '%1'?
 
 All its settings will be lost.
-"), select( (list) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
-		SambaServer::removeShare( (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
+"), select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) ) ) ) {
+	    SambaServer::removeShare( (string) select( (term) UI::QueryWidget(`id(`table), `Item(id) ), 2, nil ) );
 	    
-		UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
-		continue;
-	    }
+	    UI::ChangeWidget( `id(`table), `Items, shares2items( SambaServer::shares ) );
 	}
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
+    }
+    else if(ret == `filter_all)
+    {
+	list items = shares2items( SambaServer::shares );
+	UI::ChangeWidget ( `id( `table ), `Items, items );
+    }
+    else if(ret == `filter_non_system)
+    {
+	list<string> system = ["homes","printers","print$"];
+	list items = shares2items( 
+	    filter (string share, map value, SambaServer::shares
+		, ``(! contains (system, share) ) )
+	);
+	UI::ChangeWidget ( `id( `table ), `Items, items );
+    }
+    return nil;
+}
+
+void AddTrustedDomain ()
+{
+    term contents = `VBox (
+	`Label (_("Enter the name of the trusted domain
+and the password to access it.")),
+	`VSpacing (1),
+	`TextEntry (`id(`domain), _("&Domain:") ),
+	`Password (`id(`password), _("&Password:") ),
+	`VSpacing (1),
+	`HBox (
+	    `PushButton (`id (`ok), `opt (`default), Label::OKButton () ),
+	    `PushButton (`id (`cancel), Label::CancelButton () )
+	)
+    );
+    
+    UI::OpenDialog (contents);
+    UI::SetFocus (`id (`domain) );
+
+    symbol ret = nil;    
+    do 
+    {
+	ret = (symbol)UI::UserInput ();
+	
+	if (ret == `ok)
+	{
+	    string domain = (string) UI::QueryWidget (`domain, `Value);
+	    string passwd = (string) UI::QueryWidget (`password, `Value);
+	    
+	    if ( size(domain) == 0 )
+	    {
+		import "Report";
+		Report::Error (_("Domain name cannot be empty.") );
+		ret = nil;
+	    }
+	    if (! SambaServer::EstablishTrustedDomain (domain, passwd) )
+	    {
+		import "Report";
+		Report::Error (_("Cannot establish trusted domain relationship."));
+		ret = nil;
+	    }
+	    
+	    SambaServer::modified = true;
+	}
+    } while (ret == nil );
+    
+    
+    UI::CloseDialog ();
+}
+
+boolean autoyast_warning_done = false;
+
+void TrustedDomainsWidgetInit (map<string, any> descr, any key)
+{
+
+    if ( Mode::config && !autoyast_warning_done)
+    {
+	// issue a warning, if not already done so
+	Popup::Warning (_("YaST needs to store a password for trusted domains 
+in the autoinstallation control file. The password
+will be stored as a plain text. This can be considered
+a security threat."));
+	autoyast_warning_done = true;
     }
     
-    Wizard::RestoreNextButton();
+    list<term> domains = [];
+    
+    foreach (string key, boolean value, SambaServer::trusted_domains, ``{
+	if (value) 
+	{
+	    domains = add (domains, `item ( `id(key), key ) );
+	}
+    });
+    
+    UI::ReplaceWidget (`id (`domains_tr), `SelectionBox( `id( "trusted_domains" ), _("&Trusted Domains List") , domains ) );
 
-    return (symbol) ret;
+    // disable delete button if needed
+    UI::ChangeWidget (`id (`delete_domain), `Enabled, size (domains) != 0);
 }
+
+symbol TrustedDomainsWidgetHandle (string key, map event_descr)
+{
+    if ( event_descr["ID"]:nil == `add_domain )
+    {
+	AddTrustedDomain ();
+    }
+    else if ( event_descr["ID"]:nil == `delete_domain )
+    {
+	string to_delete = (string)UI::QueryWidget (
+	    `id ("trusted_domains"), `CurrentItem );
+	    
+	// confirmation
+	if  (Popup::ContinueCancel( sformat( _("Really abadon trust relationship 
+to trusted domain '%1'?"), to_delete ) )  )
+	{
+	    SambaServer::trusted_domains[to_delete] = false;
+	    
+	    SambaServer::modified = true;
+	}
+    }
+
+    // reinitialize contents
+    TrustedDomainsWidgetInit ($[], key);
+
+    return nil;
+}
+
+/**
+ * EditShareDialog dialog
+ * @return dialog result
+ */
+symbol EditShareDialog () ``{
+
+    term contents = `HBox (`HSpacing (1), `VBox (
+        `VSpacing (1), 
+        "share_edit"
+    ), `HSpacing (1));
+
+    // dialog caption
+    string caption = sformat( _("Edit Share \"%1\""), SambaServerWidgets::shareToEdit );
+
+    return CWM::ShowAndRun (
+	["share_edit"], 
+	SambaServerWidgets::widgets, 
+	contents, 
+	caption, 
+	Label::BackButton (), Label::OKButton (), 
+	$[`abort: SambaServer::AbortFunction]
+    );
+}
+
+symbol GlobalSettingsDialog () ``{
+
+    term contents = `HBox (`HSpacing (1), `VBox (
+        `VSpacing (1), 
+        "globalsettings"
+    ), `HSpacing (1));
+
+    // dialog caption
+    string caption = _("Expert Global Settings Configuration");
+
+    symbol res = CWM::ShowAndRun (
+	["globalsettings"], 
+	SambaServerWidgets::widgets, 
+	contents, 
+	caption, 
+	Label::BackButton (), Label::OKButton (), 
+	$[`abort: SambaServer::AbortFunction]
+    );
+    
+    if (res == `next)
+    {
+	// update the rest of the settings using the entered ones
+	
+	Samba::setWorkgroup ( SambaServer::global_config["workgroup"]: (Samba::workgroup) );	
+	SambaServer::add_machine_script = SambaServer::global_config["add machine script"]: (SambaServer::add_machine_script);
+	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
+	SambaServer::preferred_master = SambaServer::global_config["preferred master"]: (SambaServer::preferred_master);
+	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
+	SambaServer::netbios_name = SambaServer::global_config["netbios name"]: (SambaServer::netbios_name);
+	SambaServer::domain_master = SambaServer::global_config["domain master"]: (SambaServer::domain_master);
+	
+	SambaServerPassdb::SetBackends ( splitstring( SambaServer::global_config["passdb backend"]:"", " ") );
+	
+	SambaServer::role = SambaServer::DetermineRole();
+    }
+    
+    return res;
+}
+
+symbol AddShareDialog () ``{
+
+    term contents = `HVSquash (`HBox (`HSpacing (1), `VBox ( `opt (`hstretch),
+	`VSpacing (1),
+	`Frame ( _("Identification:"),
+	    `VBox (
+		`TextEntry ( `id (`name), _("Share &Name:") ),
+		`TextEntry (`id (`comment), _("Share &Description:") )
+	    )
+	),
+	`Frame ( _("Share Type:"),
+	    `HBox (
+		`HSpacing ( 1 ),
+		`VBox ( `opt ( `hstretch ),
+		    `RadioButtonGroup( 
+		    `VBox (
+			`Left( `RadioButton( `id ( `printer), `opt( `notify ), _("&Printer") ) ),
+			`Left( `RadioButton( `id ( `directory), `opt( `notify ), _("&Directory"), true ) )
+		    )
+		),
+                `HBox(
+            	    // translators: text entry label
+            	    `TextEntry( `id(`path), _("Share &Path:"), "/home" ),
+            	    `Bottom( `PushButton( `id( `browse ), Label::BrowseButton() ) )
+        	)),
+		`HSpacing ( 1 )
+	    )
+	)
+    )));
+    
+    // translators: dialog caption
+    string caption = _("Add New Share");
+
+    Wizard::SetContentsButtons ( caption, contents, HELPS["add_share"]:"",
+	Label::BackButton (), Label::OKButton () );
+	
+    UI::SetFocus ( `id (`name));
+
+    symbol ret = nil;
+    
+    do 
+    {
+	// enable/disable path
+	boolean on = (boolean)UI::QueryWidget ( `id( `directory ), `Value );
+	UI::ChangeWidget ( `id (`path), `Enabled, on );
+	UI::ChangeWidget ( `id (`browse), `Enabled, on );
+	
+	ret = (symbol)UI::UserInput ();
+	
+	if (ret == `printer || ret == `directory)
+	{
+	    ret = nil;
+	    continue;
+	}
+	
+	if (ret == `browse)
+	{
+            // translators: file selection dialog title
+            string dir = UI::AskForExistingDirectory ( 
+		(string)UI::QueryWidget (`id(`path), `Value)
+		, _("Path for a Share") );
+            if( dir != nil ) {
+                UI::ChangeWidget( `id (`path), `Value, dir );
+            }
+            ret = nil;
+
+	} else if (ret == `next) 
+	{
+	    // OK was pressed
+	
+	    string name = (string) UI::QueryWidget( `id( `name ), `Value );
+	    string pathvalue = (string) UI::QueryWidget( `id( `path ), `Value );
+	    string comment = (string) UI::QueryWidget( `id( `comment ), `Value );
+	    boolean printable = (boolean) UI::QueryWidget (`id ( `printer ), `Value );
+	
+	    if( size( name ) == 0 ) {
+		// translators: error message
+		Popup::Error( _("Share name cannot be empty.") );
+		ret = nil;
+		continue;
+	    } else if( size( pathvalue ) == 0 && ! printable ) {
+		// translators: error message
+		Popup::Error( _("Share path cannot be empty.") );
+		ret = nil;
+		continue;
+	    } else if ( ! SambaServerWidgets::SharePathWarning (pathvalue) ) {
+		ret = nil;
+		continue;
+	    } else if( !printable && ! Mode::config && SCR::Read( .target.stat, pathvalue ) == $[] ) {
+		// translators: question popup. A user entered non-existent path
+		// for a share
+		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.
+Really use this path?
+"), pathvalue ) ) ) {
+		    ret = nil;
+		    continue;
+		}
+	    }
+	    
+	    map<string,any> res = $[
+            	    "comment": comment,
+            	];
+	    
+	    if (printable) 
+	    {
+		res["printable"] = true;
+		res["path"] = "/var/tmp";
+	    }
+	    else
+	    {
+		res["writeable"] = true;
+		res["path"] = pathvalue;
+	    }
+
+	    if (SambaServer::addShare( name , res ) != true) {
+		// translators: popup error message for "add share"
+		Popup::Error( sformat( _("Share '%1' already exists."), name ) );
+		ret = nil;
+	    }
+	}
+    } while( ret == nil );
+    return ret;
+}
+
+boolean TabAbort () {
+
+    if (TabWidget::Modified ())
+    {
+	SambaServer::modified = true;
+    }
+    
+    return SambaServer::AbortFunction ();
+}
+
+any Installation_Conf_Tab () {
+
+    term page_start_up =
+	`HBox (
+	    `VBox (
+		`RadioButtonGroup( `id ( "samba_server_type" ),
+		    `VBox (
+			`Left( `RadioButton( `id(`enable), _("On -- &Enable Services Automatically and Start on Booting") ) ),
+			`Left( `RadioButton( `id(`disable), _("Off -- &Disable Services") ) )
+		    )
+		),
+		`VStretch ()
+	    ),
+	    `HStretch ()
+	);
+
+    term page_shares =
+	`HBox (
+	    `HWeight ( 1,
+		`Empty ()
+	    ),
+	    `HWeight ( 100,
+	    `VBox (
+		`VWeight (1,
+		`HBox (
+		    `Left ( `Label ( _("Available shares are") ) ),
+		    `HStretch (),
+		    `Right (
+			`MenuButton( _("&Filter"), [
+			    `item ( `id( `filter_all ), "Show &All Shares" ),
+			    `item ( `id( `filter_non_system ), "Do Not Show &System Shares" )
+			] )
+		    )
+		)
+		),
+		`VWeight ( 5,
+		    // translators: table header texts
+		    `Table ( `id ( `table ), `opt( `hvstretch ), `header( _("Status"), _("Name"),  _("Path"), _("Comment") ), [] )
+		),
+		`VWeight ( 1,
+		`HBox (
+		    `PushButton ( `id ( `add ),		Label::AddButton() + "..." ),
+		    `PushButton ( `id ( `edit ),	Label::EditButton() + "..." ),
+		    `PushButton ( `id ( `delete ),	Label::DeleteButton() ),
+		    `HStretch (),
+		    `PushButton ( `id ( `toggle ),	_("&Toggle Status") )
+		)
+		),
+		`VStretch ()
+	    )
+	    ),
+	    `HWeight ( 1,
+		`Empty ()
+	    )
+	);
+
+    term page_identity =
+	`HBox (
+	    `HWeight ( 1,
+		`Empty ()
+	    ),
+	    `HWeight ( 30,
+		`VBox ( `opt ( `hstretch ),
+		    `HStretch (),
+		    `Top (
+		    `HBox (
+			`HWeight ( 10,
+			    `Frame ( _("Base Settings"),
+				`HBox (
+				    `HSpacing ( 1 ),
+				    `VBox ( `opt ( `hstretch ),
+					`ComboBox ( `id ( "workgroup_domainname" ), `opt( `editable, `hstretch ), _("&Workgroup or Domain Name")
+					, maplist( string key,	boolean value, Samba::PreprocessAvailableWorkgroups (), ``(key))
+					),
+					// translators: combobox label
+					`ComboBox(  `id ( "domain_controller" ), `opt ( `hstretch ), _("Domain &Controller"), [
+					    // translators: combobox item
+					    `item ( `id ( `standalone ), _("No DC") ),
+					    // translators: combobox item
+					    `item ( `id ( `pdc ), _("Primary (PDC)") ),
+					    // translators: combobox item
+					    `item ( `id ( `bdc ), _("Backup (BDC)") )
+					] ),
+					`VStretch ()
+				    ),
+				    `HSpacing ( 1 )
+				)
+			    )
+			),
+			`HSpacing ( 1 ),
+			`HWeight ( 10,
+			    `Frame ( _("WINS"),
+				`HBox (
+				    `HSpacing ( 1 ),
+				    `VBox ( `opt ( `hstretch ),
+					`RadioButtonGroup( `id ( "wins_support" ),
+					    `VBox (
+						`Left( `RadioButton( `id ( "wins_server_support"), `opt( `notify ), _("WINS Server Support") ) ),
+						`Left( `RadioButton( `id ( "remote_wins_server"), `opt( `notify ), _("Remote WINS Server") ) )
+					    )
+					),
+					`HBox (
+					    `HSpacing ( 3 ),
+					    `TextEntry( `id( "wins_server_name" ), `opt( `hstretch ), _("Na&me:") )
+					),
+					`VStretch ()
+				    ),
+				    `HSpacing ( 1 )
+				)
+			    )
+			),
+			`HStretch ()
+		    )
+		    ),
+		    `VBox (
+			`VSpacing ( 1 ),
+			`TextEntry( `id( "netbios_hostname" ), `opt( `hstretch ), _("NetBIOS &Host Name") ),
+			`MenuButton( _("Advanced Settings..."), [
+			    `item ( `id( `global_settings ), _("&Expert Global Settings")),
+			    `item ( `id( `ldap ), _("&LDAP Settings") ),
+			    `item ( `id( `passdb ), _("&User Authentication Sources") )
+			] )
+		    ),
+		    `VStretch ()
+		)
+	    ),
+	    `HWeight ( 1,
+		`Empty ()
+	    ),
+	    `HStretch ()
+	);
+
+    term page_trusted_domains =
+	`HBox (
+	    `HWeight ( 1,
+		`Empty ()
+	    ),
+	    `HWeight ( 100,
+	    `VBox (
+		`VWeight ( 7,
+		    `ReplacePoint (`id (`domains_tr), 
+		    `SelectionBox( `id( "trusted_domains" ), _("&Trusted Domains List") , [] )
+		)),
+		`VWeight ( 1,
+		`HBox (
+		    `PushButton ( `id ( `add_domain ),		Label::AddButton() + "..." ),
+		    `PushButton ( `id ( `delete_domain ),	Label::DeleteButton() ),
+		    `HStretch ()
+		)
+		),
+		`VStretch ()
+	    )
+	    ),
+	    `HWeight ( 1,
+		`Empty ()
+	    )
+	);
+
+    string caption = _("Samba Configuration");
+
+    map widgets =  $[ "overview" : TabWidget::CreateTabWidgetDescr (
+          $[], $[
+                "tabs": [
+                        CWM::prepareWidget($[
+                                "id" : "startup",
+                                "header" : _("Start &Up"),
+				"widget" : `custom,
+				"custom_widget" : page_start_up,
+				"init" : ServiceWidgetInit,
+				"store" : ServiceWidgetStore,
+				"help"	: HELPS["smb_conf_tab_startup"]:""
+                        ]),
+                        CWM::prepareWidget($[
+                                "id" : "shares",
+                                "header" : _("&Shares"),
+				"widget" : `custom,
+				"custom_widget" : page_shares,
+				"init" : SharesWidgetInit,
+				"handle" : SharesWidgetHandle,
+				"help"	: HELPS["smb_conf_tab_shares"]:""
+                        ]),
+                        CWM::prepareWidget($[
+                                "id" : "identity",
+                                "header" : _("I&dentity"),
+				"widget" : `custom,
+				"custom_widget" : page_identity,
+				"init" : IdentityWidgetInit,
+				"handle" : IdentityWidgetHandle,
+				"store" : IdentityWidgetStore,
+				"help"	: HELPS["smb_conf_tab_identity"]:""
+                        ]),
+                        CWM::prepareWidget($[
+                                "id" : "trusted_domains",
+                                "header" : _("&Trusted Domains"),
+				"widget" : `custom,
+				"custom_widget" : page_trusted_domains,
+				"init" : TrustedDomainsWidgetInit,
+				"handle" : TrustedDomainsWidgetHandle,
+				"help"	: HELPS["smb_conf_tab_trusted_domains"]:""
+                        ]),
+                ],
+		"start_tab" : return_tab,
+        ]) 
+    ];
+    
+    return_tab = "startup";
+
+    term contents = `VBox( "overview", `VStretch ());
+
+    list<map <string, any> > w = CWM::CreateWidgets (["overview"], widgets);
+    string help = CWM::MergeHelps (w);
+    contents = CWM::PrepareDialog (contents, w);
+
+    Wizard::SetContentsButtons (caption, contents, help,
+        Label::NextButton (), Label::FinishButton ());
+    Wizard::HideBackButton ();
+    
+    any ret = CWM::Run (w, $[`abort: TabAbort ]);
+    
+    Wizard::RestoreBackButton ();
+    
+    return ret;
+}
+
 
 /**
  * Dialog to configure passdb backends.
@@ -445,7 +925,20 @@ symbol LDAPDialog () ``{
 	    string passwd = passwordPopup( sformat( _("Enter LDAP Administration Password"), Samba::workgroup ) );
 	    // user cancelled
 	    if( passwd == nil ) continue;
-
+	    
+	    string admin_dn = (string) UI::QueryWidget( `id( `ldap_admin_dn ), `Value );
+	    string suffix = (string) UI::QueryWidget( `id( `ldap_suffix ), `Value );
+	    if (size(admin_dn) == 0 || size(suffix) == 0) 
+	    {
+		y2milestone ("Empty admin dn or suffix");
+		// FIXME: better message after freeze
+		Popup::Error( _("Cannot set the password.") );
+		continue;
+	    }
+	    
+	    // store the current bind DN
+	    SambaServer::setLDAPAdminDN( admin_dn  );
+	    
 	    string error = SambaServer::setLDAPAdminPassword( passwd );
 	    if(  error != nil )
 	    {
@@ -469,111 +962,7 @@ symbol LDAPDialog () ``{
         }
     }
     
-    Wizard::RestoreNextButton();
-
     return (symbol) ret;
-}
-
-/**
- * EditShareDialog dialog
- * @return dialog result
- */
-symbol EditShareDialog () ``{
-
-    term contents = `HBox (`HSpacing (1), `VBox (
-        `VSpacing (1), 
-        "share_edit"
-    ), `HSpacing (1));
-
-    // dialog caption
-    string caption = sformat( _("Edit Share \"%1\""), SambaServerWidgets::shareToEdit );
-
-    return CWM::ShowAndRun (
-	["share_edit"], 
-	SambaServerWidgets::widgets, 
-	contents, 
-	caption, 
-	Label::BackButton (), Label::OKButton (), 
-	$[`abort: SambaServer::AbortFunction]
-    );
-}
-
-/**
- * Popup to add a new share by entering its name, path and comment.
- * 
- * @return map	description of the new share
- */
-map AddSharePopup() ``{
-    UI::OpenDialog( 
-	`VBox(
-	    // translators: text entry label
-	    `TextEntry( `id(`name), _("Share &Name:") ),
-	    // translators: text entry label
-	    `TextEntry( `id(`comment), _("Share &Description:") ),
-	    `HBox(
-		// translators: text entry label
-		`TextEntry( `id(`path), _("Share &Path:") ),
-		`Bottom( `PushButton( `id( `browse ), Label::BrowseButton() ) )
-	    ),
-	    `HBox( 
-		`PushButton( `id( `ok ), Label::OKButton() ),
-		`PushButton( `id( `cancel ), Label::CancelButton() )
-	    )
-	)
-    );
-    
-    string name = "";
-    string pathvalue = "";
-    string comment = "";
-    
-    any ret = nil;
-    do {
-	ret = UI::UserInput();
-	
-	// user cancelled the dialog
-	if( ret == `cancel ) {
-	    UI::CloseDialog();
-	    return nil;
-	} else if( ret == `browse ) {
-	    // translators: file selection dialog title
-	    string dir = UI::AskForExistingDirectory ( "/", _("Path for a Share") );
-	    if( dir != nil ) {
-		UI::ChangeWidget( `id (`path), `Value, dir );
-	    }
-	    ret = nil;
-	} else {
-	    // OK was pressed
-	
-	    name = (string) UI::QueryWidget( `id( `name ), `Value );
-	    pathvalue = (string) UI::QueryWidget( `id( `path ), `Value );
-	    comment = (string) UI::QueryWidget( `id( `comment ), `Value );
-	
-	    if( size( name ) == 0 ) {
-		// translators: error message
-		Popup::Error( _("Share name cannot be empty.") );
-		ret = nil;
-	    } else if( size( pathvalue ) == 0 ) {
-		// translators: error message
-		Popup::Error( _("Share path cannot be empty.") );
-		ret = nil;
-	    } else if( ! Mode::config && SCR::Read( .target.stat, pathvalue ) == $[] ) {
-		// translators: question popup. A user entered non-existent path
-		// for a share
-		if( !Popup::ContinueCancel( sformat( _("The path '%1' does not exist.
-Really use this path?
-"), pathvalue ) ) ) {
-		    ret = nil;
-		}
-	    }
-	}
-    } while( ret == nil );
-    
-    UI::CloseDialog();
-    
-    return $[ "name": name,
-	"comment": comment,
-	"path": pathvalue
-    ];
 }
 
 /* EOF */

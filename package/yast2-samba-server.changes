@@ -1,4 +1,181 @@
 -------------------------------------------------------------------
+Wed Jun 23 08:59:23 CEST 2004 - visnov@suse.cz
+
+- missing marks of text for translation (#41404) 
+
+-------------------------------------------------------------------
+Mon Jun  7 14:23:42 CEST 2004 - rhafer@suse.de
+
+- users-plugin: plugin can be removed when adding a new user (#41645)
+
+-------------------------------------------------------------------
+Fri Jun  4 15:15:43 CEST 2004 - visnov@suse.cz
+
+- even if smb.conf does not contain "ldap suffix", create LDAP objects if necessary (#41633) 
+- 2.9.28
+
+-------------------------------------------------------------------
+Tue Jun  1 18:13:28 CEST 2004 - visnov@suse.cz
+
+- in retry, handle correct success (do not avoid too many LDAP connections) - 41400
+- 2.9.27 
+
+-------------------------------------------------------------------
+Mon May 31 18:58:54 CEST 2004 - visnov@suse.cz
+
+- properly initialize LDAP before creating LDAP objects (#41398)
+- allow to retry LDAP server connection after its restart (#41400)
+- create also idmap suffix object (#41306)
+- 2.9.26 
+
+-------------------------------------------------------------------
+Wed May 26 15:17:35 CEST 2004 - visnov@suse.cz
+
+- create root account if not exists (#41182)
+- setup ACLs for Samba (#41210) 
+- setup and create if needed machine LDAP suffix (#41183)
+- adding indices into slapd.conf, if needed (#41165)
+- 2.9.25
+
+-------------------------------------------------------------------
+Mon May 24 10:03:27 CEST 2004 - visnov@suse.cz
+
+- fixed testsuite
+- 2.9.24 
+
+-------------------------------------------------------------------
+Mon May 24 01:20:02 CEST 2004 - nashif@suse.de
+
+- temp. diasble testuite 
+- 2.9.23
+
+-------------------------------------------------------------------
+Thu May 20 08:15:00 CEST 2004 - visnov@suse.cz
+
+- use secrets.tdb instead of RPC call for trusted domains (#40732) 
+- added version and capabilities info to YaPI (#40796)
+- try to bind before setting LDAP password (#40809)
+- write LDAP settings before storing LDAP password (#40866)
+- propose LDAP URL when adding a new passdb backend (#40849)
+- improve "add machine" script for LDAP (#40365)
+- 2.9.22
+
+-------------------------------------------------------------------
+Wed May 19 09:07:49 CEST 2004 - visnov@suse.cz
+
+- also setup home directory for machine accounts (#40365) 
+
+-------------------------------------------------------------------
+Thu May 13 16:50:48 CEST 2004 - visnov@suse.cz
+
+- if using common LDAP setup, update users plugin list (#40509) 
+- 2.9.21
+
+-------------------------------------------------------------------
+Thu May 13 15:39:42 CEST 2004 - rhafer@suse.de
+
+- users-plugin don't abort when adding new user and SID couldn't
+  be read (#40508)
+- return an error message requesting password change when adding
+  a samba account to an existing user (#40419)
+
+-------------------------------------------------------------------
+Thu May 13 08:13:47 CEST 2004 - visnov@suse.cz
+
+- synchronization between Expert options and Authentication Sources dialogs fixed
+- for LDAP use own script for "add machine script" (#40365)
+
+-------------------------------------------------------------------
+Tue May 11 10:02:47 CEST 2004 - visnov@suse.cz
+
+- use Shares tab as a default when configuration is changed (#40058)
+- refix - remove duplicated warning (#40154)
+- cleanup autoyast summary (#40311)
+- don't show warning is netbios name was empty or in autoyast (#40312)
+- fix gettext use in users-plugin (#40160)
+- fix autoyast (#40314, #40310, #40315)
+- refix schema installation (#40034)
+- handle empty share table correctly (#40349)
+
+-------------------------------------------------------------------
+Mon May 10 17:13:47 CEST 2004 - visnov@suse.cz
+
+- fix neededforbuild and requires
+- 2.9.20 
+
+-------------------------------------------------------------------
+Mon May 10 10:42:29 CEST 2004 - visnov@suse.cz
+
+- install samba3.schema if using local LDAP server - added yast2-ldap-server to neededforbuild and requires (#40034)
+- use "net getlocalsid" to initialize SID (#40034) 
+- fix wizard to handle authentication details dialog correctly (#40146)
+- duplicate the workgroup info in global settings (#40149)
+- select the correct tab in Qt (#40137)
+- merged proofread texts
+- don't allow to add an already existing share (#40235)
+- show only warning with the longest path prefix (#40154)
+- always ask before abort (#40240)
+- don't create "server string" if not present already (#40056)
+
+-------------------------------------------------------------------
+Thu May  6 17:52:04 CEST 2004 - visnov@suse.cz
+
+- 2.9.19
+
+-------------------------------------------------------------------
+Wed May  5 10:31:49 CEST 2004 - visnov@suse.cz
+
+- use proper tab widget if available
+- don't start wizard if the config file is changed (#39779)
+- restore workgroup in wizard if clicked next/back (#39779) 
+- YaPI::Samba implementation fixes (#39971)
+
+-------------------------------------------------------------------
+Tue May  4 12:47:34 CEST 2004 - rhafer@suse.de
+
+- users-plugin: disabled debugging output
+- users-plugin: return appropriate error in initialization fails
+- users-plugin: separated users and groups plugin
+
+-------------------------------------------------------------------
+Tue May  4 08:43:06 CEST 2004 - visnov@suse.cz
+
+- merged in the proofread texts 
+- cleanup buttons (#39779)
+- show abort warning (#39779)
+- complete list of known smb.conf options added (#39779)
+- require ldap:// or ldaps:// scheme prefix for LDAP-based 
+  passdb backend (#38994)
+- warn when using insecure path in a share (#39779)
+- warn when netbios name changes (#39779)
+- don't lookup the package if required packages installation failed
+- store table data between tab switches (#39779)
+
+-------------------------------------------------------------------
+Thu Apr 29 17:26:22 CEST 2004 - visnov@suse.cz
+
+- help texts added
+- dialog buttons fixes
+- 2.9.18 
+
+-------------------------------------------------------------------
+Wed Apr 28 10:02:20 CEST 2004 - visnov@suse.cz
+
+- Samba YaPI improved
+- complete UI redesign
+- plugin for Users module
+- 2.9.17
+
+-------------------------------------------------------------------
+Wed Apr 21 10:51:20 CEST 2004 - visnov@suse.cz
+
+- propose correct bind_dn (#38993)
+- don't split passdb backends by comma (breaks LDAP backends)
+- Samba YaPI improved
+- use Service
+- 2.9.16
+
+-------------------------------------------------------------------
 Fri Apr  2 16:23:02 CEST 2004 - visnov@suse.cz
 
 - YaST2 is now GPL

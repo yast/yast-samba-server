@@ -77,6 +77,10 @@ $result = EnableShare($shareName,$enable)
 
   enables/disabled the given share. returns undef on failure.
 
+$result = GetShareEnabled($shareName)
+
+  returns true if the given share is enabled. returns undef on failure.
+
 $result = AddShare($shareName,$options)
 
   creates a new share using the given options. returns undef on failure.
@@ -122,17 +126,20 @@ $result = EnablePrinters($printerList,$enable)
 =cut
 
 package YaPI::Samba;
-use YaST::YCP;
-BEGIN { push( @INC, '/usr/share/YaST2/modules/' ); }
+use YaST::YCP qw(:DATA :LOGGING);
 
 YaST::YCP::Import ("SambaServer");
 YaST::YCP::Import ("SambaServerPassdb");
+YaST::YCP::Import ("Service");
+
+use Data::Dumper;
 
 our %TYPEINFO;
 
-if(not defined do("YaPI.inc")) {
-    die "'$!' Can not include YaPI.inc";
-}
+our $VERSION="1.0.0"; 
+our @CAPABILITIES = ( 
+    'SLES9' 
+); 
 
 #######################################################
 
@@ -155,7 +162,7 @@ to get the error hash.
 BEGIN { $TYPEINFO{GetServiceStatus} = ["function", "string" ]; }
 sub GetServiceStatus {
     my $self = shift;    
-    return YaST::Service::Enabled ("smbd") && YaST::Service::Enabled ("nmbd");
+    return Service->Enabled ("smbd") && Service->Enabled ("nmbd");
 }
 
 =item *
@@ -171,8 +178,8 @@ to get the error hash.
 BEGIN { $TYPEINFO{DetermineRole} = ["function", "string" ]; }
 sub DetermineRole {
     my $self = shift;
-    SambaServer::Read ();
-    return SambaServer::DetermineRole ();
+    SambaServer->Read ();
+    return SambaServer->DetermineRole ()->value ();
 }
 
 =item *
@@ -191,15 +198,30 @@ BEGIN { $TYPEINFO{EditService} = ["function", "boolean", "boolean" ]; }
 sub EditService {
     my $self = shift;    
     my $enable = shift;
-
-    unless (YaST::Service::Enable ("smbd", $enable))
+    
+    if ($enable)
     {
-	return undef;
+	unless (Service->Enable ("smbd"))
+	{
+	    return undef;
+	}
+
+	unless (Service->Enable ("nmbd"))
+	{
+	    return undef;
+	}
     }
-
-    unless (YaST::Service::Enable ("nmbd", $enable))
+    else
     {
-	return undef;
+	unless (Service->Disable ("smbd"))
+	{
+	    return undef;
+	}
+
+	unless (Service->Disable ("nmbd"))
+	{
+	    return undef;
+	}
     }
 
     return 1;
@@ -215,19 +237,20 @@ to get the error hash.
 
 =cut
 
-BEGIN { $TYPEINFO{EditServerAsBDC} = ["function", "void", "string" ]; }
+BEGIN { $TYPEINFO{EditServerAsBDC} = ["function", "boolean", "string" ]; }
 sub EditServerAsBDC {
     my $self = shift;   
     my $pdc = shift; 
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    SambaServer::SetAsBDC ($pdc);
+    # FIXME: PDC host setup???
+    SambaServer->setAsBDC ();
 
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->WriteSettings () )
     {
 	return undef;
     }
@@ -244,18 +267,18 @@ to get the error hash.
 
 =cut
 
-BEGIN { $TYPEINFO{EditServerAsPDC} = ["function", "void" ]; }
+BEGIN { $TYPEINFO{EditServerAsPDC} = ["function", "boolean" ]; }
 sub EditServerAsPDC {
     my $self = shift;
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    SambaServer::SetAsPDC ();
+    SambaServer->setAsPDC ();
 
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->WriteSettings () )
     {
 	return undef;
     }
@@ -273,18 +296,18 @@ to get the error hash.
 
 =cut
 
-BEGIN { $TYPEINFO{EditServerAsStandalone} = ["function", "void" ]; }
+BEGIN { $TYPEINFO{EditServerAsStandalone} = ["function", "boolean" ]; }
 sub EditServerAsStandalone {
     my $self = shift;    
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    SambaServer::SetAsPDC ();
+    SambaServer->setAsStandalone ();
 
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->WriteSettings () )
     {
 	return undef;
     }
@@ -305,12 +328,12 @@ BEGIN { $TYPEINFO{GetServerDescription} = ["function", "string" ]; }
 sub GetServerDescription {
     my $self = shift;    
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    return SambaServer::server_string ();
+    return SambaServer->getDescription ();
 }
 
 =item *
@@ -327,9 +350,9 @@ sub EditServerDescription {
     my $self = shift;    
     my $description = shift;
 
-    SambaServer::Read ();
-    SambaServer::setDescription ($description);
-    SambaServer::Write ();
+    SambaServer->Read ();
+    SambaServer->setDescription ($description);
+    SambaServer->Write ();
 
     return 1;
 }
@@ -337,22 +360,53 @@ sub EditServerDescription {
 =item *
 C<@passdb = GetSAMBackends();>
 
-Returns a list of options specified for the given SAM. The structure of the options is sam-type specific.
+Returns a list of configured SAM backends.
 On error, undef is returned and the Error() function can be used
 to get the error hash.
 
 =cut
 
 BEGIN { $TYPEINFO{GetSAMBackends} = ["function", [ "list", "string" ] ]; }
-sub GetSAMConfiguration {
+sub GetSAMBackends {
     my $self = shift;
     
-    unless (SambaServerPassdb::Read ())
+    unless (SambaServerPassdb->Read ())
     {
 	return undef;
     }
     
-    return SambaServerPassdb::GetBackends ();
+    return SambaServerPassdb->GetBackends ();
+}
+
+=item *
+C<@passdb = GetSAMConfiguration();>
+
+Returns a list of options specified for the given SAM. The structure of the options is sam-type specific.
+On error, undef is returned and the Error() function can be used
+to get the error hash.
+
+The only SAM type supported is LDAP and the 
+hash currently contains only "ldap suffix" and "ldap admin dn" for it.
+
+=cut
+
+BEGIN { $TYPEINFO{GetSAMConfiguration} = ["function", [ "map", "string", "any" ], "string" ]; }
+sub GetSAMConfiguration {
+    my $self = shift;
+    my $sam = shift;
+    
+    my %res = ();
+    
+    # we support LDAP only
+    if ( $sam =~ /^ldap(sam)?:/ )
+    {
+	SambaServer->ReadLDAPSettings ();
+	
+	$res { "ldap suffix" } = SambaServer->LDAP_suffix ();
+	$res { "ldap admin dn" } = SambaServer->LDAP_admin_dn ();
+    }
+    
+    return \%res;
 }
 
 =item *
@@ -369,21 +423,29 @@ BEGIN { $TYPEINFO{EditSAMConfiguration} = ["function", "boolean", "string", ["ma
 sub EditSAMConfiguration {
     my $self = shift;
     my $sam = shift;
-    my %options = shift;
+    my %options = %{ +shift };
     
-    unless (SambaServerPassdb::Read ())
+    # we support LDAP only
+    if ( $sam =~ /^ldap(sam)?:/ )
     {
-	return undef;
-    }
-    
-    unless (SambaServerPassdb::EditSAMConfiguration ($sam, %options))
-    {
-	return undef;
-    }
+	SambaServer->ReadLDAPSettings ();
+	
+	my $val = $options { "ldap suffix" };	
+	if ( defined $val )
+	{
+	    SambaServer->setLDAPSuffix ( $val )
+	}
 
-    unless (SambaServerPassdb::Write ())
-    {
-	return undef;
+	$val = $options { "ldap admin dn" };
+	if ( defined $val )
+	{
+	    SambaServer->setLDAPAdminDN ( $val )
+	}
+	
+	unless (SambaServer->WriteLDAPSettings ())
+	{
+	    return undef;
+	}
     }
     
     return 1;
@@ -403,18 +465,22 @@ sub EditDefaultSAM {
     my $self = shift;
     my $sam = shift;
     
+    my @current = @{ $self->GetSAMBackends () };
 
-    unless (SambaServerPassdb::Read ())
-    {
+    unless( grep( /^$sam$/, @current ) ) {
+        # not there, error
 	return undef;
     }
+
+    # filter out the sam
+    my $item = undef;
+    my @new = grep (!/^$sam$/, @current);
     
-    unless (SambaServerPassdb::SetDefaultSAM ($sam))
-    {
-	return undef;
-    }
-
-    unless (SambaServerPassdb::Write ())
+    unshift ( @new, $sam );
+    
+    SambaServerPassdb->SetBackends (\@new);
+    
+    unless (SambaServerPassdb->Write ())
     {
 	return undef;
     }
@@ -438,7 +504,7 @@ sub AddSAM {
     my $sam = shift;
     my $default = shift;
     
-    my @current = $self->GetSAMBackends ();
+    my @current = @{ $self->GetSAMBackends () };
     
     if( grep( /^$sam$/, @current ) ) {
         # already there, error
@@ -454,9 +520,9 @@ sub AddSAM {
 	push @current, $sam;
     }
     
-    SambaServerPassdb::SetBackends (@current);
+    SambaServerPassdb->SetBackends (\@current);
     
-    unless (SambaServerPassdb::Write ())
+    unless (SambaServerPassdb->Write ())
     {
 	return undef;
     }
@@ -478,7 +544,7 @@ sub DeleteSAM {
     my $self = shift;
     my $sam = shift;
     
-    my @current = $self->GetSAMBackends ();
+    my @current = @{ $self->GetSAMBackends () };
     
     unless( grep( /^$sam$/, @current ) ) {
         # not there, error
@@ -487,19 +553,11 @@ sub DeleteSAM {
 
     # filter out the sam
     my $item = undef;
-    my @new = ();
-    while (@current)
-    {
-	$item = shift @current;
-	if( $item != $sam )
-	{
-	    push @new, $item;
-	}
-    }
+    my @new = grep (!/^$sam$/, @current);
     
-    SambaServerPassdb::SetBackends (@new);
+    SambaServerPassdb->SetBackends (\@new);
     
-    unless (SambaServerPassdb::Write ())
+    unless (SambaServerPassdb->Write ())
     {
 	return undef;
     }
@@ -522,22 +580,54 @@ sub EnableShare {
     my $name = shift;
     my $on = shift;
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    unless (SambaServer::EnableShare ($name, Boolean($on) ))
+    unless (SambaServer->enableShare ($name, Boolean($on) ))
     {
 	return undef;
     }
 
-    unless ( SambaServer::Write () )
+    unless (SambaServer->Write () )
     {
 	return undef;
     }
 
     return 1;
+}
+
+=item *
+C<$result = GetShareEnabled($shareName);>
+
+Returns true if the given stare is enabled, false if disabled. 
+On error, undef is returned and the Error() function can be used
+to get the error hash.
+
+=cut
+
+BEGIN { $TYPEINFO{GetShareEnabled} = ["function", "boolean", "string"] ; }
+sub GetShareEnabled {
+    my $self = shift;
+    my $name = shift;
+
+    unless (SambaServer->Read ())
+    {
+	return undef;
+    }
+    
+    my $foo = $self->GetShare ($name);
+    unless (defined $foo)
+    {
+	return undef;
+    }
+    
+    my %descr = %{ $foo };
+    
+    $descr { "commentout" } = Boolean ($descr { "commentout" });
+
+    return SambaServer->shareEnabled ( \%descr );
 }
 
 =item *
@@ -555,17 +645,17 @@ sub AddShare {
     my $name = shift;
     my $options = shift;
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    unless (SambaServer::AddShare ($name, $options ))
+    unless (SambaServer->addShare ($name, $options ))
     {
 	return undef;
     }
 
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->Write () )
     {
 	return undef;
     }
@@ -587,17 +677,17 @@ sub DeleteShare {
     my $self = shift;
     my $name = shift;
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    unless (SambaServer::DeleteShare ($name))
+    unless (SambaServer->removeShare ($name))
     {
 	return undef;
     }
 
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->Write () )
     {
 	return undef;
     }
@@ -619,19 +709,24 @@ sub EditShare {
 
     my $self = shift;
     my $name = shift;
-    my $options = shift;
+    my %options = %{ +shift };
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
+    {
+	return undef;
+    }
+    
+    # fix the types passed back to ycp :-((
+    
+    # add commentout if missing and ensure the type
+    $options { "commentout" } = Boolean ( $options { "commentout" } || 0 );
+
+    unless (SambaServer->updateShare ($name, \%options ))
     {
 	return undef;
     }
 
-    unless (SambaServer::EditShare ($name, $options ))
-    {
-	return undef;
-    }
-
-    unless ( SambaServer::Write () )
+    unless ( SambaServer->Write () )
     {
 	return undef;
     }
@@ -653,12 +748,12 @@ sub GetShare {
     my $self = shift;
     my $name = shift;
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    return SambaServer::GetShare ($name);
+    return SambaServer->getShare ($name);
 }
 
 =item *
@@ -676,18 +771,20 @@ sub GetAllDirectories {
 
     my $self = shift;
 
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
     my @res = ();
-    my %shares = SambaServer::shares ();
+    my %shares = %{ SambaServer->shares () };
     
     # filter out the printers
-    while (my ($key, %vals) = each (%shares) )
+    foreach my $key (keys %shares) 
     {
-	unless (defined $vals {"printable"})
+	my %vals = %{ $shares { $key } };
+	
+	if (! $vals {"printable"})
 	{
 	    push @res, $key;
 	}
@@ -711,7 +808,19 @@ sub EnableHomes {
     my $self = shift;
     my $on = shift;
     
-    return $self->EnableShare ("homes", $on);
+    unless (SambaServer->Read ())
+    {
+	return undef;
+    }
+
+    SambaServer->enableHomes (Boolean($on));
+
+    unless (SambaServer->Write () )
+    {
+	return undef;
+    }
+
+    return 1;
 }
 
 =item *
@@ -729,7 +838,19 @@ sub EnableNetlogon {
     my $self = shift;
     my $on = shift;
     
-    return $self->EnableShare ("netlogon", $on);
+    unless (SambaServer->Read ())
+    {
+	return undef;
+    }
+
+    SambaServer->enableNetlogon (Boolean($on));
+
+    unless (SambaServer->Write () )
+    {
+	return undef;
+    }
+
+    return 1;
 }
 
 =item *
@@ -745,23 +866,25 @@ BEGIN { $TYPEINFO{GetAllPrinters} = ["function", [ "list", "string" ] ]; }
 sub GetAllPrinters {
     my $self = shift;
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
     my @res = ();
-    my %shares = SambaServer::shares ();
+    my %shares = %{ SambaServer->shares () };
     
     # filter out the printers
-    while (my ($key, %vals) = each (%shares) )
+    foreach my $key (keys %shares) 
     {
-	if (defined $vals {"printable"})
+	my %vals = %{ $shares { $key } };
+	
+	if ($vals {"printable"})
 	{
 	    push @res, $key;
 	}
     }
-    
+
     return \@res;
 }
 
@@ -777,19 +900,21 @@ to get the error hash.
 BEGIN { $TYPEINFO{EnablePrinters} = ["function", "boolean", [ "list", "string" ], "boolean"] ; }
 sub EnablePrinters {
     my $self = shift;
-    my @printer_names = shift;
+    my @printer_names = @{ +shift };
+    
     my $enable = shift;
     
-    unless (SambaServer::Read ())
+    unless (SambaServer->Read ())
     {
 	return undef;
     }
 
-    my %shares = SambaServer::shares ();
+    my %shares = %{SambaServer->shares ()};
     
     while (my $share = pop @printer_names)
     {
-	my %conf = $shares{ $share };
+	# get the share hash or empty one, if the share is not defined
+	my %conf = %{ $shares{ $share } || {} };
 	
 	unless (defined $conf {"printable"})
 	{
@@ -798,7 +923,7 @@ sub EnablePrinters {
 	
 	$conf {"enabled"} = $enable;
 
-	$self->EditShare ($share, %conf);
+	$self->EditShare ($share, \%conf);
     }
     
     return 1;
