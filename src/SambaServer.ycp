@@ -598,7 +598,7 @@ global define boolean Import (map settings) ``{
 
     if( size( settings ) == 0 ) return true;
     
-    y2error( "Importing: %1", settings );
+    y2debug( "Importing: %1", settings );
     
     Samba::Import( settings );
     
