@@ -30,14 +30,14 @@ include "samba-client/routines.ycp";
 global define symbol RoleDialog () ``{
 
     /* Samba-server role dialog caption */
-    string caption = _("SAMBA Server Role");
+    string caption = _("Samba Server Role");
     
     Wizard::SetContents( caption, `VBox(
 	`RadioButtonGroup( `id(`server_status), `VBox(
 	    // radio button label
-    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("&Disable SAMBA Server") ) ),
+    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("&Disable Samba Server") ) ),
 	    // radio button label
-    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("&Enable SAMBA Server") ) )
+    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("&Enable Samba Server") ) )
 	)),
 	`VSpacing(),
 	`HBox(
@@ -111,8 +111,13 @@ global define symbol RoleDialog () ``{
 		// translators: BDC requires replication of important data but YaST does not support this
 		Popup::Warning(_("The Backup Domain Controller role
 requires a replication of data about
-users and other aspects. However, YaST2 cannot set up
+users and other aspects from 
+Primary Domain Controller. 
+However, YaST2 cannot set up
 the replication.
+
+Also note that the Primary Domain 
+Controller must be a Samba server.
 ") );		
 	    }
 
@@ -346,7 +351,7 @@ All its settings will be lost.
 global define symbol AdvancedDialog () ``{
 
     /* Samba-server advanced dialog caption */
-    string caption = _("Advanced SAMBA Server Options");
+    string caption = _("Advanced Samba Server Options");
 
     /* Samba-server advanced dialog contents */
     term contents = 

@@ -54,7 +54,7 @@ global boolean write_only = false;
 /**
  * Server description
  */
-global string server_string = "SAMBA Server";
+global string server_string = "Samba Server";
 
 /**
  * role of the server: `disabled, `standalone, `bdc, `pdc
@@ -237,18 +237,18 @@ global define boolean Read() ``{
     // We do not set help text here, because it was set outside
     Progress::New( caption, " ", steps, [
 	    // translators: progress stage 1/4
-	    _("Read global SAMBA settings"),
+	    _("Read global Samba settings"),
 	    // translators: progress stage 2/4
-	    _("Read the SAMBA shares"),
+	    _("Read the Samba shares"),
 	    // translators: progress stage 3/4
 	    _("Read the printing settings"),
 	    // translators: progress stage 4/4
 	    _("Read the LDAP settings"),
 	], [
 	    // translators: progress step 1/4
-	    _("Reading global SAMBA settings..."),
+	    _("Reading global Samba settings..."),
 	    // translators: progress step 2/4
-	    _("Reading the SAMBA shares..."),
+	    _("Reading the Samba shares..."),
 	    // translators: progress step 3/4
 	    _("Read the printing settings..."),
 	    // translators: progress step 4/4
@@ -456,18 +456,18 @@ global define boolean Write() ``{
 	    // translators: write progress stage
 	    _("Run SuSEconfig"),
 	    // translators: write progress stage
-	    role == `disabled ? _("Disable SAMBA services") 
+	    role == `disabled ? _("Disable Samba services") 
 	    // translators: write progress stage
-		: _("Enable SAMBA services")
+		: _("Enable Samba services")
 	], [
 	    // translators: write progress step
 	    _("Writing the settings..."),
 	    // translators: write progress step
 	    _("Running SuSEconfig..."),
 	    // translators: write progress step
-	    role == `disabled ? _("Disabling SAMBA services...") 
+	    role == `disabled ? _("Disabling Samba services...") 
 	    // translators: write progress step
-		: _("Enabling SAMBA services..."),
+		: _("Enabling Samba services..."),
 	    // translators: write progress step
 	    _("Finished")
 	],
