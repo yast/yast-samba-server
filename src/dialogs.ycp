@@ -241,7 +241,6 @@ void GlobalConfigStringWidgetStore(string key, map event_descr)
     string value = (string)UI::QueryWidget(`id(key), `Value);
     
     boolean changed = SambaConfig::GlobalSetStr(key, value == "" ? nil : value);
-y2warning("changing %1 = %2 (changed %3)", key, value, changed);
     
     // warn about the netbios name change
     if (key == "netbios name" && changed && !Mode::config()) {
@@ -472,6 +471,7 @@ symbol GlobalSettingsDialog () ``{
     
     return res;
 }
+
 
 symbol AddShareDialog () ``{
 

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov 12 14:34:07 CET 2004 - mlazar@suse.cz
+
+- fixed CWM handlers
+
+-------------------------------------------------------------------
 Thu Nov 11 12:29:06 CET 2004 - mlazar@suse.cz
 
 - fixed typo "lasp passwd sync" => "ldap passwd sync"

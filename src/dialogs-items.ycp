@@ -28,32 +28,33 @@
 
     define list ShareEditContents (map descr);
     define void ShareEditPopupInit (any opt_id, string opt_key);
-    define void ShareEditPopupStore (any opt_id, string opt_key, map event);
+    define void ShareEditPopupStore (any opt_id, string opt_key);
     define string ShareEditSummary (any opt_id, string opt_key);
     define boolean ShareEditEntryDelete (any opt_id, string opt_key);
 
     define list GlobalSettingsContents (map descr);
     define void GlobalSettingsPopupInit (any opt_id, string opt_key);
-    define void GlobalSettingsPopupStore (any opt_id, string opt_key, map event);
+    define void GlobalSettingsPopupStore (any opt_id, string opt_key);
     define string GlobalSettingsSummary (any opt_id, string opt_key);
     define boolean GlobalSettingsEntryDelete (any opt_id, string opt_key);
 
     define list PassdbEditContents (map descr);
-    define string PassdbEditOptionSummary (any opt_id, any opt_key);
-    define boolean PassdbOptionMove (any opt_id, string opt_key, symbol direction);
+    define string PassdbEditOptionSummary (any opt_id, string opt_key);
+    define any PassdbOptionMove (any opt_id, string opt_key, symbol direction);
     define string PassdbId2Key (map desc, any id);
-    define boolean PassdbEntryDelete (any opt_id, any opt_key);
-    define void PassdbEditOptionInit (any opt_id, any opt_key);
-    define void PassdbEditOptionStore (any opt_id, any opt_key, map event);
+    define boolean PassdbEntryDelete (any opt_id, string opt_key);
+    define void PassdbEditOptionInit (any opt_id, string opt_key);
+    define void PassdbEditOptionStore (any opt_id, string opt_key);
 
-define boolean initFun(any key);
-define symbol handleFun(any key, map event_descr);
-define boolean initPassdb(any key);
-define symbol handlePassdb(any key, map event_descr);
-define void storePassdb(any key, map event);
+define void ShareInitFun(string key);
+define symbol ShareHandleFun(string key, map event_descr);
+
+define void initPassdb(string key);
+define symbol handlePassdb(string key, map event_descr);
+define void storePassdb(string key, map event);
 define void AddPassdbBackend ();
-define boolean ValidateLDAPURL (any opt_id, any opt_key, map event_descr);
-define boolean ValidateSharePath (any opt_id, any opt_key, map event_descr);
+define boolean ValidateLDAPURL(any opt_id, string opt_key, map event_descr);
+define boolean ValidateSharePath(any opt_id, string opt_key, map event_descr);
 
 include "samba-server/samba-options-local.ycp";
 include "samba-server/samba-options-global.ycp"; 
@@ -64,8 +65,8 @@ map shareswidget =  TablePopup::CreateTableDescr (
 	      "up_down_buttons" : false, 
 	      "unique_keys" : true ]
 	  , $[
-	    "init" : initFun,
-	    "handle" : handleFun,
+	    "init" : ShareInitFun,
+	    "handle" : ShareHandleFun,
 	    "options" : local_option_widgets,
 	    "ids" : ShareEditContents,
 	    "fallback" : $[
@@ -180,7 +181,7 @@ string shareToEdit = nil;
 // translators: error message for wrong LDAP source
 string wrong_ldap_url = _("The entered LDAP URL is invalid.");
 
-boolean ValidateLDAPURL (any opt_id, any opt_key, map event_descr) {
+boolean ValidateLDAPURL(any opt_id, string opt_key, map event_descr) {
 
     import "URL";
     
@@ -206,41 +207,37 @@ boolean SharePathWarning (string p)
 {
     string text = nil;
 
-    if ( p == "/" )
-    {
+    if ( p == "/" ) {
 	text = root_warning;
+    } else {
+	foreach(string known, maplist (string key, string val, warnings, ``(key)), ``{
+	    if (find (p,known) == 0) {
+		text = warnings [known]:nil;
+	    }
+	});
     }
-    else    
-    foreach (string known, maplist (string key, string val, warnings, ``(key)), ``{
-	if (find (p,known) == 0)
-	{
-	    text = warnings [known]:nil;
-	}
-    });
     
-    if (text != nil)
-    {
-	return Popup::ContinueCancel (text);
+    if (text != nil) {
+        return Popup::ContinueCancel (text);
     }
     
     return true;
 }
 
-boolean ValidateSharePath (any opt_id, any opt_key, map event_descr) {
+boolean ValidateSharePath(any opt_id, string opt_key, map event_descr) {
 
-    string p = (string)UI::QueryWidget (`id(opt_id), `Value);
+    string p = (string)UI::QueryWidget (`id(opt_key), `Value);
 
     return SharePathWarning (p);
 }
 
 
-
-define boolean initFun(any key) ``{
-    return TablePopup::TableInit(xx_widgets["share_edit"]:$[], (string)key);
+define void ShareInitFun(string key) ``{
+    TablePopup::TableInit(xx_widgets["share_edit"]:$[], key);
 }
 
-define symbol handleFun(any key, map event_descr) ``{
-    return TablePopup::TableHandle(xx_widgets["share_edit"]:$[], (string)key, event_descr);
+define symbol ShareHandleFun(string key, map event_descr) ``{
+    return TablePopup::TableHandle(xx_widgets["share_edit"]:$[], key, event_descr);
 }
 
 // ************************************ default host table ********************
@@ -276,7 +273,12 @@ define symbol handleFun(any key, map event_descr) ``{
     define void ShareEditPopupInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
 	    // not adding a new option
-	    UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::ShareGetStr(shareToEdit, opt_key, ""));
+	    any val = UI::QueryWidget(`id (opt_key), `Value);
+	    if (is(val, boolean)) {
+		UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::ShareGetTruth(shareToEdit, opt_key, nil));
+	    } else {
+		UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::ShareGetStr(shareToEdit, opt_key, nil));
+	    }
 	}
 	UI::SetFocus (`id (opt_key));
     }
@@ -286,8 +288,13 @@ define symbol handleFun(any key, map event_descr) ``{
       * @param opt_id any option id
       * @param opt_key any option key
       */
-    define void ShareEditPopupStore (any opt_id, string opt_key, map event) ``{
-	SambaConfig::ShareSetStr(shareToEdit, opt_key, (string)UI::QueryWidget (`id (opt_key), `Value));
+    define void ShareEditPopupStore (any opt_id, string opt_key) ``{
+	any val = UI::QueryWidget(`id (opt_key), `Value);
+	if (is(val, boolean)) {
+	    SambaConfig::ShareSetTruth(shareToEdit, opt_key, (boolean)val);
+	} else {
+	    SambaConfig::ShareSetStr(shareToEdit, opt_key, (string)val);
+	}
     }
 
     /**
@@ -333,7 +340,12 @@ define symbol handleFun(any key, map event_descr) ``{
       */
     define void GlobalSettingsPopupInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
-	    UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::GlobalGetStr(opt_key, nil));
+	    any val = UI::QueryWidget(`id (opt_key), `Value);
+	    if (is(val, boolean)) {
+		UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::GlobalGetTruth(opt_key, nil));
+	    } else {
+		UI::ChangeWidget(`id (opt_key), `Value, SambaConfig::GlobalGetStr(opt_key, nil));
+	    }
 	}
 	UI::SetFocus (`id (opt_key));
     }
@@ -343,8 +355,13 @@ define symbol handleFun(any key, map event_descr) ``{
       * @param opt_id any option id
       * @param opt_key any option key
       */
-    define void GlobalSettingsPopupStore (any opt_id, string opt_key, map event) ``{
-	SambaConfig::GlobalSetStr(opt_key, (string)UI::QueryWidget (`id (opt_key), `Value));
+    define void GlobalSettingsPopupStore (any opt_id, string opt_key) ``{
+	any val = UI::QueryWidget(`id (opt_key), `Value);
+	if (is(val, boolean)) {
+	    SambaConfig::GlobalSetTruth(opt_key, (boolean)val);
+	} else {
+	    SambaConfig::GlobalSetStr(opt_key, (string)val);
+	}
     }
 
     /**
@@ -386,7 +403,7 @@ define symbol handleFun(any key, map event_descr) ``{
 	}
     }
     
-    define void PassdbEditOptionInit (any opt_id, any opt_key) ``{
+    define void PassdbEditOptionInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
 	    // not adding a new option
 	    UI::ChangeWidget (`id (opt_key), `Value, SambaBackend::GetLocation(passdb_backends[(string)opt_id]:""));
@@ -394,7 +411,7 @@ define symbol handleFun(any key, map event_descr) ``{
 	UI::SetFocus (`id (opt_key));
     }
 
-    define void PassdbEditOptionStore (any opt_id, any opt_key, map event) ``{
+    define void PassdbEditOptionStore (any opt_id, string opt_key) ``{
 	string details = (string) UI::QueryWidget (`id (opt_key), `Value);
 	// TODO: handle empty details
 	
@@ -420,7 +437,7 @@ define symbol handleFun(any key, map event_descr) ``{
 	}
     }
 
-    define string PassdbEditOptionSummary (any opt_id, any opt_key) ``{
+    define string PassdbEditOptionSummary (any opt_id, string opt_key) ``{
 	string option = passdb_backends [(string)opt_id]:"";
 	return SambaBackend::GetLocation(option);
     }
@@ -431,7 +448,7 @@ define symbol handleFun(any key, map event_descr) ``{
 	return SambaBackend::GetName(s_id);
     }
 
-    define boolean PassdbEntryDelete (any opt_id, any opt_key) ``{
+    define boolean PassdbEntryDelete (any opt_id, string opt_key) ``{
     
 	// don't delete the last one
 	if (size (passdb_backends) == 1)
@@ -473,10 +490,10 @@ The back-end will not be deleted.
 		    `Left (`RadioButton ( `id("mysql"), `opt (`notify),_("MySQL database") ) )
 		))),
 		// translators: textentry label to enter details for the selected passdb backend
-		`TextEntry ( `id(`details), _("&Details:") ),
+		`TextEntry ( `id("details"), _("&Details:") ),
 		`HBox (
-		    `PushButton (`id (`add), `opt(`default), Label::AddButton ()),
-		    `PushButton (`id (`cancel), Label::CancelButton ())
+		    `PushButton (`id("add"), `opt(`default), Label::AddButton ()),
+		    `PushButton (`id("cancel"), Label::CancelButton ())
 		)
 	    )
 	);
@@ -485,9 +502,8 @@ The back-end will not be deleted.
 	    any ret = UI::UserInput ();
 	    if ( contains ( (list)[ "smbpasswd", "ldapsam", "tdbsam", "mysql" ], ret ) )
 	    {
-/*
 		// prefill a hint, if details empty
-		string details = (string) UI::QueryWidget ( `details, `Value );
+		string details = (string) UI::QueryWidget(`id("details"), `Value );
 		if (size(details) == 0)
 		{
 		    if ( ret == "ldapsam" )
@@ -498,18 +514,18 @@ The back-end will not be deleted.
 			
 			// ensure to take only the first one
 			list<string> servers = splitstring (server, " ");
-			UI::ChangeWidget ( `id (`details), `Value, "ldap://" + servers[0]:"localhost" );
+			UI::ChangeWidget(`id("details"), `Value, "ldap://" + servers[0]:"localhost" );
 		    }
 		}
-*/
+
 		continue;
 	    } else
 	
-	    if ( ret == `add )
+	    if ( ret == "add" )
 	    {
 		// check: all types except smbpasswd must get detailed info
-		string type = (string) UI::QueryWidget ( `types, `CurrentButton );
-		string details = (string) UI::QueryWidget ( `details, `Value );
+		string type = (string) UI::QueryWidget(`id(`types), `CurrentButton);
+		string details = (string) UI::QueryWidget(`id("details"), `Value);
 		if (size(details) != 0 ) {
 		    details = ":"+details;
 		} else {
@@ -534,8 +550,7 @@ further information.
 		else if (type == "ldapsam" && size(details) > 0)
 		{
 		    // fill in empty params to keep interpreter happy
-		    if (!ValidateLDAPURL (nil, `details,nil) )
-		    {
+		    if (!ValidateLDAPURL(nil, "details", nil)) {
 			continue;
 		    }
 		}
@@ -552,8 +567,9 @@ further information.
 	UI::CloseDialog ();
     }
     
-    define boolean PassdbOptionMove (any opt_id, string opt_key, symbol direction) {
+    define any PassdbOptionMove (any opt_id, string opt_key, symbol direction) {
 	string id = (string)opt_id;
+
 	passdb_order = sort (string left, string right, passdb_order, ``{ boolean res = 
 	    direction == `down ?
 	    (left == id ? false : true)
@@ -562,7 +578,7 @@ further information.
 	    return res;
 	});
 	initPassdb (opt_key);
-	return true;
+	return opt_id;
     }
 
     // test the LDAP
@@ -578,15 +594,15 @@ further information.
     }
 
 
-    define boolean initPassdb(any key) ``{
-	return TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], (string)key);
+    define void initPassdb(string key) ``{
+	TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], key);
     }
 
-    define symbol handlePassdb(any key, map event_descr) ``{
+    define symbol handlePassdb(string key, map event_descr) ``{
 	if ( event_descr["ID"]:nil == `_tp_add )
 	{
 	    AddPassdbBackend ();
-	    TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], (string)key);
+	    TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], key);
 	    // continue
 	    return nil;
 	}
@@ -618,10 +634,10 @@ further information.
 	    return nil;
 	}
     
-	return TablePopup::TableHandle(xx_widgets["passdb_edit"]:$[], (string)key, event_descr);
+	return TablePopup::TableHandle(xx_widgets["passdb_edit"]:$[], key, event_descr);
     }
 
-    define void storePassdb(any key, map event) ``{
+    define void storePassdb(string key, map event) ``{
 	list<string> res = maplist (string id, passdb_order, ``{
 	    return passdb_backends[id]:"";
 	});
