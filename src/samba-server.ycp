@@ -342,7 +342,7 @@ map cmdline = $[
 	"standalone"	:$[
 	    // translators: command line help text for standalone server role option
 	    // logon is the Windows synonym for login
-	    "help"	: _("Server should provide shares, but should not allow domain logons."),
+	    "help"	: _("Server should provide shares, but should not allow domain logins."),
 	],
 	"smbpasswd"	:$[
 	    // translators: command line help text for smbpasswd option
