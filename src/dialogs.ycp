@@ -27,6 +27,7 @@ include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
 string return_tab = "startup";
+map <string, any> firewall_widget = nil;
 
 any Installation_Step1 () {
 
@@ -154,6 +155,7 @@ void ServiceWidgetInit (map<string, any> descr, any key)
 {
     symbol status = SambaServer::ServiceEnabled () ? `enable: `disable;
     UI::ChangeWidget ( `id ( status ), `Value, true );
+    CWMFirewallInterfaces::OpenFirewallInit(firewall_widget, "");
 }
 
 void ServiceWidgetStore (map<string, any> descr, any key)
@@ -161,7 +163,17 @@ void ServiceWidgetStore (map<string, any> descr, any key)
     SambaServer::setServiceEnabled ( 
 	UI::QueryWidget ( `id ("samba_server_type"), `CurrentButton ) == `enable 
     );
+    CWMFirewallInterfaces::OpenFirewallStore(firewall_widget, "", $["ID":`next]);
 }
+
+symbol ServiceWidgetHandle(string key, map event_descr)
+{
+    CWMFirewallInterfaces::OpenFirewallHandle(firewall_widget, "", event_descr);
+//    if (CWMFirewallInterfaces::configuration_changed == true) {
+//	SambaServer::modified = true;
+//    }
+}
+
 
 void IdentityWidgetInit (map<string, any> descr, any key)
 {
@@ -606,7 +618,7 @@ boolean TabAbort () {
 any Installation_Conf_Tab () {
 
     map<string,any> firewall_settings = $[ "services" : [ "samba-server" ], "display_details" : true ];
-    map<string,any> firewall_widget = CWMFirewallInterfaces::CreateOpenFirewallWidget(firewall_settings);
+    firewall_widget = CWMFirewallInterfaces::CreateOpenFirewallWidget(firewall_settings);
     string firewall_help = firewall_widget["help"]:"";
     term firewall_layout = firewall_widget["custom_widget"]:`VBox();
 
@@ -717,6 +729,7 @@ any Installation_Conf_Tab () {
 	    "custom_widget" : page_start_up,
 	    "init" : ServiceWidgetInit,
 	    "store" : ServiceWidgetStore,
+	    "handle" : ServiceWidgetHandle,
 	    "help": HELPS["smb_conf_tab_startup"]:"" + firewall_help
 	]),
         CWM::prepareWidget($[

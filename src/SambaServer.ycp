@@ -24,6 +24,7 @@ import "Progress";
 import "Report";
 import "Service";
 import "URL";
+import "SuSEFirewall";
 
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
@@ -386,27 +387,31 @@ global define boolean Read() ``{
     string caption = _("Initializing Samba Server Configuration");
 
     
-    integer steps = 4;
+    integer steps = 5;
 
     // We do not set help text here, because it was set outside
     Progress::New( caption, " ", steps, [
-	    // translators: progress stage 1/4
+	    // translators: progress stage 1/5
 	    _("Read global Samba settings"),
-	    // translators: progress stage 2/4
+	    // translators: progress stage 2/5
 	    _("Read the Samba shares"),
-	    // translators: progress stage 3/4
+	    // translators: progress stage 3/5
 	    _("Read the printing settings"),
-	    // translators: progress stage 4/4
+	    // translators: progress stage 4/5
 	    _("Read the LDAP settings"),
+	    // translators: progress stage 5/5
+	    _("Read the firewall settings")
 	], [
-	    // translators: progress step 1/4
+	    // translators: progress step 1/5
 	    _("Reading global Samba settings..."),
-	    // translators: progress step 2/4
+	    // translators: progress step 2/5
 	    _("Reading the Samba shares..."),
-	    // translators: progress step 3/4
+	    // translators: progress step 3/5
 	    _("Reading the printing settings..."),
-	    // translators: progress step 4/4
+	    // translators: progress step 4/5
 	    _("Reading the LDAP settings..."),
+	    // translators: progress step 5/5
+	    _("Reading the firewall settings..."),
 	    // translators: progress finished
 	    _("Finished")
 	],
@@ -594,10 +599,16 @@ Remove one of the options to resolve this conflict.
 
     // read LDAP settings
     Progress::NextStage();
-    
     ReadLDAPSettings();
-    
     if(Abort()) return false;
+    
+    // read firewall setting
+    Progress::NextStage();
+    Progress::off();
+    SuSEFirewall::Read();
+    Progress::on();
+    if(Abort()) return false;
+    
     // translators: progress finished
     ProgressNextStage(_("Finished"));
 
@@ -628,7 +639,7 @@ global define boolean Write() ``{
 	}
     }
     
-    integer steps = 3;
+    integer steps = 4;
 
     // We do not set help text here, because it was set outside
     Progress::New(caption, " ", steps, [
@@ -637,9 +648,11 @@ global define boolean Write() ``{
 	    // translators: write progress stage
 	    _("Run SuSEconfig"),
 	    // translators: write progress stage
-	    !service ? _("Disable Samba services") 
+	    ( !service ? _("Disable Samba services") 
 	    // translators: write progress stage
-		: _("Enable Samba services")
+		: _("Enable Samba services") ),
+	    // translators: write progress stage
+	    _("Save firewall settings")
 	], [
 	    // translators: write progress step
 	    _("Writing the settings..."),
@@ -649,6 +662,8 @@ global define boolean Write() ``{
 	    ! service ? _("Disabling Samba services...") 
 	    // translators: write progress step
 		: _("Enabling Samba services..."),
+	    // translators: write progress step
+	    _("Saving firewall settings..."),
 	    // translators: write progress step
 	    _("Finished")
 	],
@@ -840,6 +855,14 @@ domain relationship for '%1'.
     }
 
     if(Abort()) return false;
+
+    // save firewall settings
+    Progress::NextStage();
+    Progress::off();
+    SuSEFirewall::Write ();
+    Progress::on();
+    if(Abort()) return false;
+    
     // translators: progress finished
     ProgressNextStage(_("Finished"));
 
