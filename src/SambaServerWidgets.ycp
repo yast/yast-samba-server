@@ -75,6 +75,8 @@ global map defaulthostwidget = union ( CWM::CreateTable (
 	), $[
 	    "init" : ``(CWM::TableInit (
 		SambaServerWidgets::widgets["share_edit"]:$[])),
+	    "handle" : ``(CWM::TableHandle (
+		SambaServerWidgets::widgets["share_edit"]:$[])),
 	    "options" : smbconf_popups,
 	    "ids" : ``(SambaServerWidgets::ShareEditContents ()),
 	    "fallback" : $[
