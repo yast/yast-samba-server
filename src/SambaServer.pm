@@ -86,7 +86,7 @@ sub Read {
     my $caption = __("Initializing Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 5, [
+    Progress->New($caption, " ", 3, [
 	    # translators: progress stage 1/5
 	    __("Read global Samba settings"),
 	    # translators: progress stage 4/5
@@ -134,13 +134,15 @@ sub Read {
     
     # read firewall setting
     Progress->NextStage();
+    my $po = Progress->set(0);
     SuSEFirewall->Read();
+    Progress->set($po);
 #    if(Abort()) return false;
 
     # Read finished
     Progress->NextStage();
     $Modified = 0;
-y2milestone("Read finished");
+    y2milestone("Read finished");
     
     return 1;
 }
@@ -175,11 +177,9 @@ sub Write {
     my $caption = __("Saving Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 4, [
+    Progress->New($caption, " ", 3, [
 	    # translators: write progress stage
 	    _("Write the settings"),
-	    # translators: write progress stage
-	    _("Run SuSEconfig"),
 	    # translators: write progress stage
 	    ( !SambaService->GetServiceAutoStart() ? _("Disable Samba services") 
 	    # translators: write progress stage
@@ -189,8 +189,6 @@ sub Write {
 	], [
 	    # translators: write progress step
 	    _("Writing the settings..."),
-	    # translators: write progress step
-	    _("Running SuSEconfig..."),
 	    # translators: write progress step
 	    ! SambaService->GetServiceAutoStart() ? _("Disabling Samba services...") 
 	    # translators: write progress step
@@ -224,22 +222,24 @@ sub Write {
     
     # run SuSEconfig for samba
 #    if(Abort()) return false;
-#    Progress->NextStage() unless $noprogress;
 
     SambaBackend->Write();    
-    SambaService->Write();
     SambaTrustDom->Write();
     SambaAccounts->Write();
 
+    Progress->NextStage();
+    SambaService->Write();
 #    if(Abort()) return false;
 
     # save firewall settings
+    Progress->NextStage();
+    my $po = Progress->set(0);
     SuSEFirewall->Write();
+    Progress->set($po);
 #    if(Abort()) return false;
     
     # progress finished
-#    Progress->NextStage();
-
+    Progress->NextStage();
 #    if(Abort()) return false;
 
     $GlobalsConfigured = 1;
