@@ -179,10 +179,13 @@ map<string, map<string,any> > removed_shares  = $[];
 list<string> system_printers = [];
 
 /**
- * Just ensure a translation to exist
+ * Just ensure a translation do exist
  */
+// translators: server role name
 string ____1 = _("File and Printer Sharing");
+// translators: server role name
 string ____2 =_("Backup Domain Controller");
+// translators: server role name
 string ____3 =_("Primary Domain Controller");
 
 /** ============================= defaults ====================================*/

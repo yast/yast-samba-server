@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 17 10:29:53 CET 2004 - visnov@suse.cz
+
+- finished help texts
+- don't show help for passdb backend twice 
+
+-------------------------------------------------------------------
 Mon Mar 15 18:40:36 CET 2004 - visnov@suse.cz
 
 - use "mysql", not "mysqlsam" (#35393)
