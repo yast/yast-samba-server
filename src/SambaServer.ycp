@@ -2055,20 +2055,16 @@ boolean EnsureRootAccount ()
     // try to create it
     
     // first, ask for password
-    UI::OpenDialog(
-	`HVSquash(
+    UI::OpenDialog(`HVSquash(
         `VBox(
-	    `Label ( _("For a proper function, Samba server needs an
+	    `Label( _("For a proper function, Samba server needs an
 administrative account (root).
-It will be created now."),
-	    `Password(`id(`passwd1), _("Samba root Password:") ,
-            `Password(`id(`passwd2), _("Reenter the password for &verification:") ),
-                `HBox(
-                    `PushButton(`id(`ok), `opt(`default), Label::OKButton() ),
-                    `PushButton(`id(`cancel), Label::CancelButton() )
-                )
-            )
-	))));
+It will be created now.")),
+	    `Password(`id(`passwd1), _("Samba root Password:")),
+            `Password(`id(`passwd2), _("Reenter the password for &verification:")),
+            `HBox(
+                `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
+                `PushButton(`id(`cancel), Label::CancelButton())))));
 
     any ret = nil;
     string passwd = nil;
