@@ -35,9 +35,9 @@ global define symbol RoleDialog () ``{
     Wizard::SetContents( caption, `VBox(
 	`RadioButtonGroup( `id(`server_status), `VBox(
 	    // radio button label
-    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("Server &disabled") ) ),
+    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("&Disable SAMBA Server") ) ),
 	    // radio button label
-    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("Server &enabled") ) )
+    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("&Enable SAMBA Server") ) )
 	)),
 	`VSpacing(),
 	`HBox(
