@@ -25,9 +25,9 @@
 
     global define list ShareEditContents (map descr);
     global define void ShareEditPopupInit (any opt_id, string opt_key);
-    global define void ShareEditPopupStore (any opt_id, any opt_key);
+    global define void ShareEditPopupStore (any opt_id, string opt_key);
     global define string ShareEditSummary (any opt_id, string opt_key);
-    global define boolean ShareEditEntryDelete (any opt_id, any opt_key);
+    global define boolean ShareEditEntryDelete (any opt_id, string opt_key);
 
     global define list PassdbEditContents (map descr);
     global define string PassdbEditOptionSummary (any opt_id, any opt_key);
@@ -204,7 +204,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_key any option key of selected option
       * @return boolean true if was really deleted
       */
-    global define boolean ShareEditEntryDelete (any opt_id, any opt_key) ``{
+    global define boolean ShareEditEntryDelete (any opt_id, string opt_key) ``{
 	// message popup
 	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
@@ -232,7 +232,7 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_id any option id
       * @param opt_key any option key
       */
-    global define void ShareEditPopupStore (any opt_id, any opt_key) ``{
+    global define void ShareEditPopupStore (any opt_id, string opt_key) ``{
 	SambaServer::shares[shareToEdit, opt_key] = UI::QueryWidget (`id (opt_key), `Value);
 	SambaServer::modified = true;
     }

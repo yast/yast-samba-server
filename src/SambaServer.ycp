@@ -1240,7 +1240,7 @@ global define boolean removeShare( string name ) ``{
  * @param options	configuration of the share
  * @return boolean	true on success, false if the share already exists
  */
-global define boolean addShare( string name, map options ) ``{
+global define boolean addShare( string name, map<string,any> options ) ``{
     // share already exists
     if( haskey( shares, name ) ) return false;
     
@@ -1281,7 +1281,7 @@ global define boolean enableShare( string name, boolean on ) ``{
  * @param options	new options of the share
  * @return boolean	true on success, false if the share does not exist
  */
-global define boolean updateShare( string name, map options ) ``{
+global define boolean updateShare( string name, map<string,any> options ) ``{
 
     // share does not exists
     if( !haskey( shares, name ) ) return false;
@@ -1331,7 +1331,7 @@ global define symbol DetermineRole() ``{
  * Return required packages for auto-installation
  * @return map of packages to be installed and to be removed
  */
-global define map AutoPackages() ``{
+global define map<string,list<string> > AutoPackages() ``{
 	return ($["install": required_packages, "remove": []]);
 
 }
