@@ -14,7 +14,7 @@ X-SuSE-YaST-RootOnly=true
 X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoinstResource= samba-server
+X-SuSE-YaST-AutoInstResource= samba-server
 
 Icon=samba-server
 Exec=/sbin/yast2 samba-server 
