@@ -959,7 +959,7 @@ symbol AskJoinDomainDialog() ``{
 	`Password(`id(`passwd), _("&Password:")),
 	`HBox( 
 	    // translators: button label to skip joining to domain
-	    `PushButton(`id(`skip), _("&No join")), 
+	    `PushButton(`id(`skip), _("Do &Not Join")), 
 	    `PushButton(`id(`cancel), Label::CancelButton(),
 	    `PushButton(`id(`ok), `opt(`default), Label::OKButton())))));
     

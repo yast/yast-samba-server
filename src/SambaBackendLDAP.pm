@@ -237,7 +237,7 @@ sub getLdapError {
     if ($map) {
 	my $msg = $map->{msg};
 	# translators: in error message
-	$msg .= "\n" . __("Additional info:") . " ". $map->{server_msg} if $map->{server_msg};
+	$msg .= "\n" . __("Additional Information:") . " ". $map->{server_msg} if $map->{server_msg};
 	return $msg if $msg;
     }
     # translators: unknown error message
@@ -312,7 +312,7 @@ sub addLdapDn {
 	when ("dc") {$map = {objectclass => ["top", "dcobject"], dc => $value}}
 	when ("ou") {$map = {objectclass => ["top", "organizationalunit"], ou => $value}}
 	# translators: error message
-	default {return __("Unknown class:")." $dn\n".__("YaST supports only dcObject (dc) and organizationalUnit (ou) classes.")}
+	default {return __("Unknown Class:")." $dn\n".__("YaST supports only dcObject (dc) and organizationalUnit (ou) classes.")}
     };
     
     if ($map && !SCR->Write(".ldap.add", {dn=>$dn}, $map)) {
@@ -598,7 +598,9 @@ sub TestLDAP {
 
     if ($result->{exit}) {
 	# translators: warning message, %s is LDAP server name/IP
-	Report->Warning(sprintf(__("It seems like there is no functional\nLDAP server at %s.\n"), $server));
+	Report->Warning(sprintf(__("It seems that there is no functional
+LDAP server at %s.
+"), $server));
 	return 0;
     }
     

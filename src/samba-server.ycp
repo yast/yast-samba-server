@@ -337,7 +337,7 @@ map cmdline = $[
 	], 
 	"member"	:$[
 	    // translators: command line help text for Domain Member role option
-	    "help"	: _("Server should act as a Domain Member"),
+	    "help"	: _("Server should act as a domain member"),
 	], 
 	"standalone"	:$[
 	    // translators: command line help text for standalone server role option

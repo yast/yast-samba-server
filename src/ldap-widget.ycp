@@ -92,7 +92,7 @@ boolean _try_connect(string url, string admin_dn, string passwd)
 {
     if (url == "") {
         // translators: popup warning message about empty text entry
-        Popup::Warning(_("You have to specify server URL"));
+        Popup::Warning(_("Enter the server URL."));
         return false;
     }
     string err = SambaBackendLDAP::TryBind(url, admin_dn, passwd);
@@ -108,7 +108,7 @@ boolean SambaLDAPTryConnect()
     string passwd1 = (string)UI::QueryWidget(`id(`passwd1), `Value);
     string passwd2 = (string)UI::QueryWidget(`id(`passwd1), `Value);
     if (passwd1 != passwd2) {
-	Popup::Warning(_("Passwords does not match"));
+	Popup::Warning(_("Passwords do not match."));
 	return false;
     }
     
@@ -164,14 +164,14 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
 	string passwd2 = (string)UI::QueryWidget(`id(`passwd2), `Value);
 	if (passwd1 != passwd2) {
 	    // translators: inform text
-	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords do not match"))));
+	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords do not match."))));
 	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, false);
 	} else if (passwd1 == SambaBackendLDAP::GetAdminPassword()) {
 	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label("")));
 	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, true);
 	} else {
 	    // translators: inform text
-	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords match"))));
+	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords match."))));
 	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, true);
 	}
     } else if (id == `ldap_passdb_backend_enable || id == `ldap_idmap_backend_enable) {
@@ -189,11 +189,13 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
     } else if (id == `ldap_try_connect) {
 	if (SambaLDAPTryConnect()) {
 	    // translators: popup message
-	    Popup::Message(_("Connection successful"));
+	    Popup::Message(_("Connection successful."));
 	}
     } else if (id == `ldap_suse_defaults) {
 	// translators: popup message
-	if (Popup::YesNo(_("All current LDAP-related values will be rewrited.\nDo you want to continue?"))) {
+	if (Popup::YesNo(_("All current LDAP-related values will be rewritten.
+Continue?
+"))) {
 	    SambaConfig::GlobalSetMap(SambaBackendLDAP::GetSuseDefaultValues());
 	    if (Ldap::server != nil && Ldap::server != "") {
 		SambaConfig::GlobalSetStr("idmap backend", "ldap:ldap://" + Ldap::GetFirstServer(Ldap::server));
@@ -267,18 +269,18 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	`Empty(`opt(`vstretch))));
     term passdb = 
 	// translators: frame title (passdb == password database)
-	`Frame(_("Passdb Backend"), `VBox(
+	`Frame(_("Passdb Back-End"), `VBox(
 	    // translators: check box label
-	    `Left(`CheckBox(`id(`ldap_passdb_backend_enable), `opt(`notify), _("Use LDAP &Password Backend"))),
+	    `Left(`CheckBox(`id(`ldap_passdb_backend_enable), `opt(`notify), _("Use LDAP &Password Back-End"))),
 	    // translators: text entry label
 	    `TextEntry(`id(`ldap_passdb_backend_url), _("LDAP Server URL")),
 	    `Empty(`opt(`vstretch))));
 
     term idmap = 
         // translators: frame title (idmap = user id mapping)
-	`Frame(_("Idmap Backend"), `VBox(
+	`Frame(_("Idmap Back-End"), `VBox(
 	    // translators: check box label
-	    `Left(`CheckBox(`id(`ldap_idmap_backend_enable), `opt(`notify), _("Use LDAP &Idmap Backend"))),
+	    `Left(`CheckBox(`id(`ldap_idmap_backend_enable), `opt(`notify), _("Use LDAP &Idmap Back-End"))),
 	    // translators: text entry label
 	    `TextEntry(`id(`ldap_idmap_backend_url), _("LDAP Server URL")),
 	    `Empty(`opt(`vstretch))));
@@ -296,7 +298,7 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	    basedn,
 	    `VWeight(8, `Empty()),
 	    `Right(`HBox(
-		`PushButton(`id(`ldap_try_connect), _("Try Connect")),
+		`PushButton(`id(`ldap_try_connect), _("Test Connection")),
 		`MenuButton(`id(`ldap_advanced_settings), _("Advanced Settings..."), [
 		    `item(`id(`ldap_expert_settings), _("E&xpert LDAP Settings")),
 		    `item(`id(`ldap_suse_defaults), _("Default Values"))])))),
@@ -374,11 +376,11 @@ void SambaLDAPSettingsTimeoutsWidgetStore(string key, map event_descr)
 map CreateSambaLDAPSettingsTimeoutsWidget()
 {
     // translators: frame label
-    term timeouts_widget = `Frame(_("Timeouts"), `VBox(
+    term timeouts_widget = `Frame(_("Time-Outs"), `VBox(
     	    // translators: integer field label
 	    `Left(`IntField(`id("ldap replication sleep"), _("&Replication Sleep:"), 0, 999999, 3)),
     	    // translators: integer field label
-	    `Left(`IntField(`id("ldap timeout"), _("&Timeout:"), 0, 999999, 3))));
+	    `Left(`IntField(`id("ldap timeout"), _("&Time-Out:"), 0, 999999, 3))));
 
     return $[
 	"widget": `custom,
