@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  3 11:53:33 CET 2005 - mlazar@suse.cz
+
+- fixed function SambaRole::getLocalSID()
+
+-------------------------------------------------------------------
 Tue Mar  1 16:13:17 CET 2005 - mlazar@suse.cz
 
 - adapted to yast2-samba-client 2.12.0

@@ -114,7 +114,7 @@ sub getLocalSID {
 	y2error("Error retrieving local SID: $result->{stderr}");
 	return undef;
     }
-    return undef unless $result->{output} =~ /^SID for domain .* is: (\S*)/;
+    return undef unless $result->{stdout} =~ /^SID for domain .* is: (\S*)/;
     return $1;
 }
 
