@@ -168,12 +168,14 @@ void BaseSettingsWidgetInit(string key)
 
 void WinsSettingsWidgetInit(string key)
 {
-    boolean wins = SambaServer::global_config["wins support"]:false;
+    if (ProductFeatures::ui_mode != "simple") {
+	boolean wins = SambaServer::global_config["wins support"]:false;
 
-    UI::ChangeWidget(`id("wins_server_support"), `Value, wins);
-    UI::ChangeWidget(`id("remote_wins_server"), `Value, ! wins);
-    UI::ChangeWidget(`id("wins_server_name"), `Enabled, ! wins);
-    UI::ChangeWidget(`id("wins_server_name"), `Value, SambaServer::global_config["wins server"]:"" );
+	UI::ChangeWidget(`id("wins_server_support"), `Value, wins);
+	UI::ChangeWidget(`id("remote_wins_server"), `Value, ! wins);
+	UI::ChangeWidget(`id("wins_server_name"), `Enabled, ! wins);
+        UI::ChangeWidget(`id("wins_server_name"), `Value, SambaServer::global_config["wins server"]:"" );
+    }
 }
 
 void GlobalConfigStringWidgetInit(string key)
@@ -197,16 +199,18 @@ void BaseSettingsWidgetStore(string key, map event_descr)
 
 void WinsSettingsWidgetStore(string key, map event_descr)
 {
-    if ( (boolean)UI::QueryWidget(`id("wins_server_support"), `Value)) {
-	y2milestone("Enabling wins support");
-	SambaServer::global_config["wins support"] = true;
-    } else {
-	SambaServer::global_config ["wins support"] = false;
-	SambaServer::global_config ["wins server"] = (string)UI::QueryWidget(`id("wins_server_name"), `Value);
-	y2milestone("Disabling wins support, using server '%1'", SambaServer::global_config["wins server"]:nil );
-    }
+    if (ProductFeatures::ui_mode != "simple") {
+	if ( (boolean)UI::QueryWidget(`id("wins_server_support"), `Value)) {
+	    y2milestone("Enabling wins support");
+	    SambaServer::global_config["wins support"] = true;
+	} else {
+	    SambaServer::global_config ["wins support"] = false;
+	    SambaServer::global_config ["wins server"] = (string)UI::QueryWidget(`id("wins_server_name"), `Value);
+    	    y2milestone("Disabling wins support, using server '%1'", SambaServer::global_config["wins server"]:nil );
+	}
 
-    SambaServer::modified = true;
+        SambaServer::modified = true;
+    }
 }
 
 void GlobalConfigStringWidgetStore(string key, map event_descr)
@@ -226,9 +230,11 @@ void GlobalConfigStringWidgetStore(string key, map event_descr)
 
 symbol WinsSettingsWidgetHandle(string key, map event_descr)
 {
-    any event = event_descr["ID"]:nil;
-    if ( event == "wins_server_support" || event == "remote_wins_server" ) {
-	UI::ChangeWidget(`id("wins_server_name"), `Enabled, event == "remote_wins_server");
+    if (ProductFeatures::ui_mode != "simple") {
+	any event = event_descr["ID"]:nil;
+	if ( event == "wins_server_support" || event == "remote_wins_server" ) {
+	    UI::ChangeWidget(`id("wins_server_name"), `Enabled, event == "remote_wins_server");
+	}
     }
     return nil;
 }

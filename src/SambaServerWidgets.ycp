@@ -116,9 +116,9 @@ include "samba-server/samba-options-local.ycp";
 include "samba-server/samba-options-global.ycp"; 
 
 global map shareswidget =  TablePopup::CreateTableDescr (
-	    $["add_delete" : true, 
-	      "up_down" : false, 
-	      "unique_keys" : true]
+	    $["add_delete_buttons" : true, 
+	      "up_down_buttons" : false, 
+	      "unique_keys" : true ]
 	  , $[
 	    "init" : initFun,
 	    "handle" : handleFun,
@@ -136,8 +136,8 @@ global map shareswidget =  TablePopup::CreateTableDescr (
 	]);
 
 global map globalsettingswidget =  TablePopup::CreateTableDescr (
-	    $["add_delete" : true, 
-	      "up_down" : false, 
+	    $["add_delete_buttons" : true, 
+	      "up_down_buttons" : false, 
 	      "unique_keys" : true]
 	  , $[
 	    "options" : global_option_widgets,
@@ -195,7 +195,7 @@ global map passdboptions = $[
 ];
 
 global map passdbwidget =  TablePopup::CreateTableDescr (
-	    $["add_delete" : true, 
+	    $["add_delete_buttons" : true, 
 	      "up_down_buttons" : true, 
 	      "unique_keys" : false]
 	  , $[

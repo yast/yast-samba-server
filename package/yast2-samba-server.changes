@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 16 12:28:34 CEST 2004 - mlazar@suse.cz
+
+- changed TablePopup::CreateTableDescr attributes
+- no WINS widget initialization when ui_mode is "simple"
+
+-------------------------------------------------------------------
 Fri Aug 13 13:10:25 CEST 2004 - mlazar@suse.cz
 
 - used CWMTab module
