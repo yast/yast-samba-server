@@ -652,14 +652,14 @@ global define map Export () ``{
 	"LDAP_suffix" : LDAP_suffix
     ]);
     
-    list r_shares = union( samba["shares"]:$[],  maplist( string share, map options, shares, ``{
+    list r_shares =  maplist( string share, map options, shares, ``{
 	return $[ 
 	    "share" : share, 
 	    "options" : maplist( string key, any value, options, ``{
 		return $[ "key": key, "value" : value ];
 	    })
 	];
-    }) );
+    });
     
     list printers = maplist( string printer, boolean status, printer_status, ``{
 	return $[ "printer": printer, "status" : status ];
