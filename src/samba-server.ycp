@@ -262,7 +262,7 @@ y2milestone ("Samba-server module started");
 include "samba-server/wizards.ycp";
 
 /* main ui function */
-boolean ret = nil;
+any ret = nil;
 
 map cmdline = $[
     "id" 		: "samba-server",
@@ -439,7 +439,7 @@ if( !Require::RequireAndConflictTarget( SambaServer::required_packages, [],
     Popup::Error( sformat( _("YaST2 cannot continue the configuration
 without installing the required packages."), "samba" ) );
 
-    return false;
+    return (any)false;
 }
 
 ret = CommandLine::Run( cmdline );

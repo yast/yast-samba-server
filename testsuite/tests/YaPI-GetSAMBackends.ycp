@@ -6,46 +6,58 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT( [ 
-	$[ 
-	    "target" : $[ "tmpdir" : "/tmp" ],  
-	    "etc" : $[
-		"smb" : $[
-		    "value" : $[
-			"global" : $[
-			    "workgroup" : "Test",
-			    "security" : "user",
-			    "domain master" : "no",
-			    "domain logons" : "no",
-			    "local master" : "no",
-			    "preferred master" : "yes",
-			    "passdb backend" : "smbpassd ldapsam:ldaps://localhost",
-			],
-		    ],
-		],
-		"printcap" : [],
-	    ],
-	    "passwd" : $[
-		"passwd" : $[
-		    "plusline" : "",
-		]
-	    ],
-	],
-	$[],
-	$[
-    	    "target" : $[
-        	"bash_output" : $[],
-		"bash" : 1
-    	    ],
-	    "background" : $[
-		"run_output" : true,
-	    ],
-	    "passwd" : $[
-		"init" : true,
-	    ],
-	]
-    ], nil );
-
+    TESTSUITE_INIT([
+            $[
+                "passwd" : $[
+                    "passwd" : $[
+                        "plusline" : ""
+                    ]
+                ],
+                "target" : $[
+                    "tmpdir" : "/tmp"
+                ],
+                "etc" : $[
+                    "smb" : $[
+                        "value_type" : $[
+                            "global" : $[
+                                "workgroup" : 0,
+                                "domain master" : 0,
+                                "security" : 0,
+                                "preferred master" : 0,
+                                "passdb backend" : 0,
+                                "domain logons" : 0,
+                                "local master" : 0
+                            ]
+                        ],
+                        "value" : $[
+                            "global" : $[
+                                "workgroup" : "Test",
+                                "domain master" : "no",
+                                "security" : "user",
+                                "passdb backend" : "smbpassd ldapsam:ldaps://localhost",
+                                "preferred master" : "yes",
+                                "local master" : "no",
+                                "domain logons" : "no"
+                            ]
+                        ]
+                    ],
+                    "printcap" : []
+                ]
+            ],
+            $[],
+            $[
+                "passwd" : $[
+                    "init" : true
+                ],
+                "target" : $[
+                    "bash" : 1,
+                    "bash_output" : $[]
+                ],
+                "background" : $[
+                    "run_output" : true
+                ]
+            ]
+        ],nil);
     import "YaPI::Samba";
 
     DUMP(YaPI::Samba::GetSAMBackends());

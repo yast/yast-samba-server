@@ -13,26 +13,38 @@ Execute	.background.run_output "/usr/bin/nmbstatus" true
 Read	.etc.smb.value.global."passdb backend" nil
 Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
 Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value_type.global."domain logons" 0
 Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value_type.global."domain master" 0
 Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value_type.global."local master" 0
 Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value_type.global."preferred master" 0
 Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value_type.global."security" 0
 Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value_type.global."workgroup" 0
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
 Log	Cannot get the list of trusted domains
 Dir	.etc.smb.section: ["lp", "lp2"]
-Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp" 0
-Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp2"."comment" "testing printer"
-Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp2"."printable" "yes"
+Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp"."comment" 0
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value_type."lp"."path" 0
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp"."printable" 0
+Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp2" 1
+Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp2"."comment" 0
+Read	.etc.smb.value."lp2"."comment" "testing printer"
+Read	.etc.smb.value_type."lp2"."path" 0
+Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp2"."printable" 0
+Read	.etc.smb.value."lp2"."printable" "yes"
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
@@ -69,26 +81,38 @@ Execute	.background.run_output "/usr/bin/nmbstatus" true
 Read	.etc.smb.value.global."passdb backend" nil
 Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
 Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value_type.global."domain logons" 0
 Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value_type.global."domain master" 0
 Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value_type.global."local master" 0
 Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value_type.global."preferred master" 0
 Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value_type.global."security" 0
 Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value_type.global."workgroup" 0
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
 Log	Cannot get the list of trusted domains
 Dir	.etc.smb.section: ["lp", "lp2"]
-Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp" 0
-Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp2"."comment" "testing printer"
-Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp2"."printable" "yes"
+Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp"."comment" 0
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value_type."lp"."path" 0
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp"."printable" 0
+Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp2" 1
+Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp2"."comment" 0
+Read	.etc.smb.value."lp2"."comment" "testing printer"
+Read	.etc.smb.value_type."lp2"."path" 0
+Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp2"."printable" 0
+Read	.etc.smb.value."lp2"."printable" "yes"
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
@@ -126,26 +150,38 @@ Execute	.background.run_output "/usr/bin/nmbstatus" true
 Read	.etc.smb.value.global."passdb backend" nil
 Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
 Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value_type.global."domain logons" 0
 Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value_type.global."domain master" 0
 Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value_type.global."local master" 0
 Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value_type.global."preferred master" 0
 Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value_type.global."security" 0
 Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value_type.global."workgroup" 0
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
 Log	Cannot get the list of trusted domains
 Dir	.etc.smb.section: ["lp", "lp2"]
-Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp" 0
-Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp2"."comment" "testing printer"
-Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp2"."printable" "yes"
+Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp"."comment" 0
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value_type."lp"."path" 0
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp"."printable" 0
+Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp2" 1
+Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp2"."comment" 0
+Read	.etc.smb.value."lp2"."comment" "testing printer"
+Read	.etc.smb.value_type."lp2"."path" 0
+Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp2"."printable" 0
+Read	.etc.smb.value."lp2"."printable" "yes"
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
@@ -182,26 +218,38 @@ Execute	.background.run_output "/usr/bin/nmbstatus" true
 Read	.etc.smb.value.global."passdb backend" nil
 Dir	.etc.smb.value.global: ["domain logons", "domain master", "local master", "preferred master", "security", "workgroup"]
 Read	.etc.smb.value.global."domain logons" "no"
+Read	.etc.smb.value_type.global."domain logons" 0
 Read	.etc.smb.value.global."domain master" "no"
+Read	.etc.smb.value_type.global."domain master" 0
 Read	.etc.smb.value.global."local master" "no"
+Read	.etc.smb.value_type.global."local master" 0
 Read	.etc.smb.value.global."preferred master" "yes"
+Read	.etc.smb.value_type.global."preferred master" 0
 Read	.etc.smb.value.global."security" "user"
+Read	.etc.smb.value_type.global."security" 0
 Read	.etc.smb.value.global."workgroup" "Test"
+Read	.etc.smb.value_type.global."workgroup" 0
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
 Log	Cannot get the list of trusted domains
 Dir	.etc.smb.section: ["lp", "lp2"]
-Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp" 0
-Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
-Read	.etc.smb.value."lp2"."comment" "testing printer"
-Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp2"."printable" "yes"
+Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp"."comment" 0
+Read	.etc.smb.value."lp"."comment" "testing printer"
+Read	.etc.smb.value_type."lp"."path" 0
+Read	.etc.smb.value."lp"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp"."printable" 0
+Read	.etc.smb.value."lp"."printable" "yes"
 Read	.etc.smb.section_type."lp2" 1
+Dir	.etc.smb.value."lp2": ["comment", "path", "printable"]
+Read	.etc.smb.value_type."lp2"."comment" 0
+Read	.etc.smb.value."lp2"."comment" "testing printer"
+Read	.etc.smb.value_type."lp2"."path" 0
+Read	.etc.smb.value."lp2"."path" "/var/spool/lp"
+Read	.etc.smb.value_type."lp2"."printable" 0
+Read	.etc.smb.value."lp2"."printable" "yes"
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil

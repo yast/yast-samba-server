@@ -6,59 +6,79 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT( [ 
-	$[ 
-	    "target" : $[ "tmpdir" : "/tmp" ],  
-	    "etc" : $[
-		"smb" : $[
-		    "value" : $[
-			"global" : $[
-			    "workgroup" : "Test",
-			    "security" : "user",
-			    "domain master" : "no",
-			    "domain logons" : "no",
-			    "local master" : "no",
-			    "preferred master" : "yes",
-			    "ldap suffix" : "dc=another",
-			    "ldap admin dn" : "uid=fool,dc=another",
-			    
-			],
-			"lp" : $[
-			    "comment" : "testing printer",
-			    "path" : "/var/spool/lp",
-			    "printable" : "yes",
-			]
-		    ],
-		    "section" : $[
-			"lp" : $[],
-		    ],
-		    "section_type" : $[
-			"lp" : 0,
-		    ],
-		],
-		"printcap" : [],
-	    ],
-	    "passwd" : $[
-		"passwd" : $[
-		    "pluslines" : [],
-		]
-	    ],
-	],
-	$[],
-	$[
-    	    "target" : $[
-        	"bash_output" : $[],
-		"bash" : 1
-    	    ],
-	    "background" : $[
-		"run_output" : true,
-	    ],
-	    "passwd" : $[
-		"init" : true,
-	    ],
-	]
-    ], nil );
-
+    TESTSUITE_INIT([
+            $[
+                "passwd" : $[
+                    "passwd" : $[
+                        "pluslines" : []
+                    ]
+                ],
+                "target" : $[
+                    "tmpdir" : "/tmp"
+                ],
+                "etc" : $[
+                    "smb" : $[
+                        "section_type" : $[
+                            "lp" : 0
+                        ],
+                        "section_types" : $[
+                            "lp" : 0
+                        ],
+                        "value_types" : $[
+                            "global" : $[
+                                "ldap suffix" : 0,
+                                "local master" : 0,
+                                "workgroup" : 0,
+                                "domain master" : 0,
+                                "ldap admin dn" : 0,
+                                "security" : 0,
+                                "preferred master" : 0,
+                                "domain logons" : 0
+                            ],
+                            "lp" : $[
+                                "comment" : 0,
+                                "printable" : 0,
+                                "path" : 0
+                            ]
+                        ],
+                        "value" : $[
+                            "global" : $[
+                                "ldap suffix" : "dc=another",
+                                "local master" : "no",
+                                "workgroup" : "Test",
+                                "domain master" : "no",
+                                "ldap admin dn" : "uid=fool,dc=another",
+                                "security" : "user",
+                                "preferred master" : "yes",
+                                "domain logons" : "no"
+                            ],
+                            "lp" : $[
+                                "comment" : "testing printer",
+                                "printable" : "yes",
+                                "path" : "/var/spool/lp"
+                            ]
+                        ],
+                        "section" : $[
+                            "lp" : $[]
+                        ]
+                    ],
+                    "printcap" : []
+                ]
+            ],
+            $[],
+            $[
+                "passwd" : $[
+                    "init" : true
+                ],
+                "target" : $[
+                    "bash" : 1,
+                    "bash_output" : $[]
+                ],
+                "background" : $[
+                    "run_output" : true
+                ]
+            ]
+        ],nil);
     import "YaPI::Samba";
 
     DUMP(YaPI::Samba::EditSAMConfiguration( "ldapsam:ldap://localhost", 

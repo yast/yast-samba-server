@@ -257,8 +257,9 @@ global define symbol handleFun(any key, map event_descr) ``{
 	// message popup
 	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
-	SambaServer::shares[shareToEdit]
-	    = filter (string k, any v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
+//	SambaServer::shares[shareToEdit]
+//	    = filter (string k, any v, SambaServer::shares[shareToEdit]:$[], ``(k != opt_id));
+	SambaServer::shares[shareToEdit, opt_key] = nil;
 	return true;
     }
 
@@ -307,7 +308,9 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @return list of items for the table
       */
     global define list GlobalSettingsContents (map descr) ``{
-	return maplist ( string k, any v, SambaServer::global_config, ``(k) );
+	list<string> keys = maplist ( string k, any v, SambaServer::global_config, ``(k) );
+	keys = filter(string key, keys, {return SambaServer::global_config[key]:nil != nil; });
+	return keys;
     }
     
     /**
@@ -320,8 +323,9 @@ global define symbol handleFun(any key, map event_descr) ``{
 	// message popup
 	if (! Popup::YesNo (_("Delete the selected entry?")))
 	    return false;
-	SambaServer::global_config
-	    = filter (string k, any v, SambaServer::global_config, ``(k != opt_id));
+//	SambaServer::global_config
+//	    = filter (string k, any v, SambaServer::global_config, ``(k != opt_id));
+	SambaServer::global_config[opt_key] = nil;
 	return true;
     }
 
@@ -347,8 +351,11 @@ global define symbol handleFun(any key, map event_descr) ``{
       * @param opt_key any option key
       */
     global define void GlobalSettingsPopupStore (any opt_id, string opt_key, map event) ``{
-	SambaServer::global_config[opt_key] = UI::QueryWidget (`id (opt_key), `Value);
-	SambaServer::modified = true;
+	any val = UI::QueryWidget (`id (opt_key), `Value);
+	if (val != SambaServer::global_config[opt_key]:nil) {
+	    SambaServer::global_config[opt_key] = UI::QueryWidget (`id (opt_key), `Value);
+	    SambaServer::modified = true;
+	}
     }
 
     /**

@@ -102,10 +102,20 @@ list printers2items( map<string,boolean> printers ) ``{
  */
 map <string, any> check_one_synonym(map <string, any> config, string key1, string key2, string share)
 {
+    share = share==nil ? "global" : share;
+    string comment1 = (string)SCR::Read(add(add(.etc.smb.value_comment, share), key1));
+    string comment2 = (string)SCR::Read(add(add(.etc.smb.value_comment, share), key2));
+    string val1 = is(config[key1]:nil, boolean) ? (config[key1]:false?"yes":"no") : config[key1]:"";
+    string val2 = is(config[key2]:nil, boolean) ? (config[key2]:false?"yes":"no") : config[key2]:"";
+    
     if (config[key1]:nil == nil) {
 	if (config[key2]:nil != nil) {
 	    config[key1] = config[key2]:nil;
-	    config = remove(config, key2);
+	    config[key2] = nil;
+	    if (comment1 == nil && comment2 != nil) {
+		SCR::Write(add(add(.etc.smb.value, share), key1), val2);
+		SCR::Write(add(add(.etc.smb.value_comment, share), key1), comment2);
+	    }
 	}
 	return config;
     }
@@ -116,10 +126,9 @@ map <string, any> check_one_synonym(map <string, any> config, string key1, strin
     
     // both master and synonym key are specified
     if (config[key1]:nil != config[key2]:nil) {
-	string val1 = is(config[key1]:nil, boolean) ? (config[key1]:false?"yes":"no") : config[key1]:"";
-        string val2 = is(config[key2]:nil, boolean) ? (config[key2]:false?"yes":"no") : config[key2]:"";
+	config = remove(config, key2);
 	
-	if (share != nil) {
+	if (share != nil && share != "global") {
 	    // translators: error popup on conflicting options, %1 is the name of the
 	    // option which will be used, %2 is its value, %3 is the name of the
 	    // other option, %4 is the %3's value. %5 is the name of a share
@@ -152,6 +161,10 @@ Remove one of the options to resolve this conflict.
 	}
     } else {
 	config[key2] = nil;
+	if (comment1 == nil && comment2 != nil) {
+	    SCR::Write(add(add(.etc.smb.value, share), key1), val2);
+	    SCR::Write(add(add(.etc.smb.value_comment, share), key1), comment2);
+	}
     }
     
     return config;

@@ -8,16 +8,19 @@
     
     import "Samba";
 
-    TESTSUITE_INIT( [
-        $[ "target" : $[ "tmpdir" : "/tmp" ] ],
-        $[],
-        $[
-            "target" : $[
-                "bash_output" : $[],
+    TESTSUITE_INIT([
+            $[
+                "target" : $[
+                    "tmpdir" : "/tmp"
+                ]
             ],
-        ]
-    ], nil );
-    
+            $[],
+            $[
+                "target" : $[
+                    "bash_output" : $[]
+                ]
+            ]
+        ],nil);    
     import "SambaServer";
     
     SambaServer::share_printers = false;

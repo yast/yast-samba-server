@@ -413,16 +413,17 @@ global define boolean Read() ``{
     list<string> options = (list<string>)SCR::Dir( .etc.smb.value.global );
     foreach( string option, options, ``{
 	string value = (string)SCR::Read(add(.etc.smb.value.global, option));
-	if (value != nil) {
+	integer type = (integer)SCR::Read(add(.etc.smb.value_type.global, option));
+	if (value != nil && type == 0) {
 	    if (global_option_widgets[option, "popup", "widget"]:nil == `checkbox) {
-		global_config[option] = normalize_boolean( value, false);
+		global_config[option] = normalize_boolean(value, false);
 	    } else {
 		global_config[option] = value;
 	    }
 	}
     });
     
-    global_config = check_synonym(global_config, global_synonym_map, nil);
+    global_config = check_synonym(global_config, global_synonym_map, "global");
     
     service = Service::Enabled("smb");
 
@@ -447,14 +448,22 @@ global define boolean Read() ``{
     shares = (map<string, map<string,any> >)listmap( string share, sl, ``{
 	path p = add( .etc.smb.value, share );
 	map <string, any> result = $[];
+	integer share_type = (integer)SCR::Read(add(.etc.smb.section_type, share));
 	
 	foreach( string option, (list<string>)SCR::Dir(p), ``{
-	    string value = (string) SCR::Read( add(p, option) );
-	    if (value != nil) {
-		if (local_option_widgets[option, "popup", "widget"]:nil == `checkbox) {
-		    result[option] = normalize_boolean( value, false);
-		} else {
-		    result[option] = value;
+	    integer type = (integer)SCR::Read(add(add(.etc.smb.value_type, share),option));
+	    if (share_type == 0 && type > 0) {
+		// found disabled key/value pairs in enabled share
+		// => use '##' for comment-out line instead of one '#'
+		SCR::Write(add(add(.etc.smb.value_type, share), option), 2);
+	    } else {
+		string value = (string)SCR::Read(add(p, option));
+		if (value != nil) {
+		    if (local_option_widgets[option, "popup", "widget"]:nil == `checkbox) {
+			result[option] = normalize_boolean( value, false);
+		    } else {
+			result[option] = value;
+		    }
 		}
 	    }
 	});
@@ -462,7 +471,7 @@ global define boolean Read() ``{
 	result = check_synonym(result, local_synonym_map, share);
 	// TODO: "writable" and "read only" are inverted synonym
 
-	result["commentout"] = SCR::Read( add(.etc.smb.section_type, share) ) > 0 ;
+	result["commentout"] = share_type > 0 ;
 	return $[ share: result ];
     });
     
@@ -794,28 +803,32 @@ domain relationship for '%1'.
  */
 global define boolean WriteSettings() ``{
 
-    // first, write the global settings complete
-    foreach( string option, any value, global_config, ``{
-	if ( is(global_config[option]:nil, boolean) )
-	{
-	    SCR::Write( add(.etc.smb.value.global, option), (boolean)value ? "yes" : "no" );
-	}
-	else
-	{
-	    SCR::Write( add(.etc.smb.value.global, option), value );
-	}
-    });    
-    
     // ensure "encrypt passwords = yes";
-    SCR::Write( .etc.smb.value.global."encrypt passwords" , "yes" );
+    global_config["encrypt passwords"] = true;
     
     // ensure high os level for PDC
     if( role == `pdc ) {
-	string val = (string) SCR::Read( .etc.smb.value.global."os level" );
-	if( val == nil || tointeger(val) < 65 ) {
-	    SCR::Write( .etc.smb.value.global."os level", 65 );
+	if (global_config["os level"]:"20" == nil || tointeger(global_config["os level"]:"20") < 65 ) {
+	    global_config["os level"] = "65";
 	}
     }
+
+    // first, write the global settings complete
+    foreach(string option, any value, global_config, ``{
+	if (global_config[option]:nil == nil) {
+	    SCR::Write(add(.etc.smb.value.global, option), nil);
+	} else {
+	    if (is(global_config[option]:nil, boolean)) {
+		SCR::Write(add(.etc.smb.value.global, option), (boolean)value ? "yes" : "no" );
+	    } else {
+		SCR::Write(add(.etc.smb.value.global, option), value );
+	    }
+	    SCR::Write(add(.etc.smb.value_type.global, option), 0); // ensure option is not commented
+	}
+    });    
+
+    // ensure section is not commented
+    SCR::Write(.etc.smb.section_type.global, 0);
     
     // remove removed shares first
     foreach( string share, map options, removed_shares, ``{
@@ -829,16 +842,14 @@ global define boolean WriteSettings() ``{
 	// prepare the right type for writing out the value
 	integer type = ( options["commentout"]:false ) ? 1 : 0;
 	
-	// write the type of the section
-	SCR::Write( add(.etc.smb.section_type, share), type );
-	
 	// write all the options
 	path sectionpath = add( .etc.smb.value, share );
 	path sectiontypepath = add( .etc.smb.value_type, share );
 	foreach( string opt, any value, options, ``{
 	    // skip our internal options
-	    if( value != nil && opt != "commentout" && opt != "yast" ) {
-
+	    if (value == nil) {
+		SCR::Write( add(sectionpath, opt), nil );
+	    } else if( opt != "commentout" && opt != "yast" ) {
 		if( is( value, string ) )
 		{
 		    SCR::Write( add(sectionpath, opt), value );
@@ -846,9 +857,29 @@ global define boolean WriteSettings() ``{
 		    // it must be boolean
 		    SCR::Write( add(sectionpath, opt), (boolean) value ? "yes": "no" );
 		}
-		if( value != nil ) SCR::Write( add(sectiontypepath, opt), type );
+		SCR::Write( add(sectiontypepath, opt), type );
 	    }
 	});
+	
+	// write the type of the section
+	SCR::Write( add(.etc.smb.section_type, share), type );
+	string comment = (string)SCR::Read(add(.etc.smb.section_comment, share));
+	if (comment == nil) comment = "";
+	
+	if (type == 0) {
+	    string c1 = regexpsub(comment, "## Share disabled by YaST\n", "");
+	    if (c1 != nil)
+		comment = c1;
+	} else {
+	    if (!regexpmatch(comment, ".*[Ss]hare.*[Dd]isabled.*")) {
+		comment = comment + "## Share disabled by YaST\n";
+	    }
+	}
+	
+	if (comment == nil || comment == "")
+	    comment = "\n";
+	SCR::Write(add(.etc.smb.section_comment, share), comment);
+
     });
     
     WriteLDAPSettings();

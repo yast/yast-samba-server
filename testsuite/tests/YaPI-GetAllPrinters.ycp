@@ -6,68 +6,92 @@
 
     include "testsuite.ycp";
 
-    TESTSUITE_INIT( [ 
-	$[ 
-	    "target" : $[ "tmpdir" : "/tmp" ],  
-	    "etc" : $[
-		"smb" : $[
-		    "value" : $[
-			"global" : $[
-			    "workgroup" : "Test",
-			    "security" : "user",
-			    "domain master" : "no",
-			    "domain logons" : "no",
-			    "local master" : "no",
-			    "preferred master" : "yes",
-			],
-			"lp" : $[
-			    "comment" : "testing printer",
-			    "path" : "/var/spool/lp",
-			    "printable" : "yes",
-			],
-			"tmp" : $[
-			    "path" : "/tmp",
-			    "guest ok" : "yes",
-			],
-			"home" : $[
-			    "path" : "/home",
-			    "comment" : "All homes",
-			]
-		    ],
-		    "section" : $[
-			"lp" : $[],
-			"tmp" : $[],
-			"home" : $[],
-		    ],
-		    "section_type" : $[
-			"lp" : 0,
-			"tmp" : 0,
-			"home" : 1,
-		    ],
-		],
-		"printcap" : [],
-	    ],
-	    "passwd" : $[
-		"passwd" : $[
-		    "pluslines" : [],
-		]
-	    ],
-	],
-	$[],
-	$[
-    	    "target" : $[
-        	"bash_output" : $[],
-		"bash" : 1
-    	    ],
-	    "background" : $[
-		"run_output" : true,
-	    ],
-	    "passwd" : $[
-		"init" : true,
-	    ],
-	]
-    ], nil );
-
+    TESTSUITE_INIT([
+            $[
+                "passwd" : $[
+                    "passwd" : $[
+                        "pluslines" : []
+                    ]
+                ],
+                "target" : $[
+                    "tmpdir" : "/tmp"
+                ],
+                "etc" : $[
+                    "smb" : $[
+                        "value_type" : $[
+                            "global" : $[
+                                "workgroup" : 0,
+                                "domain master" : 0,
+                                "security" : 0,
+                                "preferred master" : 0,
+                                "local master" : 0,
+                                "domain logons" : 0
+                            ],
+                            "tmp" : $[
+                                "guest ok" : 0,
+                                "path" : 0
+                            ],
+                            "home" : $[
+                                "comment" : 0,
+                                "path" : 0
+                            ],
+                            "lp" : $[
+                                "comment" : 0,
+                                "printable" : 0,
+                                "path" : 0
+                            ]
+                        ],
+                        "section_type" : $[
+                            "home" : 1,
+                            "tmp" : 0,
+                            "lp" : 0
+                        ],
+                        "value" : $[
+                            "global" : $[
+                                "workgroup" : "Test",
+                                "domain master" : "no",
+                                "security" : "user",
+                                "preferred master" : "yes",
+                                "domain logons" : "no",
+                                "local master" : "no"
+                            ],
+                            "home" : $[
+                                "comment" : "All homes",
+                                "path" : "/home"
+                            ],
+                            "tmp" : $[
+                                "guest ok" : "yes",
+                                "path" : "/tmp"
+                            ],
+                            "lp" : $[
+                                "comment" : "testing printer",
+                                "printable" : "yes",
+                                "path" : "/var/spool/lp"
+                            ]
+                        ],
+                        "section" : $[
+                            "home" : $[],
+                            "tmp" : $[],
+                            "lp" : $[]
+                        ]
+                    ],
+                    "printcap" : []
+                ]
+            ],
+            $[],
+            $[
+                "passwd" : $[
+                    "init" : true
+                ],
+                "target" : $[
+                    "bash" : 1,
+                    "bash_output" : $[]
+                ],
+                "background" : $[
+                    "run_output" : true
+                ]
+            ]
+        ],nil);
     import "YaPI::Samba";
 
     DUMP(YaPI::Samba::GetAllPrinters());

@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Aug 18 15:26:38 CEST 2004 - mlazar@suse.cz
+
+- 2.10.3
+- fixed Bugzilla Bug 41402 - Don't add unset/ unused default options
+- fixed Bugzilla Bug 40059 - mark disabled share as 'disabled by YaST'
+- fixed bug when delete item in expert settings
+- updated testsuite
+- fixed return value for CommandLine::Run()
+
+-------------------------------------------------------------------
 Tue Aug 17 15:30:19 CEST 2004 - jsuchome@suse.cz
 
 - plugin for users and groups only available in expert mode
