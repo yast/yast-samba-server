@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb 21 18:49:45 CET 2004 - schwab@suse.de
+
+- Fix typo in specfile.
+
+-------------------------------------------------------------------
 Wed Feb 18 12:32:48 CET 2004 - visnov@suse.cz
 
 - rewritten SAM support. Now multiple passdb backends can be configured
