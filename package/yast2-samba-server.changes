@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 19 14:02:35 CEST 2003 - visnov@suse.de
+
+- improve start dialog
+- use Printer::checkSpooler
+- 2.8.4
+
+-------------------------------------------------------------------
 Tue Aug 19 02:03:53 CEST 2003 - nashif@suse.de
 
 - Added yast2-packager to neededforbuild

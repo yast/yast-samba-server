@@ -394,7 +394,7 @@ Remove one of the options to resolve this conflict.
     printer_status = $[];
     
     Progress::off();
-    Printer::Read();
+    Printer::checkSpooler();
     system_printers = Printer::GetAvailableQueues();
     Progress::on();
 

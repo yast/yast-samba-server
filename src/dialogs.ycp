@@ -33,23 +33,33 @@ global define symbol RoleDialog () ``{
     string caption = _("SAMBA Server Role");
     
     Wizard::SetContents( caption, `VBox(
-	// radio button group label
-	`Frame( _("Sharing Type"), `VBox(
-	    `RadioButtonGroup( `id(`samba_role), `VBox(
-        	`Left( `RadioButton( `id(`disabled), `opt(`notify), SambaServer::roleName( `disabled ) ) ),
-		`Left( `RadioButton( `id(`standalone), `opt(`notify), SambaServer::roleName( `standalone ) ) ),
-		`Left( `RadioButton( `id(`bdc), `opt(`notify), SambaServer::roleName( `bdc ) ) ),
-		`Left( `RadioButton( `id(`pdc), `opt(`notify), SambaServer::roleName( `pdc ) ) )
-	     ) ),
+	`RadioButtonGroup( `id(`server_status), `VBox(
+	    // radio button label
+    	    `Left( `RadioButton( `id(`disabled), `opt(`notify), _("Server &disabled") ) ),
+	    // radio button label
+    	    `Left( `RadioButton( `id(`enabled), `opt(`notify), _("Server &enabled") ) )
+	)),
+	`VSpacing(),
+	`HBox(
+	    `HSpacing(3),
+	    // radio button group label
+	    `Frame( _("Sharing Type"), `VBox(
+		`RadioButtonGroup( `id(`samba_role), `VBox(
+		    `Left( `RadioButton( `id(`standalone), `opt(`notify), SambaServer::roleName( `standalone ), true ) ),
+		    `Left( `RadioButton( `id(`bdc), `opt(`notify), SambaServer::roleName( `bdc ) ) ),
+		    `Left( `RadioButton( `id(`pdc), `opt(`notify), SambaServer::roleName( `pdc ) ) )
+	        ) ),
 	    
-	    `VBox(
-		WorkgroupWidget(),
-		// text entry label
-		`TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string )
-	     ) 
-	) ),
+		`VBox(
+		    WorkgroupWidget(),
+		    // text entry label
+		    `TextEntry(`id(`server_description), _("Server &Description:"), SambaServer::server_string )
+	        ) 
+	    ) ),
+	    `HSpacing(3)
+	),
 	// push button label
-	`PushButton( `id( `advanced ), _("&Authentication Details") ) 
+	`PushButton( `id( `advanced ), _("&Authentication Details") )
 	) , 
 	HELPS["RoleDialog"]:"", false, true
     );
@@ -62,6 +72,9 @@ global define symbol RoleDialog () ``{
 	// enable widgets according to the current role
 	boolean ew = !(UI::QueryWidget( `id( `disabled ), `Value ));
 	
+	UI::ChangeWidget( `id( `pdc ), `Enabled, ew );
+	UI::ChangeWidget( `id( `bdc ), `Enabled, ew );
+	UI::ChangeWidget( `id( `standalone ), `Enabled, ew );
 	UI::ChangeWidget( `id( `workgroup ), `Enabled, ew );
 	UI::ChangeWidget( `id( `server_description ), `Enabled, ew );
 	UI::ChangeWidget( `id( `advanced ), `Enabled, ew );
@@ -84,7 +97,12 @@ global define symbol RoleDialog () ``{
             continue;
 	}
         else if(ret == `next || ret == `advanced ) {
-	    symbol role = UI::QueryWidget( `id( `samba_role ), `CurrentButton ) ;
+	    symbol role = `disabled;
+
+	    // if not disabled, choose the role
+	    if( ew ) {
+		role = UI::QueryWidget( `id( `samba_role ), `CurrentButton ) ;
+	    }
 	    
 	    // warning about replication for BDC
 	    if( role == `bdc ) {
