@@ -1261,7 +1261,7 @@ global define boolean setAsPDC() ``{
     Samba::security = "user";
     global_config[ "domain logons"] = true;
     global_config[ "preferred master"] = "yes";
-    global_config[ "domain master"] = "auto";
+    global_config[ "domain master"] = "yes";
     global_config[ "local master"] = true;
     
     AdaptMachineScript ();

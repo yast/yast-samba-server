@@ -1,9 +1,9 @@
 Dump	`standalone
 Dump	user
 Dump	Domain logons: nil
-Dump	Domain master: auto
+Dump	Domain master: nil
 Dump	Local master: nil
-Dump	Preferred master: auto
+Dump	Preferred master: nil
 Return	true
 Dump	false
 Dump	`pdc

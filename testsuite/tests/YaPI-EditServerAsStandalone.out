@@ -18,11 +18,6 @@ Read	.etc.smb.value.global."local master" "no"
 Read	.etc.smb.value.global."preferred master" "yes"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value.global."add machine script" nil
-Read	.etc.smb.value.global."domain master" "no"
-Read	.etc.smb.value.global."netbios name" nil
-Read	.etc.smb.value.global."preferred master" "yes"
-Read	.etc.smb.value.global."prefered master" nil
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
@@ -47,18 +42,16 @@ Read	.init.scripts.exists "autofs" nil
 Log	Service autofs does not exist.
 Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
+Read	.init.scripts.exists "SuSEfirewall2_init" nil
+Log	Service SuSEfirewall2_init does not exist.
 Write	.etc.smb.value.global."domain logons" "no" true
-Write	.etc.smb.value.global."domain master" "no" true
+Write	.etc.smb.value.global."domain master" "false" true
 Write	.etc.smb.value.global."ldap idmap suffix" "ou=Idmap" true
 Write	.etc.smb.value.global."ldap machine suffix" "ou=Computers" true
 Write	.etc.smb.value.global."local master" "no" true
 Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."security" "user" true
 Write	.etc.smb.value.global."workgroup" "Test" true
-Write	.etc.smb.value.global."netbios name" nil true
-Write	.etc.smb.value.global."add machine script" "" true
-Write	.etc.smb.value.global."domain master" "false" true
-Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."encrypt passwords" "yes" true
 Write	.etc.smb.value.global."ldap admin dn" nil true
 Write	.etc.smb.value.global."ldap suffix" nil true

@@ -22,9 +22,9 @@
     DUMP(SambaServer::role);
     DUMP(Samba::security);
     DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
-    DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
+    DUMP( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) );
     DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
-    DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
+    DUMP( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) );
     
     Samba::modified = false;
     TEST( ``( SambaServer::setAsPDC() ), [], nil );
@@ -34,7 +34,7 @@
     DUMP(Samba::security);
 
     DUMP( sformat( "Domain logons: %1", SambaServer::global_config["domain logons"]:nil) );
-    DUMP( sformat( "Domain master: %1", SambaServer::domain_master) );
+    DUMP( sformat( "Domain master: %1", SambaServer::global_config["domain master"]:nil) );
     DUMP( sformat( "Local master: %1", SambaServer::global_config["local master"]:nil) );
-    DUMP( sformat( "Preferred master: %1", SambaServer::preferred_master) );
+    DUMP( sformat( "Preferred master: %1", SambaServer::global_config["preferred master"]:nil) );
 }

@@ -7,11 +7,6 @@ Read	.etc.smb.value.global."preferred master" "yes"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."server string" "This is test"
 Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value.global."add machine script" nil
-Read	.etc.smb.value.global."domain master" "no"
-Read	.etc.smb.value.global."netbios name" nil
-Read	.etc.smb.value.global."preferred master" "yes"
-Read	.etc.smb.value.global."prefered master" nil
 Read	.target.stat "/etc/samba/secrets.tdb" nil
 Log	Cannot get the list of trusted domains
 Dir	.etc.smb.section: []
@@ -26,10 +21,6 @@ Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."security" "user" true
 Write	.etc.smb.value.global."server string" "AND NOW FOR SOMETHING COMPLETELY DIFFERENT" true
 Write	.etc.smb.value.global."workgroup" "Test" true
-Write	.etc.smb.value.global."netbios name" nil true
-Write	.etc.smb.value.global."add machine script" "" true
-Write	.etc.smb.value.global."domain master" "no" true
-Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."encrypt passwords" "yes" true
 Write	.etc.smb.value.global."ldap admin dn" nil true
 Write	.etc.smb.value.global."ldap suffix" nil true

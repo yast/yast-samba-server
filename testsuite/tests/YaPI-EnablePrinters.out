@@ -18,11 +18,6 @@ Read	.etc.smb.value.global."local master" "no"
 Read	.etc.smb.value.global."preferred master" "yes"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value.global."add machine script" nil
-Read	.etc.smb.value.global."domain master" "no"
-Read	.etc.smb.value.global."netbios name" nil
-Read	.etc.smb.value.global."preferred master" "yes"
-Read	.etc.smb.value.global."prefered master" nil
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
@@ -32,16 +27,6 @@ Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
 Read	.etc.smb.value."lp"."comment" "testing printer"
 Read	.etc.smb.value."lp"."path" "/var/spool/lp"
 Read	.etc.smb.value."lp"."printable" "yes"
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."directory" nil
-Read	.etc.smb.value."lp"."read list" nil
-Read	.etc.smb.value."lp"."write list" nil
-Read	.etc.smb.value."lp"."browseable" nil
-Read	.etc.smb.value."lp"."guest ok" nil
-Read	.etc.smb.value."lp"."valid users" nil
-Read	.etc.smb.value."lp"."printable" "yes"
-Read	.etc.smb.value."lp"."print ok" nil
 Read	.etc.smb.section_type."lp" 0
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
@@ -62,6 +47,8 @@ Read	.init.scripts.exists "autofs" nil
 Log	Service autofs does not exist.
 Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
+Read	.init.scripts.exists "SuSEfirewall2_init" nil
+Log	Service SuSEfirewall2_init does not exist.
 Read	.etc.smb.value.global."workgroup" "Test"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."password server" nil
@@ -82,11 +69,6 @@ Read	.etc.smb.value.global."local master" "no"
 Read	.etc.smb.value.global."preferred master" "yes"
 Read	.etc.smb.value.global."security" "user"
 Read	.etc.smb.value.global."workgroup" "Test"
-Read	.etc.smb.value.global."add machine script" nil
-Read	.etc.smb.value.global."domain master" "no"
-Read	.etc.smb.value.global."netbios name" nil
-Read	.etc.smb.value.global."preferred master" "yes"
-Read	.etc.smb.value.global."prefered master" nil
 Read	.init.scripts.exists "smb" nil
 Log	Service smb does not exist.
 Read	.target.stat "/etc/samba/secrets.tdb" nil
@@ -96,16 +78,6 @@ Dir	.etc.smb.value."lp": ["comment", "path", "printable"]
 Read	.etc.smb.value."lp"."comment" "testing printer"
 Read	.etc.smb.value."lp"."path" "/var/spool/lp"
 Read	.etc.smb.value."lp"."printable" "yes"
-Read	.etc.smb.value."lp"."comment" "testing printer"
-Read	.etc.smb.value."lp"."path" "/var/spool/lp"
-Read	.etc.smb.value."lp"."directory" nil
-Read	.etc.smb.value."lp"."read list" nil
-Read	.etc.smb.value."lp"."write list" nil
-Read	.etc.smb.value."lp"."browseable" nil
-Read	.etc.smb.value."lp"."guest ok" nil
-Read	.etc.smb.value."lp"."valid users" nil
-Read	.etc.smb.value."lp"."printable" "yes"
-Read	.etc.smb.value."lp"."print ok" nil
 Read	.etc.smb.section_type."lp" 0
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
@@ -126,6 +98,8 @@ Read	.init.scripts.exists "autofs" nil
 Log	Service autofs does not exist.
 Execute	.passwd.init $["base_directory":"/etc"] true
 Read	.passwd.passwd.pluslines []
+Read	.init.scripts.exists "SuSEfirewall2_init" nil
+Log	Service SuSEfirewall2_init does not exist.
 Write	.etc.smb.value.global."domain logons" "no" true
 Write	.etc.smb.value.global."domain master" "no" true
 Write	.etc.smb.value.global."ldap idmap suffix" "ou=Idmap" true
@@ -134,20 +108,12 @@ Write	.etc.smb.value.global."local master" "no" true
 Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."security" "user" true
 Write	.etc.smb.value.global."workgroup" "Test" true
-Write	.etc.smb.value.global."netbios name" nil true
-Write	.etc.smb.value.global."add machine script" "" true
-Write	.etc.smb.value.global."domain master" "no" true
-Write	.etc.smb.value.global."preferred master" "yes" true
 Write	.etc.smb.value.global."encrypt passwords" "yes" true
 Write	.etc.smb.section_type."lp" 0 true
-Write	.etc.smb.value."lp"."browseable" "1" true
-Write	.etc.smb.value_type."lp"."browseable" 0 true
 Write	.etc.smb.value."lp"."comment" "testing printer" true
 Write	.etc.smb.value_type."lp"."comment" 0 true
 Write	.etc.smb.value."lp"."enabled" "1" true
 Write	.etc.smb.value_type."lp"."enabled" 0 true
-Write	.etc.smb.value."lp"."guest ok" "0" true
-Write	.etc.smb.value_type."lp"."guest ok" 0 true
 Write	.etc.smb.value."lp"."path" "/var/spool/lp" true
 Write	.etc.smb.value_type."lp"."path" 0 true
 Write	.etc.smb.value."lp"."printable" "1" true
