@@ -331,13 +331,13 @@ Remove one of the options to resolve this conflict.
     Progress::NextStage();
 
     // read the list of shares, skip "global" section        
-    list sl = SCR::Dir( .etc.smb.section );
+    list<string> sl = (list<string>)SCR::Dir( .etc.smb.section );
     sl = filter(string s, sl, ``(s != "global" ) );
     shares = listmap( string share, sl, ``{
 	path p = add( .etc.smb.value, share );
 	
 	map result = $[];
-	list options = SCR::Dir( p );
+	list<string> options = (list<string>)SCR::Dir( p );
 	foreach( string option, options, ``{
 	    result[option] = SCR::Read( add(p, option) );
 	});

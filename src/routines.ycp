@@ -56,7 +56,7 @@ boolean yes_or_auto( string value ) ``{
  * @param shares	map of available shares
  * @return list 	list of table items
  */
-list shares2items( map shares ) ``{
+list shares2items( map<string,map> shares ) ``{
     integer index = 0;
     return maplist( string name, map descr, shares, ``{ index = index+1; return `item( `id(index), descr["commentout"]:false ? _("Disabled"): _("Enabled") , name, descr["path"]:"", descr["comment"]:"" ); }  );
 }
@@ -81,7 +81,7 @@ boolean shareEnabled( map options ) ``{
  * @param printers	map of available printers
  * @return list 	list of box items
  */
-list printers2items( map printers ) ``{
+list printers2items( map<string,boolean> printers ) ``{
     return maplist( string name, boolean value, printers, ``{
 	return `item( `id( name ), name , value );
     });
