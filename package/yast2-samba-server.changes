@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  3 11:55:25 CET 2005 - mlazar@suse.cz
+
+- 2.11.9
+- fixed function SambaRole::getLocalSID()
+
+-------------------------------------------------------------------
 Fri Feb 25 13:52:16 CET 2005 - mlazar@suse.cz
 
 - updated testsuites
