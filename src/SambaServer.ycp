@@ -163,6 +163,13 @@ map removed_shares = $[];
  */
 list system_printers = [];
 
+/**
+ * Just ensure a translation to exist
+ */
+string ____1 = _("File and printer sharing");
+string ____2 =_("Backup Domain Controller");
+string ____3 =_("Primary Domain Controller");
+
 /** ============================= defaults ====================================*/
 
 /**
