@@ -20,7 +20,6 @@ textdomain "samba-server";
 import "CommandLine";
 import "Popup";
 import "Report";
-import "Require";
 import "SambaServer";
 
 include "samba-server/routines.ycp";
@@ -427,20 +426,6 @@ See Samba documentation for details."),
 	"configure"	: [ "workgroup", "description", "ldap_suffix", "ldap_admin_dn" ]
     ]
 ];
-
-/* ensure samba package is installed */
-if( !Require::RequireAndConflictTarget( SambaServer::required_packages, [], 
-        // notification about package needed 1/2
-    _("<p>To configure the Samba server, the <b>%1</b> package must be installed.</p>") +
-        // notification about package needed 2/2
-    _("<p>Do you want to install it now?</p>")) )
-{
-    // translators: error popup before aborting the module
-    Popup::Error( sformat( _("YaST2 cannot continue the configuration
-without installing the required packages."), "samba" ) );
-
-    return (any)false;
-}
 
 ret = CommandLine::Run( cmdline );
 

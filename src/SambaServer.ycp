@@ -26,6 +26,9 @@ import "Service";
 import "URL";
 import "SuSEFirewall";
 
+import "PackageSystem";
+import "Mode";
+
 include "samba-server/routines.ycp";
 include "samba-client/routines.ycp";
 
@@ -405,6 +408,12 @@ global define boolean Read() ``{
     // read global settings
     Progress::NextStage();
 
+    // check installed packages
+    if (!Mode::test && !PackageSystem::CheckAndInstallPackagesInteractive(required_packages))
+    {
+	return false;
+    }
+
     Progress::off ();
     Samba::Read();
     Progress::on ();
@@ -646,12 +655,10 @@ domain relationship for '%1'.
     
     if (size (rpms) > 0)
     {
-	import "Require";
-	Require::RequireAndConflictTarget( rpms, [],
-    	    // notification about package needed 1/2
-	    _("<p>For the configured passdb back-ends, the <b>%1</b> package must be installed.</p>") +
-    	    // notification about package needed 2/2
-	    _("<p>Do you want to install it now?</p>"));
+        if (!PackageSystem::CheckAndInstallPackagesInteractive(rpms))
+	{
+	    return false;
+        }
     }
     
     WriteSettings();
