@@ -4,6 +4,8 @@
 // $Id$
 
     include "testsuite.ycp";
+
+    TESTSUITE_INIT( [], nil );
     
     include "samba-server/routines.ycp";
     

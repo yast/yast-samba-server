@@ -5,6 +5,8 @@
 
     include "testsuite.ycp";
     
+    TESTSUITE_INIT( [], nil );
+    
     import "SambaServer";
     
     DUMP(SambaServer::role);
