@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 11 12:29:06 CET 2004 - mlazar@suse.cz
+
+- fixed typo "lasp passwd sync" => "ldap passwd sync"
+
+-------------------------------------------------------------------
 Thu Nov 11 11:14:30 CET 2004 - mlazar@suse.cz
 
 - avoid select()

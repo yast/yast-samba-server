@@ -346,7 +346,7 @@ sub Disable {
 	"ldap group suffix" => undef,
 	"ldap machine suffix" => undef,
 	"ldap idmap suffix" => undef,
-	"lasp passwd sync" => undef,
+	"ldap passwd sync" => undef,
 	"idmap backend" => undef,
     };
     SambaConfig->GlobalSetMap($global);
