@@ -1,9 +1,5 @@
 Read	.etc.smb.value.global."ldap admin dn" "uid=fool,dc=another"
 Read	.etc.smb.value.global."ldap suffix" "dc=another"
-Read	.etc.nsswitch_conf."passwd" nil
-Read	.etc.nsswitch_conf."group" nil
-Read	.etc.nsswitch_conf."passwd_compat" nil
-Read	.etc.nsswitch_conf."group_compat" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil

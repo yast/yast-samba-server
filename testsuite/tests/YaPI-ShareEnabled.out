@@ -60,10 +60,6 @@ Read	.etc.smb.value."lp2"."print ok" nil
 Read	.etc.smb.section_type."lp2" 1
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
-Read	.etc.nsswitch_conf."passwd" nil
-Read	.etc.nsswitch_conf."group" nil
-Read	.etc.nsswitch_conf."passwd_compat" nil
-Read	.etc.nsswitch_conf."group_compat" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
@@ -143,10 +139,6 @@ Read	.etc.smb.value."lp2"."print ok" nil
 Read	.etc.smb.section_type."lp2" 1
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
-Read	.etc.nsswitch_conf."passwd" nil
-Read	.etc.nsswitch_conf."group" nil
-Read	.etc.nsswitch_conf."passwd_compat" nil
-Read	.etc.nsswitch_conf."group_compat" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
@@ -227,10 +219,6 @@ Read	.etc.smb.value."lp2"."print ok" nil
 Read	.etc.smb.section_type."lp2" 1
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
-Read	.etc.nsswitch_conf."passwd" nil
-Read	.etc.nsswitch_conf."group" nil
-Read	.etc.nsswitch_conf."passwd_compat" nil
-Read	.etc.nsswitch_conf."group_compat" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
@@ -310,10 +298,6 @@ Read	.etc.smb.value."lp2"."print ok" nil
 Read	.etc.smb.section_type."lp2" 1
 Read	.etc.smb.value.global."ldap admin dn" nil
 Read	.etc.smb.value.global."ldap suffix" nil
-Read	.etc.nsswitch_conf."passwd" nil
-Read	.etc.nsswitch_conf."group" nil
-Read	.etc.nsswitch_conf."passwd_compat" nil
-Read	.etc.nsswitch_conf."group_compat" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."host" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."base" nil
 Read	.etc.ldap_conf.v."/etc/ldap.conf"."ldap_version" nil
