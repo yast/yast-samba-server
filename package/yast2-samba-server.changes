@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 11 11:31:31 CET 2005 - mlazar@suse.cz
+
+- SambaRole.pm: avoid use Switch; better error handling
+- added perl testsuites for SambaRole.pm
+
+-------------------------------------------------------------------
 Fri Mar 11 09:09:33 UTC 2005 - mlazar@suse.cz
 
 - SambaService.pm: fixed Import(), better error handling

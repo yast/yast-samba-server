@@ -12,7 +12,6 @@
 package SambaRole;
 
 use strict;
-use Switch 'Perl6';
 use Data::Dumper;
 
 use YaST::YCP qw(:DATA :LOGGING);
@@ -26,7 +25,7 @@ YaST::YCP::Import("SambaConfig");
 YaST::YCP::Import("SambaBackend");
 }
 
-# mapping of name to role
+# mapping of name to role (for summary)
 my %RoleToName = (
 # translators: server role name
     STANDALONE => __("File and Printer Sharing"),
@@ -63,11 +62,11 @@ sub setDomainLogons {
     SambaConfig->ShareUpdateMap("netlogon", $default_netlogon) if $on;
 }
 
-sub setProfiles {
-    my ($on) = shift;
-    SambaConfig->ShareAdjust("profiles", $on);
-    SambaConfig->ShareUpdateMap("profiles", $default_profiles) if $on;
-}
+#sub setProfiles {
+#    my ($on) = shift;
+#    SambaConfig->ShareAdjust("profiles", $on);
+#    SambaConfig->ShareUpdateMap("profiles", $default_profiles) if $on;
+#}
 
 # set Local Master Browser
 sub setLMB {
@@ -89,32 +88,39 @@ sub setLMB {
 }
 
 
-# Retrieve the domain SID for DOMAIN from PDC and store it in secret.tdb
+# (for BDC) Retrieve the domain SID for DOMAIN from PDC and store it in secret.tdb
 sub getSID {
     my $domain = SambaConfig->GlobalGetStr("workgroup", "");
     my $name = SambaConfig->GlobalGetStr("netbios name", undef);
     my $cmd = "LANG=C net rpc getsid -w '$domain' -s /dev/null" . ($name?" -n '$name'":"");
     my $result = SCR->Execute(".target.bash_output", $cmd);
     y2debug("$cmd => ".Dumper($result));
-    if ($result->{exit}) {
-	y2error("Error retrieving SID for domain '$domain': $result->{stderr}");
+    if (!$result || !exists $result->{stdout} || $result->{exit}) {
+	y2error("Error retrieving SID for domain '$domain': ".Dumper($cmd,$result));
 	return undef;
     }
-    return undef unless $result->{output} =~ /^Storing SID (\S*) for Domain$/;
+    unless ($result->{stdout} =~ /^Storing SID (\S*) for Domain$/) {
+	y2error("Unexpected output: ".Dumper($cmd, $result)); 
+	return undef;
+    }
     return $1;
 }
 
-# Synchronize domain SID in LDAP and in secret.tdb (generete new one if doesn't exists yet)
+# (for PDC) Synchronize domain SID in LDAP and in secret.tdb (generete new one if doesn't exists yet)
 sub getLocalSID {
     my $name = SambaConfig->GlobalGetStr("netbios name", undef);
     my $cmd = "LANG=C net getlocalsid -s /dev/null" . ($name?" -n '$name'":"");
     my $result = SCR->Execute(".target.bash_output", $cmd);
     y2debug("$cmd => ".Dumper($result));
-    if ($result->{exit}) {
-	y2error("Error retrieving local SID: $result->{stderr}");
+    if (!$result || !exists $result->{stdout} || $result->{exit}) {
+	y2error("Error retrieving local SID: ".Dumper($cmd, $result));
 	return undef;
     }
-    return undef unless $result->{stdout} =~ /^SID for domain .* is: (\S*)/;
+    unless ($result->{stdout} =~ /^SID for domain .* is: (\S*)/) {
+	y2error("Unexpected output: ".Dumper($cmd, $result));
+	return undef;
+    }
+
     return $1;
 }
 
@@ -203,13 +209,11 @@ sub SetAsMember() {
 BEGIN{$TYPEINFO{"SetRole"} = ["function", "void", "string"]}
 sub SetRole {
     my ($self, $role) = @_;
-    given(uc $role) {
-	when ("PDC") 		{return SetAsPDC() }
-	when ("BDC")		{return SetAsBDC() }
-	when ("STANDALONE")	{return SetAsStandalone() }
-	when ("MEMBER")		{return SetAsMember() }
-    }
-    y2error("Unknown role: ".($role||"<undef>"));
+    if (uc $role eq "PDC") {return SetAsPDC() }
+    elsif (uc $role eq "BDC") {return SetAsBDC() }
+    elsif (uc $role eq "STANDALONE") {return SetAsStandalone() }
+    elsif (uc $role eq "MEMBER") {return SetAsMember() }
+    y2error("Unknown role: ".Dumper($role));
 }
 
 
@@ -223,16 +227,14 @@ sub GetRole {
     my $domain_logons = SambaConfig->GlobalGetTruth("domain logons", 0);
     my $domain_master = SambaConfig->GlobalGetStr("domain master", "Auto");
 
-    given($security) {
-	when "SHARE"	{ return "STANDALONE" }
-	when "SERVER"	{ return "MEMBER" }
-	when "DOMAIN"	{ return $domain_logons ? "BDC" : "MEMBER" }
-	when "ADS"	{ return $domain_logons ? "PDC" : "MEMBER" }
-	when "USER"	{ 
-	    return "STANDALONE" unless $domain_logons;
-	    return "PDC" if $domain_master =~ /^(1|Yes|True|Auto)$/i;
-	    return "BDC";
-	}
+    if ($security eq "SHARE") { return "STANDALONE" }
+    elsif ($security eq "SERVER") { return "MEMBER" }
+    elsif ($security eq "DOMAIN") { return $domain_logons ? "BDC" : "MEMBER" }
+    elsif ($security eq "ADS") { return $domain_logons ? "PDC" : "MEMBER" }
+    elsif ($security eq "USER")	{ 
+	return "STANDALONE" unless $domain_logons;
+	return "PDC" if $domain_master =~ /^(1|Yes|True|Auto)$/i;
+	return "BDC";
     }
     return "STANDALONE";
 }
@@ -243,3 +245,4 @@ sub GetRoleName {
     return $RoleToName{$self->GetRole()};
 }
 
+8;
