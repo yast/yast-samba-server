@@ -12,35 +12,45 @@ Read	.etc.install_inf.VNC nil
 Read	.etc.install_inf.UseSSH nil
 Read	.etc.install_inf.InstMode nil
 Read	.target.tmpdir "/tmp"
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "nmb" true
 Read	.init.scripts.exists "nmb" true
 Read	.init.scripts.runlevel "nmb" nil
 Read	.init.scripts.comment "nmb" nil
 Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/nmb" $["exit":0]
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "smb" true
 Read	.init.scripts.exists "smb" true
 Read	.init.scripts.runlevel "smb" nil
 Read	.init.scripts.comment "smb" nil
 Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/smb" $["exit":0]
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "nmb" true
 Execute	.target.bash "/etc/init.d/nmb status" $["TERM":"raw"] 0
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "smb" true
 Execute	.target.bash "/etc/init.d/smb status" $["TERM":"raw"] 0
 Execute	.target.bash "/usr/sbin/rcsmb restart" 0
 Execute	.target.bash "/usr/sbin/rcnmb restart" 0
 Return	true
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "nmb" true
 Read	.init.scripts.exists "nmb" true
 Read	.init.scripts.runlevel "nmb" nil
 Read	.init.scripts.comment "nmb" nil
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "smb" true
 Read	.init.scripts.exists "smb" true
 Read	.init.scripts.runlevel "smb" nil
 Read	.init.scripts.comment "smb" nil
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "nmb" true
 Execute	.target.bash "/etc/init.d/nmb status" $["TERM":"raw"] 0
+Log	Runlevel module is deprecated, use Service instead
 Execute	.target.bash "/etc/init.d/nmb stop" $["TERM":"raw"] 0
+Log	Runlevel module is deprecated, use Service instead
 Read	.init.scripts.exists "smb" true
 Execute	.target.bash "/etc/init.d/smb status" $["TERM":"raw"] 0
+Log	Runlevel module is deprecated, use Service instead
 Execute	.target.bash "/etc/init.d/smb stop" $["TERM":"raw"] 0
 Return	true
