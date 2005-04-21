@@ -18,7 +18,7 @@ X-SuSE-YaST-AutoInstResource=samba-server
 X-SuSE-YaST-AutoInstClonable=true
 X-SuSE-YaST-AutoInstRequires=lan
 
-Icon=samba-server
+Icon=yast-samba-server
 Exec=/sbin/yast2 samba-server 
 
 Name=Samba Server
