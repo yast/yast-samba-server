@@ -113,7 +113,7 @@ BEGIN { $TYPEINFO{Restriction} = ["function",
 sub Restriction {
     my $self	= shift;
     # plugin only available in expert mode
-    if (ProductFeatures->ui_mode () ne "expert") {
+    if (ProductFeatures->GetFeature("globals", "ui_mode") ne "expert") {
 	return {};
     }
     # this plugin applies only for LDAP users and groups

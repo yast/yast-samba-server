@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr 22 09:01:15 UTC 2005 - mlazar@suse.cz
+
+- 2.12.1
+- adapted to new interface of ProductFeatures.ycp
+
+-------------------------------------------------------------------
 Tue Mar 15 11:27:58 CET 2005 - mlazar@suse.cz
 
 - fixed AskForJoin dialog

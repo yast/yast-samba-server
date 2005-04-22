@@ -467,7 +467,7 @@ sub readSuseDefaultValues {
     }
     
     # remove common suffix
-    my @suffix = split ",", Ldap->GetDomain();
+    my @suffix = split ",", (Ldap->GetDomain()||"");
     @user = () if @user < @suffix;
     for(my $i=0; @user && $i<@suffix; $i++) {
         @user = () if $user[-$i-1] ne $suffix[-$i-1]
