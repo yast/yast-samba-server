@@ -1,0 +1,23 @@
+{
+
+// test for SambaServer::DetermineRole() for PDC
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    SambaConfig::Import( $["global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "yes",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "yes",
+                        "local master" : "yes"]]);
+
+    import "YaPI::Samba";
+
+    TEST( ``(YaPI::Samba::DetermineRole()), [r_common, w_common, x_common], nil);
+}

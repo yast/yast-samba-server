@@ -1,0 +1,36 @@
+Return	Enable disabled service
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" nil
+Read	.init.scripts.exists "nmb" true
+Read	.init.scripts.exists "nmb" true
+Read	.init.scripts.runlevel "nmb" nil
+Read	.init.scripts.comment "nmb" nil
+Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/nmb" $["exit":0]
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" nil
+Read	.init.scripts.comment "smb" nil
+Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/smb" $["exit":0]
+Return	true
+Return	Disable disabled service
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" nil
+Return	true
+Return	Enable enabled service
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
+Read	.init.scripts.exists "nmb" true
+Read	.init.scripts.exists "nmb" true
+Read	.init.scripts.runlevel "nmb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
+Read	.init.scripts.comment "nmb" nil
+Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/nmb" $["exit":0]
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
+Read	.init.scripts.comment "smb" nil
+Execute	.target.bash_output "/sbin/insserv -d /etc/init.d/smb" $["exit":0]
+Return	true
+Return	Disable enabled service
+Read	.init.scripts.exists "smb" true
+Read	.init.scripts.runlevel "smb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
+Return	true

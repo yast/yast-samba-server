@@ -1,0 +1,28 @@
+{
+
+// test for YaPI::Samba::GetShare()
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    SambaConfig::Import( $[
+                    "global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "no",
+                        "local master" : "no"],
+                    "lp" : $[
+                        "comment" : "testing printer",
+                        "printable" : "yes",
+                        "path" : "/var/spool/lp"]]);
+
+    import "YaPI::Samba";
+
+    TEST( ``(YaPI::Samba::GetShare("lp")), [r_common,w_common,x_common], nil);
+}

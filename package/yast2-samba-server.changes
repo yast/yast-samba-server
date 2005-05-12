@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 12 15:24:08 CEST 2005 - mlazar@suse.cz
+
+- 2.12.2
+- fixed testsuites
+- splited testsuites to two directories
+
+-------------------------------------------------------------------
 Fri Apr 22 09:01:15 UTC 2005 - mlazar@suse.cz
 
 - 2.12.1

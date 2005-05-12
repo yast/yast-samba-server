@@ -1,0 +1,27 @@
+{
+
+// test for YaPI::Samba::EditServerAsPDC()
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    map r = depth_union(r_common, $["etc" : $[ "nsswitch_conf" : $[
+                "passwd" : "",
+                "group" : ""]]]);
+
+    import "YaPI::Samba";
+    
+    SambaConfig::Import( $["global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "no",
+                        "local master" : "no"]]);
+
+    TEST( ``(YaPI::Samba::EditServerAsPDC()), [r,w_common,x_common], nil);
+}
