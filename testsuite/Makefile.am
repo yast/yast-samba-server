@@ -2,6 +2,6 @@
 # Makefile.am for devtools/devtools/skeletons/config/doc
 #
 
-SUBDIRS = YaPI Modules
+SUBDIRS = Modules YaPI
 
 EXTRA_DIST =

@@ -13,7 +13,7 @@ my $w_err = {target=>{string=>Boolean(0)}};
 my $e_err = {target=>{bash=>8, remove=>8, bash_output=>{exit=>8}}};
 my $e_ok = {target=>{bash=>0, remove=>0, bash_output=>{exit=>0}}};
 =cut
-=disable
+
 ## fake modules
 sub Service::Enabled {$enabled}
 sub Service::Status {$status}
