@@ -28,13 +28,13 @@ YaST::YCP::Import("SambaConfig");
 YaST::YCP::Import("SambaSecrets");
 }
 
-my $ToEstablish;
-my $ToRevoke;
+our $ToEstablish;
+our $ToRevoke;
 
 BEGIN{$TYPEINFO{GetModified}=["function","boolean"]}
 sub GetModified {
     my $self = $_;
-    return $ToEstablish || $ToRevoke;
+    return $ToEstablish || $ToRevoke ? 1 : undef;
 }
 
 BEGIN{$TYPEINFO{Write}=["function","boolean"]}
@@ -71,12 +71,13 @@ sub Import {
 BEGIN{$TYPEINFO{Revoke}=["function","boolean","string"]}
 sub Revoke {
     my ($self, $domain) = @_;
+    return undef unless defined $domain;
 
     my $cmd = "net rpc trustdom revoke '$domain'";
     y2debug("$cmd");
     if (SCR->Execute(".target.bash", $cmd)) {
 	y2error("Cannot revoke trusted domain relationship for '$domain'");
-	return 0;
+	return undef;
     }
     return 1;
 }
@@ -85,12 +86,13 @@ sub Revoke {
 BEGIN{$TYPEINFO{Establish}=["function","boolean","string","string"]}
 sub Establish {
     my ($self, $domain, $passwd) = @_;
+    return undef unless defined $domain;
     
     my $cmd = "net rpc trustdom establish '$domain' -U 'root%$passwd'";
-    y2debug("net rpc trustdom establish '$domain' -U root");
+    y2debug("net rpc trustdom establish '$domain' -U root%".("*"x length($passwd)));
     if (SCR->Execute(".target.bash", $cmd)) {
 	y2error("Cannot establish trusted domain relationship for '$domain'");
-	return 0;
+	return undef;
     }
     
     return 1;
