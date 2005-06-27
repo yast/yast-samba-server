@@ -22,5 +22,5 @@ Icon=yast-samba-server
 Exec=/sbin/yast2 samba-server 
 
 Name=Samba Server
-GenericName=Configure Samba server
+GenericName=Configure a Samba server
 X-KDE-SubstituteUID=true

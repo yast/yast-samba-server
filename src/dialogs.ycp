@@ -43,7 +43,7 @@ string return_tab = "startup";
 
 string pdc = _("&Primary Domain Controller (PDC)");
 string bdc = _("B&ackup Domain Controller (BDC)");
-string standalone = _("No Domain &Controller");
+string standalone = _("Not a Domain &Controller");
 
 // routines
 
@@ -73,7 +73,7 @@ boolean confirmAbort() {
 
 any Installation_Step1 () {
 
-    string caption = _("Samba Installation") + " - " + _("Step 1 of 2");
+    string caption = _("Samba Installation") + ": " + _("Step 1 of 2");
 
     list <string> workgroups = SambaNmbLookup::GetAvailableNeighbours(nil);
 
@@ -84,10 +84,6 @@ any Installation_Step1 () {
     }
     
     term contents = `VBox (
-	    `VSquash (
-		`Left( `Label ( _("Select one of the available workgroups or domains or enter your own.") ) )
-	    ),
-	    `VSpacing ( 1 ),
 	    `VSquash (
 		`Left ( `ComboBox ( `id( "workgroups" ), `opt( `editable ), _("&Workgroup or Domain Name"), workgroups ) )
 	    ),
@@ -126,7 +122,7 @@ any Installation_Step1 () {
 
 any Installation_Step2 () {
 
-    string caption = _("Samba Installation") + " - " + _("Step 2 of 2");
+    string caption = _("Samba Installation") + ": " + _("Step 2 of 2");
     
     string workgroup = SambaConfig::GlobalGetStr("workgroup", "");
     boolean has_pdc = SambaNmbLookup::HasPDC(workgroup);
@@ -134,15 +130,17 @@ any Installation_Step2 () {
     boolean simple = ProductFeatures::GetFeature("globals", "ui_mode") == "simple";
 
     term contents = `VBox(
+	//header of status-like information. followed by domain name
 	`VSquash(`Left(`Label( _("Current Domain Name:") + " " + workgroup))),
 	`VSpacing(1),
-	`VSquash(`Frame(_("Type Selection for SAMBA Server"), `VBox(
+	`VSquash(`Frame(_("Samba Server Type"), `VBox(
 	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
 		`VSpacing(1),
 		`Left(`RadioButton(`id("PDC"), pdc, !has_pdc)),
 		`HBox(
 		    `HSpacing(4),
-		    `Left(`Label(has_pdc?_("Not available because PDC is present."):""))),
+		    // appears on new line after Primary Domain Controller radio button
+		    `Left(`Label(has_pdc?_("Not available because a PDC is present."):""))),
 		(simple ? `Empty() : `VBox(
 			`Left(`RadioButton(`id("BDC"), bdc, false)),
 			`HBox(
@@ -320,9 +318,9 @@ symbol SharesWidgetHandle(string key, map event_descr)
     }
     if (ret == `delete)
     {
-	// confirmation dialog before deleting a share
-	if  (Popup::ContinueCancel( sformat( _("Really \ndelete share '%1'?"), share) + "\n"
-	    + _("All its settings will be lost.") + "\n"))
+	//rwalter: please check location of /n
+        // confirmation dialog before deleting a share
+	if  (Popup::YesNo( sformat( _("If you delete share %1,/n all its settings will be lost./n Really delete it?"), share)))
 	{
 	    SambaConfig::ShareRemove(share);
 	    UI::ChangeWidget( `id(`table), `Items, sharesItems(false));
@@ -335,12 +333,10 @@ symbol SharesWidgetHandle(string key, map event_descr)
 
 void AddTrustedDomain ()
 {
+    //rwalter I couldn't make this one show up. Please make sure my deletions didn't make it too confusing.
     term contents = `VBox (
-	`Label (_("Enter the name of the trusted domain
-and the password to access it.")),
-	`VSpacing (1),
-	`TextEntry (`id(`domain), _("&Domain:") ),
-	`Password (`id(`password), _("&Password:") ),
+	`TextEntry (`id(`domain), _("Trusted &Domain") ),
+	`Password (`id(`password), _("&Password") ),
 	`VSpacing (1),
 	`HBox (
 	    `PushButton (`id (`ok), `opt (`default), Label::OKButton () ),
@@ -386,8 +382,8 @@ void TrustedDomainsWidgetInit(string key)
     if ( Mode::config() && !autoyast_warning_done)
     {
 	// issue a warning, if not already done so
-	Popup::Warning (_("YaST needs to store a password for trusted domains
-in the autoinstallation control file. The password
+	Popup::Warning (_("The password for trusted domains
+is stored in the autoinstallation control file. The password
 is stored as plain text. This can be considered
 a security threat."));
 	autoyast_warning_done = true;
@@ -399,7 +395,7 @@ a security threat."));
         domains = add (domains, `item ( `id(key), key ) );
     });
     
-    UI::ReplaceWidget(`id(`domains_tr), `SelectionBox(`id("trusted_domains"), _("&Trusted Domains List"), domains));
+    UI::ReplaceWidget(`id(`domains_tr), `SelectionBox(`id("trusted_domains"), _("&Trusted Domains"), domains));
 
     // disable delete button if needed
     UI::ChangeWidget (`id (`delete_domain), `Enabled, size (domains) != 0);
@@ -416,7 +412,7 @@ symbol TrustedDomainsWidgetHandle (string key, map event_descr)
 	string to_delete = (string)UI::QueryWidget(`id("trusted_domains"), `CurrentItem );
 	    
 	// confirmation
-	if (Popup::ContinueCancel(sformat(_("Really abadon trust relationship\nto trusted domain '%1'?"), to_delete)))
+	if (Popup::ContinueCancel(sformat(_("Really abandon trust relationship\nto trusted domain %1?"), to_delete)))
 	{
 	    SambaTrustDom::Revoke(to_delete);
 	}
@@ -440,7 +436,7 @@ symbol EditShareDialog () ``{
     ), `HSpacing (1));
 
     // dialog caption
-    string caption = sformat( _("Edit Share \"%1\""), shareToEdit );
+    string caption = sformat( _("Share %1"), shareToEdit );
 
 
     return CWM::ShowAndRun($[
@@ -489,10 +485,10 @@ symbol AddShareDialog () ``{
 	`HSpacing(1),
 	`VBox(`opt(`hstretch),
 	    `VSpacing(1),
-	    `Frame(_("Identification:"), `VBox(
-		`TextEntry(`id(`name), _("Share &Name:")),
-		`TextEntry(`id(`comment), _("Share &Description:")))),
-	    `Frame(_("Share Type:"), `HBox(
+	    `Frame(_("Identification"), `VBox(
+		`TextEntry(`id(`name), _("Share &Name")),
+		`TextEntry(`id(`comment), _("Share &Description")))),
+	    `Frame(_("Share Type"), `HBox(
 		`HSpacing ( 1 ),
 		`VBox(`opt(`hstretch ),
 		    `RadioButtonGroup(`VBox(
@@ -500,16 +496,16 @@ symbol AddShareDialog () ``{
 			`Left(`RadioButton(`id(`directory), `opt(`notify), _("&Directory"), true)))),
             	    `HBox(
             		// translators: text entry label
-            		`TextEntry(`id(`path), _("Share &Path:"), "/home"),
+            		`TextEntry(`id(`path), _("Share &Path"), "/home"),
             		`Bottom(`PushButton(`id(`browse), Label::BrowseButton()))),
             	    `HBox(
-            		// translators: checkbox label
-            		`Left(`CheckBox(`id(`read_only), _("&Read Only"), false)),
-            		`Left(`CheckBox(`id(`inherit_acls), _("&Inherit ACLS"), true)))),
+            		// translators: checkbox label, setting for share
+            		`Left(`CheckBox(`id(`read_only), _("&Read-Only"), false)),
+            		`Left(`CheckBox(`id(`inherit_acls), _("&Inherit ACLs"), true)))),
 		`HSpacing(1))))));
     
     // translators: dialog caption
-    string caption = _("Add New Share");
+    string caption = _("New Share");
 
     Wizard::SetContentsButtons ( caption, contents, HELPS["add_share"]:"",
 	Label::BackButton (), Label::OKButton () );
@@ -570,9 +566,8 @@ symbol AddShareDialog () ``{
 		continue;
 	    } else if( !printable && ! Mode::config() && SCR::Read( .target.stat, pathvalue ) == $[] ) {
 		// translators: question popup. A user entered non-existent path
-		// for a share
-		if (!Popup::ContinueCancel(sformat( _("The path '%1' does not exist."), pathvalue) + "\n"
-		    + _("Really use this path?") + "\n"))
+		// for a share, %1 is entered path
+		if (!Popup::YesNo(sformat( _("The path %1 does not exist./nReally use this path?"), pathvalue)))
 		{
 		    ret = nil;
 		    continue;
@@ -598,8 +593,8 @@ symbol AddShareDialog () ``{
 	    }
 
 	    if (SambaConfig::ShareExists(name)) {
-		// translators: popup error message for "add share"
-		Popup::Error( sformat( _("Share '%1' already exists."), name ) );
+		// translators: popup error message for "add share", %1 is share name
+		Popup::Error( sformat( _("Share %1 already exists."), name ) );
 		ret = nil;
 	    }
 	    SambaConfig::ShareSetMap( name , res );
@@ -616,13 +611,13 @@ any Installation_Conf_Tab () {
 	`HWeight(1, `Empty()),
 	`HWeight(100, `VBox(
 	    `HBox(
-		`Left(`Label(_("Available shares are"))),
+		`Left(`Label(_("Available Shares"))),
 	        `HStretch(),
 		`Right(`MenuButton(_("&Filter"), [
-		    `item(`id(`filter_all), "Show &All Shares" ),
-		    `item(`id(`filter_non_system), "Do Not Show &System Shares" )]))),
+		    `item(`id(`filter_all), _("Show &All Shares") ),
+		    `item(`id(`filter_non_system), _("Do Not Show &System Shares") )]))),
 	    // translators: table header texts
-	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Read Only"), _("Name"),  _("Path"), _("Comment")), []),
+	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Read-Only"), _("Name"),  _("Path"), _("Comment")), []),
 	    `HBox(
 		`PushButton(`id(`add), Label::AddButton() + "..."),
 		`PushButton(`id(`edit), Label::EditButton() + "..."),
@@ -640,13 +635,13 @@ any Installation_Conf_Tab () {
 		`Left(`RadioButton(`id("remote_wins_server"), `opt(`notify ), _("Remote WINS Server"))))),
 	    `HBox(
 	        `HSpacing(3),
-		`TextEntry(`id("wins_server_name"), _("Na&me:"))),
+		`TextEntry(`id("wins_server_name"), _("Na&me"))),
 	    `VStretch()),
 	`HSpacing(1)));
 
     list<term> roles = [
 	// translators: combobox item
-	`item(`id("STANDALONE"), _("No DC")),
+	`item(`id("STANDALONE"), _("Not a DC")),
 	// translators: combobox item
 	`item(`id("PDC"), _("Primary (PDC)"))
     ];
@@ -674,7 +669,7 @@ any Installation_Conf_Tab () {
 	`HWeight(1, `Empty()),
 	`HWeight(100, `VBox(
 	    `VWeight(7, `ReplacePoint(`id(`domains_tr),
-		`SelectionBox(`id("trusted_domains"), _("&Trusted Domains List"), [] ))),
+		`SelectionBox(`id("trusted_domains"), _("&Trusted Domains"), [] ))),
 	    `VWeight(1, `HBox(
 		`PushButton(`id(`add_domain), Label::AddButton() + "..."),
 		`PushButton(`id(`delete_domain), Label::DeleteButton()),
@@ -686,7 +681,8 @@ any Installation_Conf_Tab () {
 
     map tabs_descr = $[
 	"startup": $[
-            "header" : _("Start &Up"),
+	    //tab label
+            "header" : _("Start-&Up"),
 	    "contents": `HBox(
 		`HWeight(2, `Empty()),
 		`HWeight(100, `VBox(
@@ -785,7 +781,7 @@ any Installation_Conf_Tab () {
 	],
 	"netbios name": $[
 	    "widget": `textentry,
-	    "label": _("NetBIOS &Host Name"),
+	    "label": _("NetBIOS &Hostname"),
 	    "help": HELPS["smb_conf_tab_netbios_name"]:"",
 	    "init": GlobalConfigStringWidgetInit,
 	    "store": GlobalConfigStringWidgetStore,
@@ -885,8 +881,8 @@ symbol EnsureRootAccountDialog () ``{
     UI::OpenDialog(`HVSquash(
         `VBox(
 	    `Label( _("For a proper function, Samba server needs an\nadministrative account (root).\nIt will be created now.")),
-	    `Password(`id(`passwd1), _("Samba root &Password:")),
-            `Password(`id(`passwd2), _("Reenter the password for &verification:")),
+	    `Password(`id(`passwd1), _("Samba root &Password")),
+            `Password(`id(`passwd2), _("Verify Password")),
             `HBox(
                 `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
                 `PushButton(`id(`cancel), Label::CancelButton())))));
@@ -900,7 +896,7 @@ symbol EnsureRootAccountDialog () ``{
             string passwd1 = (string) UI::QueryWidget(`id(`passwd1), `Value);
 	    string passwd2 = (string) UI::QueryWidget(`id(`passwd2), `Value);
 	    if ( passwd1 != passwd2 ) {
-		Popup::Error (_("The first and the second version\nof the password don't match!\nPlease try again."));
+		Popup::Error (_("The first and the second version\nof the password do not match."));
 		ret = nil;
 	    } else {
 		passwd = passwd1;
@@ -912,6 +908,7 @@ symbol EnsureRootAccountDialog () ``{
     if (ret == `cancel) return `cancel;
 
     if (SambaAccounts::UserAdd("root", passwd)) {
+	//%1 is username
 	Popup::Error ( sformat(_("Cannot create account for user %1."), "root" ) );
 	return `error;
     }
@@ -940,8 +937,8 @@ symbol AskJoinDomainDialog() ``{
     
     // Xtranslators: popup question, The workgroup is a domain in fact and the machine is not a member, ask user what to do.
     // %1 is the domain name
-//    if (!Popup::YesNo(sformat(_("This host is not a member\nof the domain '%1'.") + "\n\n"
-//        + _("Join the domain '%1'?") + "\n", workgroup)))
+//    if (!Popup::YesNo(sformat(_("This host is not a member\nof the domain %1.") + "\n\n"
+//        + _("Join the domain %1?") + "\n", workgroup)))
 //    {
 //	return `ok;
 //    }
@@ -950,12 +947,12 @@ symbol AskJoinDomainDialog() ``{
     string passwd = "";
     UI::OpenDialog(`VBox( 
 	// translators: popup to fill in the domain joining info; %1 is the domain name
-	`Label(sformat(_("Enter the user and the password\nfor joining the domain '%1'."), workgroup) + "\n\n"
+	`Label(sformat(_("Enter the username and the password\nfor joining the domain %1."), workgroup) + "\n\n"
 	    + _("To join the domain anonymously, leave the\ntext entries empty.") + "\n"),
 	// text entry label
-	`TextEntry(`id(`user), _("&User name:"), user),
+	`TextEntry(`id(`user), _("&Username"), user),
 	// text entry label
-	`Password(`id(`passwd), _("&Password:")),
+	`Password(`id(`passwd), _("&Password")),
 	`HBox( 
 	    // translators: button label to skip joining to domain
 	    `PushButton(`id(`skip), _("Do &Not Join")), 
@@ -982,7 +979,7 @@ symbol AskJoinDomainDialog() ``{
     }
     
     // Translators: Information popup, %1 is the name of the domain
-    Popup::Message(sformat(_("Domain '%1' joined successfully."), workgroup));
+    Popup::Message(sformat(_("Domain %1 joined successfully."), workgroup));
     return `ok;
 }
 

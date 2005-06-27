@@ -57,8 +57,8 @@ boolean ShareHandler(map<string,string> options) {
     }
     
     if( !SambaConfig::ShareExists(share) && command != "add" ) {
-	// translators: error message for "share add" command line action
-	Report::Error( sformat( _("The share '%1' does not exist."), share ) );
+	// translators: error message for "share add" command line action, %1 is share name
+	Report::Error( sformat( _("The share %1 does not exist."), share ) );
 	return false;
     }
     
@@ -77,8 +77,8 @@ boolean ShareHandler(map<string,string> options) {
 	}
 	
 	if (SambaConfig::ShareExists(share)) {
-	    // translators: error message for "add share" command line action
-	    Report::Error( sformat( _("Share '%1' already exists."), share ) );
+	    // translators: error message for "add share" command line action, %1 is share name
+	    Report::Error( sformat( _("Share %1 already exists."), share ) );
 	    return false;
 	}
 	SambaConfig::ShareSetStr(share, "path", options["path"]:"");
@@ -221,7 +221,7 @@ any ret = nil;
 map cmdline = $[
     "id" 		: "samba-server",
     // translators: command line help text for samba-server module
-    "help" 		: _("Samba server configuration module.\nSee Samba documentation for details."),
+    "help" 		: _("Samba server configuration module (see Samba documentation for details)"),
     "guihandler" 	: SambaServerSequence,
     "initialize"	: SambaServer::Read,
     "finish"		: SambaServer::Write,
@@ -239,7 +239,7 @@ map cmdline = $[
 	"role"	:$[
 	    "handler"	: RoleHandler,
 	    // translators: command line help text for role action
-	    "help"	: _("Set a role of the server")
+	    "help"	: _("Set the role of the server")
 	],
 	"backend" :$[
 	    "handler"	: BackendHandler,
@@ -314,7 +314,7 @@ map cmdline = $[
 	], 
 	"browseable"	:$[
 	    // translators: command line help text for share browseable option
-	    "help"	: _("Flag if the share should be visible by browsing LAN"),
+	    "help"	: _("Flag if the share should be visible when browsing the LAN"),
 	    "type"	: "boolean"
 	], 
 	"guest_ok"	:$[
@@ -329,11 +329,11 @@ map cmdline = $[
 	],
 	"pdc"		:$[
 	    // translators: command line help text for PDC role option
-	    "help"	: _("Server should act as a Primary Domain Controller"),
+	    "help"	: _("Server should act as a primary domain controller"),
 	], 
 	"bdc"		:$[
 	    // translators: command line help text for BDC role option
-	    "help"	: _("Server should act as a Backup Domain Controller"),
+	    "help"	: _("Server should act as a backup domain controller"),
 	], 
 	"member"	:$[
 	    // translators: command line help text for Domain Member role option
@@ -341,8 +341,7 @@ map cmdline = $[
 	], 
 	"standalone"	:$[
 	    // translators: command line help text for standalone server role option
-	    // logon is the Windows synonym for login
-	    "help"	: _("Server should provide shares, but should not allow domain logins."),
+	    "help"	: _("Server should provide shares, but should not allow domain logins"),
 	],
 	"smbpasswd"	:$[
 	    // translators: command line help text for smbpasswd option
@@ -367,7 +366,7 @@ map cmdline = $[
 	], 
 	"description"	:$[
 	    // translators: command line help text for description option
-	    "help"	: _("The human-readable description for the Samba server"),
+	    "help"	: _("The human-readable description of the Samba server"),
 	    "type"	: "string"
 	], 
 	"ldap_suffix"	:$[

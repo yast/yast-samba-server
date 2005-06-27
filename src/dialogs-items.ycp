@@ -457,7 +457,7 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
 	    // error message if user tries to delete the last passdb backend
 	    Report::Error (_("At least one back-end must be specified.
 
-The back-end will not be deleted.
+The back-end cannot be deleted.
 "));
 	    return false;
 	}
@@ -476,20 +476,20 @@ The back-end will not be deleted.
 	UI::OpenDialog (
 	    `VBox (
 		// translators: frame text when adding a passdb backend
-		`Frame (_("Back-end Type"),
+		`Frame (_("Back-End Type"),
 		`RadioButtonGroup ( `id (`types),  
 		`VBox(
 		    // translators: passdb backend radio button
-		    `Left (`RadioButton ( `id("smbpasswd"), `opt (`notify),_("smbpasswd file") ) ),
+		    `Left (`RadioButton ( `id("smbpasswd"), `opt (`notify),_("smbpasswd File") ) ),
 		    // translators: passdb backend radio button
 		    `Left (`RadioButton ( `id("ldapsam"), `opt (`notify),_("LDAP") ) ),
 		    // translators: passdb backend radio button
-		    `Left (`RadioButton ( `id("tdbsam"), `opt (`notify),_("TDB database") ) ),
+		    `Left (`RadioButton ( `id("tdbsam"), `opt (`notify),_("TDB Database") ) ),
 		    // translators: passdb backend radio button
-		    `Left (`RadioButton ( `id("mysql"), `opt (`notify),_("MySQL database") ) )
+		    `Left (`RadioButton ( `id("mysql"), `opt (`notify),_("MySQL Database") ) )
 		))),
 		// translators: textentry label to enter details for the selected passdb backend
-		`TextEntry ( `id("details"), _("&Details:") ),
+		`TextEntry ( `id("details"), _("&Details") ),
 		`HBox (
 		    `PushButton (`id("add"), `opt(`default), Label::AddButton ()),
 		    `PushButton (`id("cancel"), Label::CancelButton ())
@@ -539,7 +539,7 @@ The back-end will not be deleted.
 in details 
 for the MySQL passdb back-end.
 
-Consult the Samba HOWTO Collection for
+Consult the Samba HOWTO collection for
 further information.
 ") );
 		    continue;

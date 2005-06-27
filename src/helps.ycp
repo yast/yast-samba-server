@@ -22,7 +22,7 @@ Please wait...<br></p>
 ") +
 
     /* Read dialog help 2/2 */
-    _("<p><b><big>Aborting Initialization:</big></b><br>
+    _("<p><b><big>Aborting Initialization</big></b><br>
 Safely abort the configuration utility by pressing <b>Abort</b> now.</p>
 "),
 
@@ -32,7 +32,7 @@ Please wait...<br></p>
 ") +
 
     /* Write dialog help 2/2 */
-_("<p><b><big>Aborting Saving:</big></b><br>
+_("<p><b><big>Aborting Saving</big></b><br>
 Abort the save procedure by pressing <b>Abort</b>.
 An additional dialog will inform you whether it is safe to do so.
 </p>
@@ -40,23 +40,26 @@ An additional dialog will inform you whether it is safe to do so.
 
     /* Samba selecting workgroup or domain 1/2 - Installation step 1 */
     "inst_step1" : _("<p><b><big>Workgroup or Domain Selection</big></b><br>
-All available workgroups or domains found on your network are listed here.</p>
+All available workgroups or domains found on your network are listed here. Select one of them or type your own new name and click <b>Next</b>.
+</p>
 ") +
 
+    //rwalter: merged with previous
     /* Samba selecting workgroup or domain 2/2 - Installation step 1 */
-_("<p>Select one of them or type your own new name and click <b>Next</b>.</p>"),
+_(""),
 
     /* Samba select Samba Server type - Installation step 2 */
+    // italics mark special terms
     "inst_step2" : _("<p><b><big>Samba Server Type</big></b></p>")
 +("<p>A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>")
 +("<p>The backup controller uses another domain controller for validation.
 The primary controller uses its own information about users and their passwords.</p>")
-+("<p>The available options in the configuration dialogs depend on the settings in this selection.</p>"),
++("<p>The options available in the configuration dialogs depend on the settings in this selection.</p>"),
 
     /* Samba select Samba Server type - Installation step 2 */
     "inst_step2_no_bdc" : _("<p><b><big>Samba Server Type</big></b></p>")
 +("<p>A <i>domain controller</i> allows Windows clients to log in to a Windows domain.</p>")
-+("<p>The available options in the configuration dialogs 
++("<p>The options available in the configuration dialogs 
 depend on the settings in this selection.</p>"),
 
     /* Share list dialog help 1/4 */
@@ -65,15 +68,15 @@ depend on the settings in this selection.</p>"),
 are enabled or disabled, and some basic information about them.<br></p>") +
 
     /* Share list dialog help 2/4 */
-    _("<p>A share can be <i>enabled</i> or <i>disabled</i>.
+    _("<p>A share can be enabled or disabled.
 A disabled share is not accessible, but its
 configuration is still written into the configuration file.
 So the share can be later enabled again.
 </p>") +
 
     /* Share list dialog help 3/4 */
-    _("<p>Some of the shares are special. For example, a share
-<i>Homes</i> is a special <i>system</i> share for accessing home directories
+    _("<p>Some of the shares are special. For example, the share
+Homes is a special system share for accessing home directories
 of users. The system shares can be hidden from the table
 by selecting <b>Do Not Show System Shares</b> in the <b>Filter</b>
 menu.</p>
@@ -81,12 +84,11 @@ menu.</p>
 
     /* Share list dialog help 4/4 */
     _("<p>Use <b>Add</b> to add a new share, <b>Edit</b> to modify
-already existing share, and <b>Remove</b> to completely
+already existing share, and <b>Delete</b> to 
 remove the information about a share.</p>
 "),
 
-    /* Identity dialog help 1/5
-    logon is the Windows synonym for login*/
+    /* Identity dialog help 1/5*/
     "smb_conf_tab_identity" : _("<p><b><big>Identity</big></b><br>
 These options allow setup of the identity of the server and its
 primary role in the network.</p>
@@ -94,40 +96,37 @@ primary role in the network.</p>
 
     /* Samba role dialog help 2/5 */
     "smb_conf_tab_base_settings": _("<p>The base settings set up the domain and the
-server role. <b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> allow
-login of Windows clients into a Windows domain. The backup controller 
+server role. <b>Backup Domain Controller</b> and <b>Primary Domain Controller</b> allow Windows clients to log in to a Windows domain. The backup controller 
 uses another domain controller for validation. The primary controller
 uses its own information about users and their passwords.
 If the server should not participate as a domain controller, choose the
-<b>No DC</b> value.</p>
+<b>Not a DC</b> value.</p>
 "),
 
     /* Samba role dialog help 2/5 */
     "smb_conf_tab_base_settings_no_bdc": _("<p>The <b>Base Settings</b> set up the domain and the
 server role. <b>Primary Domain Controller</b> allows Windows clients
 to log in to a Windows domain. If the server should not participate
-as a domain controller, choose <b>No DC</b>.</p>
+as a domain controller, choose <b>Not a DC</b>.</p>
 "),
 
     /* Samba role dialog help 3/5 */
-    "smb_conf_tab_wins_settings": _("<p><b>WINS</b> is a network protocol to map low-level
+    "smb_conf_tab_wins_settings": _("<p><b>WINS</b> is a network protocol for mapping low-level
 network identification of a host (for example, IP address) to
 a NetBIOS name. The Samba server can be a 
-<b>WINS server</b> or can use another server for its
-queries. In the latter case, choose <b>Remote WINS server</b>
+WINS server or can use another server for its
+queries. In the latter case, choose <b>Remote WINS Server</b>
 and enter the IP address of the WINS server.</p>
 "),
 
     /* Samba role dialog help 4/5 */
     "smb_conf_tab_netbios_name": _("<p>Optionally, set a <b>Server NetBIOS Name</b>. The
-NetBIOS name is the name the server uses in the SMB networks.</p>"),
+NetBIOS name is the name the server uses in the SMB network.</p>"),
 
     /* Samba role dialog help 5/5 */
     "smb_conf_tab_advanced_settings": _("<p><b>Advanced Settings</b> provides access to 
-details about <b>LDAP Settings</b>, <b>User Authentication Sources</b> to configure 
-how the Samba server should store the authentication information, and
-<b>Expert Global Settings</b> for direct configuration of the
-global settings of the server.</p>
+detailed configuration, such as LDAP settings, user authentication sources, and
+expert global settings.</p>
 "),
 
     "smb_conf_tab_trusted_domains" : _("<p><b><big>Trusted Domains</big></b><br>
@@ -141,22 +140,22 @@ the Samba server should provide access.</p>
 Enter the name of the domain to trust
 and a password in the dialog that opens. The password is used by the Samba
 server to access the trusted domain. After <b>OK</b> is pressed,
-YaST tries to establish the trust relationship. To delete a domain,
+the trust relationship is established. To delete a domain,
 choose it in the list and press <b>Delete</b>.</p>
 ") +
 
     _("<p>For more details about how trusted domains work,
-see the <i>Samba HOWTO Collection</i>.</p>
+see the Samba HOWTO collection.</p>
 "),
 
     /* Single share editing dialog help 1/2 */
-    "share_edit" : _("<p><b><big>Edit Single Share</big></b><br>
+    "share_edit" : _("<p><b><big>Edit a Share</big></b><br>
 Here, fine-tune the options of a share.</p>
 ") +
 
     /* Single share editing dialog help 2/2 */
 _("<p>Use <b>Add</b> to add a new configuration option, <b>Edit</b> to modify
-already existing option, and <b>Delete</b> to delete an option.</p>
+an existing option, and <b>Delete</b> to delete an option.</p>
 "),
 
     /* Global settings editing dialog help 1/2 */
@@ -171,12 +170,12 @@ already existing option, and <b>Delete</b> to delete an option.</p>
 
     /* Advanced SAMBA configuration dialog help 1/3 */
     "Advanced" : _("<p><b><big>LDAP Samba Server Options</big></b><br>
-Here, set up details about usage of LDAP by the Samba
+Here, set up details about use of LDAP by the Samba
 server.</p>
 ") +
 
     /* Advanced SAMBA configuration dialog help 2/3 */
-_("<p><b>Search Base DN</b> (Distinguished Name) is
+_("<p><b>Search Base DN</b> (distinguished name) is
 the base at which to start searching the information. <b>Administration DN</b> is used when
 creating new users and groups. If the administration DN requires
 a password for write access, set the password using
@@ -184,8 +183,7 @@ a password for write access, set the password using
 ")+
 
     /* Advanced SAMBA configuration dialog help 3/3 */
-_("<p><b>Note:</b>If you try to set the LDAP administration password,
- YaST2 will save the settings first.</p>
+_("<p><b>Note:</b> Settings are saved before the LDAP administration password is set.</p>
 "),
 
     /* passdb backend configuration dialog help 1/7 */
@@ -207,15 +205,15 @@ the information.</p>
 ") +
     /* passdb backend configuration dialog help 4/7 */
 _("<p><b>TDB database</b> uses an internal Samba database binary format
-to store and lookup the information.</p>
+to store and look up the information.</p>
 ") +
     /* passdb backend configuration dialog help 5/7 */
 _("<p><b>MySQL database</b> uses an external MySQL database to 
-to store and lookup the information.</p>
+to store and look up the information.</p>
 ") +
     /* passdb backend configuration dialog help 6/7 */
 _("<p>Use <b>Add</b> to add a new configuration option, <b>Edit</b> to modify
-already existing option, and <b>Delete</b> to delete an option.
+an existing option, and <b>Delete</b> to delete an option.
 Use <b>Up</b> and <b>Down</b> to change the order
 of the back-ends.</p>
 ") +
@@ -228,7 +226,7 @@ selected LDAP back-end.</p>
 "),
 
     /* add new share dialog help 1/3 */
-    "add_share" : _("<p><b><big>Add New Share</big></b><br>
+    "add_share" : _("<p><b><big>Add a New Share</big></b><br>
 Here, enter the basic information about a share to add.</p>
 ") +
 
@@ -244,7 +242,7 @@ is presented as a network disk. <b>Share Path</b> must be
 entered for a directory share.</p>
 ") +
     /* add new share dialog help 4/3 */
-    _("<p>If <b>Read Only</b> is checked, users
+    _("<p>If <b>Read-Only</b> is checked, users
 of a service may not create or modify files in the service's
 directory.</p>
 ") +
@@ -258,33 +256,33 @@ honored when creating a subdirectory.</p>
 
 map <string,string> warnings = $[
     // translators: warning text
-    "netbios": _("If you change the 'netbios name' setting, Samba creates a
+    "netbios": _("If you change the NetBIOS Hostname, Samba creates a
 service identifier (SID) for your server with the first client
-connection.  As the new SID is not equal to the old one, clients can
+connection.  Because the new SID is not equal to the old one, clients can
 no longer authenticate as domain members.
 "),
 
     // translators: warning text
     "/tmp" : _("Consider that /tmp and /var/tmp are publicly accessible
 directories and a scheduled clean job might remove files after a
-configured period. See MAX_DAYS_IN_TMP and TMP_DIRS_TO_CLEAR of
+configured period. See MAX_DAYS_IN_TMP and TMP_DIRS_TO_CLEAR in
 /etc/sysconfig/cron.
 "),
 
     // translators: warning text
     "/var" : _("Exporting /var might lead to security problems. The
-directory includes many private secrets of your system.
+directory includes many secrets of your system.
 "),
 
     // translators: warning text
     "/etc" : _("Exporting /etc might lead to security problems. The
-directory includes many private secrets of your system.
+directory includes many secrets of your system.
 "),
 ];
 
     // translators: warning text
 string root_warning =
-     _("Exporting / might lead to security problems as it makes your
+     _("Exporting / might lead to security problems because it makes your
 entire file system browsable from Samba clients.
 ");
 

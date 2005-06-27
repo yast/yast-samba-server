@@ -236,12 +236,12 @@ sub getLdapError {
     $map = SCR->Read(".ldap.error") unless defined $map;
     if ($map) {
 	my $msg = $map->{msg};
-	# translators: in error message
+	# translators: in error message, followed by server error
 	$msg .= "\n" . __("Additional Information:") . " ". $map->{server_msg} if $map->{server_msg};
 	return $msg if $msg;
     }
     # translators: unknown error message
-    return __("Unknown error. Perhaps 'yast2-ldap' is not available.");
+    return __("Unknown error. Perhaps yast2-ldap is not available.");
 }
 
 # try to setup users plugin, i.e. add UserPluginSamba to UserTemplate/susePlugin
@@ -311,8 +311,8 @@ sub addLdapDn {
     given($attr) {
 	when ("dc") {$map = {objectclass => ["top", "dcobject"], dc => $value}}
 	when ("ou") {$map = {objectclass => ["top", "organizationalunit"], ou => $value}}
-	# translators: error message
-	default {return __("Unknown Class:")." $dn\n".__("YaST supports only dcObject (dc) and organizationalUnit (ou) classes.")}
+	# translators: error message, followed by class giving error
+	default {return __("Unknown Class:")." $dn\n".__("Only dcObject (dc) and organizationalUnit (ou) classes are supported.")}
     };
     
     if ($map && !SCR->Write(".ldap.add", {dn=>$dn}, $map)) {

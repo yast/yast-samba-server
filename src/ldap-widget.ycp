@@ -259,15 +259,15 @@ map CreateSambaLDAPSettingsEssentialWidget()
 {
     term basedn = `VBox(
 	// translators: text entry label
-	`TextEntry(`id("ldap suffix"), _("&Search Base DN:")));
+	`TextEntry(`id("ldap suffix"), _("&Search Base DN")));
     term auth = `Frame(_("Authentication"), `VBox(
 	// translators: text enrty label
-	`TextEntry(`id("ldap admin dn"), _("&Administration DN:")),
+	`TextEntry(`id("ldap admin dn"), _("&Administration DN")),
 	// TODO: if Mode::config() => no ask for pssword
 	// translators: password enrty label
-	`Password(`id(`passwd1), `opt(`notify), _("Administration &Password:")),
+	`Password(`id(`passwd1), `opt(`notify), _("Administration &Password")),
 	// translators: reenter password enrty label
-	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (A&gain):")),
+	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (A&gain)")),
 	`ReplacePoint(`id("passwd_label"), `Label("")),
 	`Empty(`opt(`vstretch))));
     term passdb = 
@@ -344,13 +344,13 @@ map CreateSambaLDAPSettingsSuffixesWidget()
     // translators: frame label
     term suffixes_widget = `Frame(_("Suffixes"), `VBox(
 	    // translators: text entry label
-	    `Left(`TextEntry(`id("ldap user suffix"), _("&User Suffix:"))),
+	    `Left(`TextEntry(`id("ldap user suffix"), _("&User Suffix"))),
 	    // translators: text entry label
-	    `Left(`TextEntry(`id("ldap group suffix"), _("&Group Suffix:"))),
+	    `Left(`TextEntry(`id("ldap group suffix"), _("&Group Suffix"))),
 	    // translators: text entry label
-	    `Left(`TextEntry(`id("ldap machine suffix"), _("&Machine Suffix:"))),
+	    `Left(`TextEntry(`id("ldap machine suffix"), _("&Machine Suffix"))),
 	    // translators: text entry label
-	    `Left(`TextEntry(`id("ldap idmap suffix"), _("&Idmap Suffix:")))));
+	    `Left(`TextEntry(`id("ldap idmap suffix"), _("&Idmap Suffix")))));
 
     return $[
 	"widget": `custom,
@@ -381,9 +381,9 @@ map CreateSambaLDAPSettingsTimeoutsWidget()
     // translators: frame label
     term timeouts_widget = `Frame(_("Time-Outs"), `VBox(
     	    // translators: integer field label
-	    `Left(`IntField(`id("ldap replication sleep"), _("&Replication Sleep:"), 0, 999999, 3)),
+	    `Left(`IntField(`id("ldap replication sleep"), _("&Replication Sleep"), 0, 999999, 3)),
     	    // translators: integer field label
-	    `Left(`IntField(`id("ldap timeout"), _("&Time-Out:"), 0, 999999, 3))));
+	    `Left(`IntField(`id("ldap timeout"), _("&Time-Out"), 0, 999999, 3))));
 
     return $[
 	"widget": `custom,
@@ -418,7 +418,7 @@ map CreateSambaLDAPSettingsSecurityWidget()
     // translators: frame label
     term widget = `Frame(_("Security"), `VBox(
 	// translators: combo box label
-	`Left(`ComboBox(`id("ldap ssl"), _("&Use SSL/TLS:"),
+	`Left(`ComboBox(`id("ldap ssl"), _("&Use SSL or TLS"),
 		maplist(list l, ldap_ssl_values, {return `item(`id(l[0]:""),l[1]:"");})))));
 
     return $[
@@ -457,14 +457,14 @@ void SambaLDAPSettingsMiscWidgetStore(string key, map event_descr)
 map CreateSambaLDAPSettingsMiscWidget()
 {
     // translators: frame label
-    term misc_widget = `Frame(_("Other settings"), `VBox(
+    term misc_widget = `Frame(_("Other Settings"), `VBox(
 	// translators: text entry label
-	`Left(`TextEntry(`id("ldap filter"), _("Search &Filter:"))),
+	`Left(`TextEntry(`id("ldap filter"), _("Search &Filter"))),
 	// translators: combo box label
-	`Left(`ComboBox(`id("ldap delete dn"), _("&Delete DN:"),
+	`Left(`ComboBox(`id("ldap delete dn"), _("&Delete DN"),
 		maplist(list l, ldap_yes_no_values, {return `item(`id(l[0]:""),l[1]:"");}))),
 	// translators: combo box label
-	`Left(`ComboBox(`id("ldap passwd sync"), _("&Synchronize Passwords:"),
+	`Left(`ComboBox(`id("ldap passwd sync"), _("&Synchronize Passwords"),
 		maplist(list l, ldap_yes_no_only_values, {return `item(`id(l[0]:""),l[1]:"");})))));
 
     return $[

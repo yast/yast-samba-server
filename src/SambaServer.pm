@@ -91,11 +91,11 @@ sub Read {
 	    # translators: progress stage 2/6
 	    __("Read Samba secrets"),
 	    # translators: progress stage 3/6
-	    __("Read Samba services settings"),
+	    __("Read Samba service settings"),
 	    # translators: progress stage 4/6
 	    __("Read Samba accounts"),
 	    # translators: progress stage 5/6
-	    __("Read the backend settings"),
+	    __("Read the back-end settings"),
 	    # translators: progress stage 6/6
 	    __("Read the firewall settings")
 	], [
@@ -104,11 +104,11 @@ sub Read {
 	    # translators: progress step 2/6
 	    __("Reading Samba secrets..."),
 	    # translators: progress step 3/6
-	    __("Reading Samba services settings..."),
+	    __("Reading Samba service settings..."),
 	    # translators: progress step 4/6
 	    __("Reading Samba accounts..."),
 	    # translators: progress step 5/6
-	    __("Reading the backend settings..."),
+	    __("Reading the back-end settings..."),
 	    # translators: progress step 6/6
 	    __("Reading the firewall settings..."),
 	    # translators: progress finished
@@ -200,9 +200,9 @@ sub Write {
 	    # translators: write progress stage
 		: _("Enable Samba services") ),
 	    # translators: write progress stage
-	    _("Write backend settings"),
+	    _("Write back-end settings"),
 	    # translators: write progress stage
-	    _("Write samba accoutns"),
+	    _("Write Samba accounts"),
 	    # translators: write progress stage
 	    _("Save firewall settings")
 	], [
@@ -212,10 +212,10 @@ sub Write {
 	    ! SambaService->GetServiceAutoStart() ? _("Disabling Samba services...") 
 	    # translators: write progress step
 		: _("Enabling Samba services..."),
-	    # translators: write progress stage
-	    _("Writing backend settings..."),
-	    # translators: write progress stage
-	    _("Writing samba accoutns..."),
+	    # translators: write progress step
+	    _("Writing back-end settings..."),
+	    # translators: write progress step
+	    _("Writing Samba accounts..."),
 	    # translators: write progress step
 	    _("Saving firewall settings..."),
 	    # translators: write progress step
@@ -235,6 +235,7 @@ sub Write {
 	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
     }
     if (!SambaConfig->Write($write_only)) {
+	# /etc/samba/smb.conf is filename
     	Report->Error(__("Cannot write settings to /etc/samba/smb.conf."));
 	return 0;
     }
@@ -326,7 +327,7 @@ sub Summary {
     }
     
     # summary item: configured workgroup/domain
-    $summary = Summary->AddHeader($summary, __("Global Configuration"));
+    $summary = Summary->AddHeader($summary, __("Global Configuration:"));
     
     $summary = Summary->AddLine($summary, sprintf(__("Workgroup or Domain: %s"), SambaConfig->GlobalGetStr("workgroup", "")));
 
@@ -335,17 +336,17 @@ sub Summary {
         $summary = Summary->AddLine($summary, sprintf(__("Role: %s"), SambaRole->GetRoleName()));
     } else {
         # summary item: status of the samba service
-        $summary = Summary->AddLine($summary, __("Samba server is <i>disabled</i>"));
+        $summary = Summary->AddLine($summary, __("Samba server is disabled"));
     }
 
     # summary heading: configured shares
-    $summary = Summary->AddHeader($summary, __("Share Configuration"));
+    $summary = Summary->AddHeader($summary, __("Share Configuration:"));
 
     my $shares = SambaConfig->GetShares();
     
     if (!$shares or $#$shares<0) {
         # summary item: no configured shares
-        $summary = Summary->AddLine($summary, __("none"));
+        $summary = Summary->AddLine($summary, __("None"));
     } else {
 	$summary = Summary->OpenList($summary);
     	foreach(@$shares) {
