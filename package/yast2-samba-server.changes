@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug  1 09:57:00 CEST 2005 - locilka@suse.cz
+
+- changed maintainer of the package
+- fixed typo error #99443
+- 2.12.4
+
+-------------------------------------------------------------------
 Mon Jun 27 14:07:49 CEST 2005 - mlazar@suse.cz
 
 - applied proofread texts
