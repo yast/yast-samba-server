@@ -38,6 +38,8 @@ YaST::YCP::Import("SambaService");
 YaST::YCP::Import("SambaBackend");
 YaST::YCP::Import("SambaSecrets");
 YaST::YCP::Import("SambaNmbLookup");
+YaST::YCP::Import("SambaTrustDom");
+YaST::YCP::Import("SambaAccounts");
 }
 
 use constant {

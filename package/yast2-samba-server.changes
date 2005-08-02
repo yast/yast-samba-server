@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug  2 10:29:32 CEST 2005 - locilka@suse.cz
+
+- fixed #78590, Export for AutoYaST didn't work
+  adding some more imports
+- 2.12.5
+
+-------------------------------------------------------------------
 Mon Aug  1 09:57:00 CEST 2005 - locilka@suse.cz
 
 - changed maintainer of the package
