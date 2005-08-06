@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Aug  6 23:30:21 CEST 2005 - locilka@suse.cz
+
+- fixed testsuites
+- 2.12.6 
+
+-------------------------------------------------------------------
 Tue Aug  2 10:29:32 CEST 2005 - locilka@suse.cz
 
 - fixed #78590, Export for AutoYaST didn't work
