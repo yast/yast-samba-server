@@ -256,6 +256,9 @@ sub Write {
     Progress->NextStage();
     SambaAccounts->Write();
 
+    # 4.5: start, stop, reload service
+    SambaService->StartStopReload();
+
     # 5: save firewall settings
     Progress->NextStage();
     my $po = Progress->set(0);

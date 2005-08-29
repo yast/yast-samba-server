@@ -112,7 +112,8 @@ sub StartStopNow {
 		}
 	    } else {
 		# the service runs => relaod it
-		unless (Service->RunInitScript($_, "restart")) {
+		# RunInitScript return exit code, 0 = OK
+		if (Service->RunInitScript($_, "restart")) {
 		    y2error("Service::RunInitScript($_, 'restart') failed");
 		    $error = 1;
 		}
@@ -129,6 +130,21 @@ sub StartStopNow {
     }
     
     return $error == 0;
+}
+
+BEGIN{$TYPEINFO{StartStopReload}=["function", "boolean"]};
+sub StartStopReload {
+    my $class = shift;
+
+    # samba server should be enabled
+    if ($class->GetServiceAutoStart()) {
+	y2milestone("(re)starting samba-server...");
+	$class->StartStopNow(1);
+    # samba server should be disabled
+    } else {
+	y2milestone("stopping samba-server...");
+	$class->StartStopNow(0);
+    }
 }
 
 8;

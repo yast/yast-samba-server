@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug 29 11:33:24 CEST 2005 - locilka@suse.cz
+
+- fixed bug #106047, Samba server hadn't been started/stopped when
+  the status was changed. Samba server wasn't restarted after
+  writting changed settings.
+- 2.12.7 
+
+-------------------------------------------------------------------
 Sat Aug  6 23:30:21 CEST 2005 - locilka@suse.cz
 
 - fixed testsuites
