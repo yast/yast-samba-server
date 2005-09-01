@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep  1 10:52:19 CEST 2005 - locilka@suse.cz
+
+- fixed bug #106618, Forgotten text marked for getext tranlation.
+- 2.12.8
+
+-------------------------------------------------------------------
 Mon Aug 29 11:33:24 CEST 2005 - locilka@suse.cz
 
 - fixed bug #106047, Samba server hadn't been started/stopped when
