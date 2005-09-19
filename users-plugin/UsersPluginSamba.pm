@@ -369,12 +369,18 @@ sub update_attributes {
     my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
     my $uidNumber = $data->{'uidnumber'};
     if ( $uidNumber ) {
-        $data->{'sambasid'} = $SID."-". ( 2 * $uidNumber + $data->{'sambainternal'}->{'ridbase'} );
+        if ( (! $data->{'sambasid'}) || ($data->{'sambasid'} eq "") ) {
+            $data->{'sambasid'} = $SID."-". ( 2 * $uidNumber +
+                                $data->{'sambainternal'}->{'ridbase'} );
+        }
     }
     my $gidNumber = $data->{'gidnumber'};
     if ( $gidNumber ) {
-        $data->{'sambaprimarygroupsid'} = $SID."-". (2 * $gidNumber + 
-                $data->{'sambainternal'}->{'ridbase'} + 1 );
+        if ( (! $data->{'sambaprimarygroupsid'}) || 
+                ($data->{'sambaprimarygroupsid'} eq "") ) {
+            $data->{'sambaprimarygroupsid'} = $SID."-". (2 * $gidNumber + 
+                                $data->{'sambainternal'}->{'ridbase'} + 1 );
+        }
     }
     $data->{'sambainternal'}->{'sambacleartextpw'} = $data->{'text_userpassword'};
 

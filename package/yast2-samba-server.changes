@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep 19 13:51:18 CEST 2005 - locilka@suse.cz
+
+- fixed bug #49369, YaST had been changing SID when editing LDAP
+
+-------------------------------------------------------------------
 Thu Sep  1 10:52:19 CEST 2005 - locilka@suse.cz
 
 - fixed bug #106618, Forgotten text marked for getext tranlation.

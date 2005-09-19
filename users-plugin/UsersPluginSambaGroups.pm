@@ -308,7 +308,10 @@ sub update_attributes {
     my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
     my $gidNumber = $data->{'gidnumber'};
     if ( $gidNumber ) {
-        $data->{'sambasid'} = $SID."-". (2 * $gidNumber + $data->{'sambainternal'}->{'ridbase'} + 1);
+        if ( (! $data->{'sambasid'}) || ($data->{'sambasid'} eq "") ) {
+            $data->{'sambasid'} = $SID."-". (2 * $gidNumber + 
+                            $data->{'sambainternal'}->{'ridbase'} + 1);
+        }
     }
     if( ! $data->{'displayname'} ) {
         $data->{'displayname'} = $data->{'cn'};
