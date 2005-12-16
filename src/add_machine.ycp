@@ -51,7 +51,7 @@ string output = res["stdout"]:"";
 list<string> lines = splitstring (output, "\n");
 integer index = -1;
 
-string regexp = "^key = \"SECRETS/LDAP_BIND_PW/"+bind_dn+"\"$";
+string regexp = "^key.* = \"SECRETS/LDAP_BIND_PW/"+bind_dn+"\"$";
 
 foreach (string line, lines, ``{
 	index = index+1;
@@ -69,7 +69,7 @@ if (index == -1 || index >= size(lines)-1 )
 
 string passwd = lines[index+1]:"";
 
-passwd = regexpsub ( passwd, "^data = \"(.*)\\\\00\"$", "\\1" );
+passwd = regexpsub ( passwd, "^data.* = \"(.*)\\\\00\"$", "\\1" );
 
 map<string,any> config_map = $[
 	"bind_pw"		: passwd,

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Dec 16 11:10:07 CET 2005 - locilka@suse.cz
+
+- fixed bug #133453, tdbdump has changed output syntax, adding
+  support for the newer version and also leaving the old one
+  supported.
+- 2.13.0
+
+-------------------------------------------------------------------
 Mon Sep 19 13:51:18 CEST 2005 - locilka@suse.cz
 
 - fixed bug #49369, YaST had been changing SID when editing LDAP
