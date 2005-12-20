@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec 20 13:30:44 CET 2005 - jsuchome@suse.cz
+
+- fixed testsuite failing due to recent changes in yast2-samba-client
+- 2.13.2 
+
+-------------------------------------------------------------------
 Mon Dec 19 13:45:03 CET 2005 - jsuchome@suse.cz
 
 - merged texts from proofreading
