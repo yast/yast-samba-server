@@ -1,0 +1,100 @@
+/**
+ * File:	data/add_machine.ycp
+ * Package:	Configuration of samba-server
+ * Authors:	???@suse.??
+ *
+ * $Id$
+ */
+
+{
+
+import "YaPI::USERS";
+import "Service";
+
+// get the machine name
+string value = (string)WFM::Args (0);
+
+// get the samba configuration
+
+string bind_dn = (string)SCR::Read (.etc.smb.value.global."ldap admin dn");
+if (bind_dn == nil)
+{
+	y2error ("ldap admin dn not configured");
+	return false;
+}
+
+string ldap_suffix = (string)SCR::Read (.etc.smb.value.global."ldap suffix");
+if (ldap_suffix == nil)
+{
+	y2error ("ldap suffix not configured");
+	return false;
+}
+
+string ldap_machine_suffix = (string)SCR::Read (.etc.smb.value.global."ldap machine suffix");
+if (ldap_machine_suffix == nil)
+{
+    y2error ("ldap machine suffix not configured");
+    return false;
+}
+
+// get the ldap password
+map res = (map)SCR::Execute (.target.bash_output, "/usr/bin/tdbdump /etc/samba/secrets.tdb");
+
+if ( res["exit"]:-1 != 0 )
+{
+	y2error ("Cannot execute tdbdump");
+	return false;
+}
+
+string output = res["stdout"]:"";
+
+list<string> lines = splitstring (output, "\n");
+integer index = -1;
+
+string regexp = "^key.* = \"SECRETS/LDAP_BIND_PW/"+bind_dn+"\"$";
+
+foreach (string line, lines, ``{
+	index = index+1;
+	if ( regexpmatch (line, regexp )) {
+		break;
+	}
+});
+
+if (index == -1 || index >= size(lines)-1 )
+{
+	// not found
+	y2error ("Cannot get LDAP admin password");
+	return false;
+}
+
+string passwd = lines[index+1]:"";
+
+passwd = regexpsub ( passwd, "^data.* = \"(.*)\\\\00\"$", "\\1" );
+
+map<string,any> config_map = $[
+	"bind_pw"		: passwd,
+	"bind_dn"		: bind_dn,
+	"user_base"		: ldap_machine_suffix+","+ldap_suffix,
+	"type"			: "ldap",
+	"plugins": [ "UsersPluginLDAPAll" ],
+    ];
+    
+map<string,any> data_map = $[
+	"uid" : value,
+	"givenName" : "Machine",
+	"cn" : value,
+	"sn" : "Machine",
+	"userpassword"	: "*",
+	"loginshell" : "/bin/false",
+	"homedirectory" : "/var/lib/nobody",
+	"create_home" : false,
+    ];
+
+// add the user
+y2milestone (YaPI::USERS::UserAdd (config_map, data_map) );
+
+Service::RunInitScript ("nscd", "try-restart");
+
+return true;
+
+}

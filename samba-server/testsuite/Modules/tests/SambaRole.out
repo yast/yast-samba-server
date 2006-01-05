@@ -1,0 +1,112 @@
+SambaBackend::UpdateScripts()
+Execute(.target.bash_output, LANG=C net getlocalsid -s /dev/null)
+SambaConfig: [global]
+SambaConfig: _modified = 1
+SambaConfig: domain logons = Yes
+SambaConfig: domain master = Yes
+SambaConfig: encrypt passwords = <undefined>
+SambaConfig: local master = Yes
+SambaConfig: os level = 100
+SambaConfig: password server = <undefined>
+SambaConfig: preferred master = Yes
+SambaConfig: security = user
+SambaConfig: workgroup = TUX-NET
+SambaConfig: 
+SambaConfig: [netlogon]
+SambaConfig: _modified = 1
+SambaConfig: comment = Network Logon Service
+SambaConfig: path = /var/lib/samba/netlogon
+SambaConfig: write list = root
+
+SambaBackend::UpdateScripts()
+Execute(.target.bash_output, LANG=C net getlocalsid -s /dev/null -n 'mr. tux')
+SambaConfig: [global]
+SambaConfig: _modified = 1
+SambaConfig: domain logons = Yes
+SambaConfig: domain master = Yes
+SambaConfig: encrypt passwords = <undefined>
+SambaConfig: local master = Yes
+SambaConfig: netbios name = mr. tux
+SambaConfig: os level = 65
+SambaConfig: password server = <undefined>
+SambaConfig: preferred master = Yes
+SambaConfig: security = user
+SambaConfig: 
+SambaConfig: [netlogon]
+SambaConfig: _modified = 1
+SambaConfig: comment = Network Logon Service
+SambaConfig: path = /var/lib/samba/netlogon
+SambaConfig: write list = root
+
+Execute(.target.bash_output, LANG=C net getlocalsid -s /dev/null -n 'mr. tux')
+$VAR1 = 1;
+Execute(.target.bash_output, LANG=C net getlocalsid -s /dev/null -n 'mr. tux')
+$VAR1 = 1;
+Execute(.target.bash_output, LANG=C net getlocalsid -s /dev/null -n 'mr. tux')
+$VAR1 = 1;
+SambaBackend::UpdateScripts()
+Execute(.target.bash_output, LANG=C net rpc getsid -w '' -s /dev/null)
+SambaConfig: [global]
+SambaConfig: _modified = 1
+SambaConfig: domain logons = Yes
+SambaConfig: domain master = No
+SambaConfig: encrypt passwords = <undefined>
+SambaConfig: local master = <undefined>
+SambaConfig: os level = <undefined>
+SambaConfig: password server = <undefined>
+SambaConfig: preferred master = <undefined>
+SambaConfig: security = user
+SambaConfig: 
+SambaConfig: [netlogon]
+SambaConfig: _modified = 1
+SambaConfig: comment = Network Logon Service
+SambaConfig: path = /var/lib/samba/netlogon
+SambaConfig: write list = root
+
+Execute(.target.bash_output, LANG=C net rpc getsid -w 'TUX-NET' -s /dev/null -n 'mr. tux')
+$VAR1 = 1;
+Execute(.target.bash_output, LANG=C net rpc getsid -w 'TUX-NET' -s /dev/null -n 'mr. tux')
+$VAR1 = 1;
+Execute(.target.bash_output, LANG=C net rpc getsid -w 'TUX-NET' -s /dev/null)
+$VAR1 = 1;
+Execute(.target.bash_output, LANG=C net rpc getsid -w 'TUX-NET' -s /dev/null)
+$VAR1 = 1;
+SambaBackend::UpdateScripts()
+SambaConfig: [global]
+SambaConfig: _modified = 1
+SambaConfig: domain logons = No
+SambaConfig: domain master = No
+SambaConfig: encrypt passwords = <undefined>
+SambaConfig: local master = <undefined>
+SambaConfig: os level = <undefined>
+SambaConfig: password server = <undefined>
+SambaConfig: preferred master = <undefined>
+SambaConfig: security = user
+SambaConfig: 
+SambaConfig: [netlogon]
+SambaConfig: _disabled = 1
+SambaConfig: comment = a comment
+
+SambaBackend::RemoveScripts()
+SambaConfig: [global]
+SambaConfig: _modified = 1
+SambaConfig: domain logons = No
+SambaConfig: domain master = No
+SambaConfig: encrypt passwords = <undefined>
+SambaConfig: local master = <undefined>
+SambaConfig: os level = <undefined>
+SambaConfig: password server = *
+SambaConfig: preferred master = <undefined>
+SambaConfig: security = domain
+
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 1;
+$VAR1 = 'Domain Member Server';

@@ -1,0 +1,219 @@
+/**
+ * File:
+ *	users_plugin_samba.ycp
+ *
+ * Package:
+ *	Configuration of Users
+ *
+ * Summary:
+ *	This is part GUI of UsersPluginSamba - plugin for editing all LDAP
+ *	user/group attributes.
+ *
+ * $Id$
+ */
+
+
+{
+    textdomain "samba-users"; // use own textdomain for new plugins
+
+    import "Label";
+    import "Popup";
+    import "Report";
+    import "Wizard";
+
+    import "Ldap";
+    import "LdapPopup";
+    import "Users";
+    import "UsersLDAP";
+    import "UsersPluginSamba"; // plugin module
+
+    any ret = nil;
+    string func			= "";
+    map<string,any> config	= $[];
+    map<string,any> data	= $[];
+
+    /* Check arguments */
+    if(size(WFM::Args()) > 0 && is(WFM::Args(0), string)) {
+	func = (string) WFM::Args(0);
+	if(size(WFM::Args()) > 1 && is(WFM::Args(1), map))
+	    config = (map<string,any>)WFM::Args(1);
+	if(size(WFM::Args()) > 2 && is(WFM::Args(2), map))
+	    data = (map<string,any>)WFM::Args(2);
+    }
+    y2milestone("----------------------------------------");
+    y2milestone("users plugin started: Samba");
+
+    y2debug ("func=%1", func);
+    y2debug ("config=%1", config);
+    y2debug ("data=%1", data);
+
+    if (func == "Summary") {
+	ret = UsersPluginSamba::Summary (config, $[]);
+    }
+    else if (func == "Name") {
+	ret = UsersPluginSamba::Name (config, $[]);
+    }
+    else if (func == "Dialog") {
+	// define the dialog for this plugin and return it's contents
+
+	string caption	= UsersPluginSamba::Name (config, $[]);
+
+	// helptext
+	string help_text = _("<p>Here, edit the setting of the user's samba account.</p>") +
+            _("<p>If do not enter custom values for ") +
+            _("<b>Home Drive</b>, <b>Home Path</b>, <b>Profile Path</b>, and <b>Logon Script</b> ") +
+            _("the default values as defined in your local Samba Configuration will be used.</p>");
+
+        term contents = `Empty();
+        boolean disabled = false;
+        boolean noExpire = false;
+
+        noExpire = ( data["sambanoexpire"]:"0" == "1" )? true : false;
+        disabled = ( data["sambadisabled"]:"0" == "1" )? true : false;
+        contents = `HBox(`HSpacing (1.5), `VBox(
+            `VSpacing(0.5),
+	    `Frame ( _("Home Drive"),
+		     `VBox(
+			   `TextEntry(`id(`homeDrive), "", data["sambahomedrive"]:"" ),
+			   `Left(`CheckBox( `id(`defhomeDrive ), `opt(`notify), _("Use Default Values"),
+				      size (data["sambahomedrive"]:"") <= 0
+					    ))
+			   )
+		     ),
+	    `Frame ( _("Home Path"),
+		     `VBox(
+			   `TextEntry(`id(`homePath), "", data["sambahomepath"]:"" ),
+			   `Left(`CheckBox( `id(`defhomePath ), `opt(`notify), _("Use Default Values"),
+				      size (data["sambahomepath"]:"") <= 0
+					    ))
+			   )
+		     ),
+	    `Frame ( _("Profile Path"),
+		     `VBox(
+			   `TextEntry(`id(`profilePath), "", data["sambaprofilepath"]:"" ),
+			   `Left(`CheckBox( `id(`defprofilePath ), `opt(`notify), _("Use Default Values"),
+					    size (data["sambaprofilepath"]:"") <= 0))
+			   )
+		     ),
+	    // translators: logon is the Windows synonym for login
+	    `Frame ( _("Logon Script"),
+		     `VBox(
+			   `TextEntry(`id(`logonScript), "", data["sambalogonscript"]:"" ),
+			   `Left(`CheckBox( `id(`deflogonScript ), `opt(`notify), _("Use Default Values"),
+					    size (data["sambalogonscript"]:"") <= 0))
+			   )
+		     ),
+            `VSpacing (1.5),
+            `Left(`CheckBox(`id(`disable), _("Samba Account Disabled"), disabled )),
+            `Left(`CheckBox(`id(`noExpire), _("No Password Expiration"), noExpire )),
+            `VSpacing (0.5)
+            ),
+            `HSpacing (1.5)
+        );
+
+	Wizard::CreateDialog ();
+        Wizard::SetDesktopIcon("users");
+
+	// dialog caption
+	Wizard::SetContentsButtons(_("Edit Samba Attributes"),
+	    contents, help_text, Label::BackButton(), Label::NextButton());
+
+	Wizard::HideAbortButton ();
+
+	ret = `next;
+	repeat
+	{
+	    UI::ChangeWidget(`id(`homeDrive), `Enabled,
+			     !((boolean) UI::QueryWidget(`id(`defhomeDrive), `Value)));
+	    UI::ChangeWidget(`id(`homePath), `Enabled,
+			     !((boolean) UI::QueryWidget(`id(`defhomePath), `Value)));
+	    UI::ChangeWidget(`id(`profilePath), `Enabled,
+			     !((boolean) UI::QueryWidget(`id(`defprofilePath), `Value)));	    
+	    UI::ChangeWidget(`id(`logonScript), `Enabled,
+			     !((boolean) UI::QueryWidget(`id(`deflogonScript), `Value)));	    
+	    
+	    ret = UI::UserInput();
+	    if ( ret == `next )
+	    {
+		string err = UsersPluginSamba::Check ( config, data);
+		if ((boolean) UI::QueryWidget(`id(`defhomeDrive), `Value))
+		{
+		    data["sambahomedrive"] = "";
+		}
+		else
+		{
+		    data["sambahomedrive"] = UI::QueryWidget(`id(`homeDrive), `Value );
+		}
+		if ((boolean) UI::QueryWidget(`id(`defhomePath), `Value))
+		{
+		    data["sambahomepath"] = "";
+		}
+		else
+		{
+		    data["sambahomepath"] = UI::QueryWidget(`id(`homePath), `Value );		    
+		}
+		if ((boolean) UI::QueryWidget(`id(`defprofilePath), `Value))
+		{		
+		    data["sambaprofilepath"] = "";
+		}
+		else
+		{		
+		    data["sambaprofilepath"] = UI::QueryWidget(`id(`profilePath), `Value );
+		}
+		if ((boolean) UI::QueryWidget(`id(`deflogonScript), `Value))
+		{		
+		    data["sambalogonscript"] = "";
+		}
+		else
+		{
+		    data["sambalogonscript"] = UI::QueryWidget(`id(`logonScript), `Value );
+		}
+                data["sambanoexpire"] = ( UI::QueryWidget(`id(`noExpire), `Value ) == true ) ? "1" : "0";
+                data["sambadisabled"] = ( UI::QueryWidget(`id(`disable), `Value ) == true ) ? "1" : "0";
+		if (err != "")
+		{
+		    Report::Error (err);
+		    ret = `notnext;
+		    continue;
+		}
+
+                // if this plugin wasn't in default set, we must save its name
+		if (!contains (data["plugins"]:[], "UsersPluginSamba"))
+		{
+		    data["plugins"] = add (data["plugins"]:[],
+			"UsersPluginSamba");
+		}
+		if (data["what"]:"" == "edit_user")
+		{
+		    Users::EditUser (data);
+		}
+		else if (data["what"]:"" == "add_user")
+		{
+		    Users::AddUser (data);
+		}
+		else if (data["what"]:"" == "edit_group")
+		{
+		    Users::EditGroup (data);
+		}
+		else if (data["what"]:"" == "add_group")
+		{
+		    Users::AddGroup (data);
+		}
+	    }
+	} until (is(ret,symbol) &&
+	    contains ([`next, `abort, `back, `cancel], (symbol) ret));
+
+	Wizard::CloseDialog ();
+    }
+    /* unknown function */
+    else {
+	y2error("unknown function: %1", func);
+	ret = false;
+    }
+
+    y2debug ("ret=%1", ret);
+    y2milestone("users plugin finished");
+    y2milestone("----------------------------------------");
+
+    return ret;
+}

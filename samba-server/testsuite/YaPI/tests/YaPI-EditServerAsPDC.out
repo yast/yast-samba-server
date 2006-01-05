@@ -1,0 +1,39 @@
+Execute	.target.bash_output "LANG=C net getlocalsid -s /dev/null" $["exit":"0", "stderr":"test std error", "stdout":"test std out"]
+Write	.etc.smb.value.global."add group script" nil true
+Write	.etc.smb.value.global."add machine script" ["/usr/sbin/useradd  -c Machine -d /var/lib/nobody -s /bin/false %m$"] true
+Write	.etc.smb.value_type.global."add machine script" [0] true
+Write	.etc.smb.value.global."add user from group script" nil true
+Write	.etc.smb.value.global."add user script" nil true
+Write	.etc.smb.value.global."add user to group script" nil true
+Write	.etc.smb.value.global."delete group script" nil true
+Write	.etc.smb.value.global."delete machine script" nil true
+Write	.etc.smb.value.global."delete user from group script" nil true
+Write	.etc.smb.value.global."delete user script" nil true
+Write	.etc.smb.value.global."delete user to group script" nil true
+Write	.etc.smb.value.global."domain logons" ["Yes"] true
+Write	.etc.smb.value_type.global."domain logons" [0] true
+Write	.etc.smb.value.global."domain master" ["Yes"] true
+Write	.etc.smb.value_type.global."domain master" [0] true
+Write	.etc.smb.value.global."encrypt passwords" nil true
+Write	.etc.smb.value.global."local master" ["Yes"] true
+Write	.etc.smb.value_type.global."local master" [0] true
+Write	.etc.smb.value.global."os level" ["65"] true
+Write	.etc.smb.value_type.global."os level" [0] true
+Write	.etc.smb.value.global."password server" nil true
+Write	.etc.smb.value.global."preferred master" ["Yes"] true
+Write	.etc.smb.value_type.global."preferred master" [0] true
+Write	.etc.smb.value.global.security ["user"] true
+Write	.etc.smb.value_type.global.security [0] true
+Write	.etc.smb.value.global.workgroup ["Test"] true
+Write	.etc.smb.value_type.global.workgroup [0] true
+Write	.etc.smb.section_type.global [0] true
+Write	.etc.smb.value.netlogon.comment ["Network Logon Service"] true
+Write	.etc.smb.value_type.netlogon.comment [0] true
+Write	.etc.smb.value.netlogon.path ["/var/lib/samba/netlogon"] true
+Write	.etc.smb.value_type.netlogon.path [0] true
+Write	.etc.smb.value.netlogon."write list" ["root"] true
+Write	.etc.smb.value_type.netlogon."write list" [0] true
+Write	.etc.smb.section_type.netlogon [0] true
+Write	.etc.smb.section_comment.netlogon ["\n"] true
+Write	.etc.smb nil true
+Return	true

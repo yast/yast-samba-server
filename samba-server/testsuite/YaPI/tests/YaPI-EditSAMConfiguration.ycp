@@ -1,0 +1,34 @@
+{
+
+// test for YaPI::Samba::EditSAMConfiguration()
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    SambaConfig::Import( $[
+                    "global" : $[
+                        "ldap suffix" : "dc=another",
+                        "local master" : "no",
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "ldap admin dn" : "uid=fool,dc=another",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "no"],
+                    "lp" : $[
+                        "comment" : "testing printer",
+                        "printable" : "yes",
+                        "path" : "/var/spool/lp"]]);
+
+    import "YaPI::Samba";
+
+    TEST( ``(YaPI::Samba::EditSAMConfiguration( "ldapsam:ldap://localhost", 
+    	$[ "ldap suffix" : "dc=test,dc=domain",
+	    "ldap admin dn" : "uid=fool,dc=test,dc=domain",
+	]
+    )), [r_common,w_common,x_common], nil);
+}

@@ -1,0 +1,100 @@
+{
+
+// test for Samba::EnableServer( boolean ) - enable/disable smb/nmb service
+// $Id$
+// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    map r = depth_union(r_common, $[]);
+    map w = depth_union(w_common, $[]);
+    map x = depth_union(x_common, $[]);
+
+    TESTSUITE_INIT([r,w,x], nil);
+    import "YaPI::Samba";
+    
+    TEST( ``("Enable disabled service"), [r,w,x], nil);
+
+    // enable service, but it's disabled
+    TEST( ``( YaPI::Samba::EditService( true ) ), [ 
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    TEST( ``("Disable disabled service"), [r,w,x], nil);
+
+    // disable service, but it's already disabled
+    TEST( ``( YaPI::Samba::EditService( false ) ), [
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    TEST( ``("Enable enabled service"), [r,w,x], nil);
+
+    // enable service, but it's already enabled
+    TEST( ``( YaPI::Samba::EditService( true ) ), [ 
+	$[ 
+	    "init" : $[ 
+		"scripts" : $[ 
+		    "exists" : true,
+		    "runlevel" : $[
+			"smbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+			"nmbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+		    ],
+		],
+	    ],
+	    
+	],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    TEST( ``("Disable enabled service"), [r,w,x], nil);
+
+    // disable service, but it's enabled
+    TEST( ``( YaPI::Samba::EditService( false ) ), [
+	$[ 
+	    "init" : $[ 
+		"scripts" : $[ 
+		    "exists" : true,
+		    "runlevel" : $[
+			"smbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+			"nmbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+		    ],
+		],
+	    ],
+	    
+	],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+}

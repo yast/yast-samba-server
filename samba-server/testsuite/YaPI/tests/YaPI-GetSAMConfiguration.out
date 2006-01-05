@@ -1,0 +1,1 @@
+Return	$["ldap admin dn":"uid=fool,dc=test,dc=domain", "ldap suffix":"dc=test,dc=domain"]

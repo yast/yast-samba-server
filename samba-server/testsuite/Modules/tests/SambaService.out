@@ -1,0 +1,44 @@
+$VAR1 = 'Disabled';
+$VAR2 = 1;
+$VAR1 = 'Enabled';
+$VAR2 = 1;
+$VAR1 = 'Disabled';
+$VAR2 = 1;
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR3 = 1;
+Service->Adjust(nmb, enable)
+Service->Adjust(smb, enable)
+$VAR1 = 1;
+$VAR2 = 1;
+$VAR1 = 1;
+Service->Adjust(nmb, disable)
+Service->Adjust(smb, disable)
+$VAR1 = 1;
+Service->Start(nmb)
+Service->Start(smb)
+$VAR1 = 1;
+Service->Start(nmb)
+Service->Start(smb)
+$VAR1 = 1;
+Service->RunInitScript(nmb, restart)
+Service->RunInitScript(smb, restart)
+$VAR1 = 1;
+Service->RunInitScript(nmb, restart)
+Service->RunInitScript(smb, restart)
+$VAR1 = 1;
+Service->Stop(nmb)
+Service->Stop(smb)
+$VAR1 = 1;
+Service->Stop(nmb)
+Service->Stop(smb)
+$VAR1 = 1;
+$VAR1 = 1;

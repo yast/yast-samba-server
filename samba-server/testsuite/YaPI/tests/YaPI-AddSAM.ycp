@@ -1,0 +1,25 @@
+{
+
+// test for YaPI::Samba::AddSAM()
+// $Id$
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    import "YaPI::Samba";
+
+    SambaConfig::Import($[
+                    "global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
+                        "preferred master" : "yes",
+                        "local master" : "no",
+                        "domain logons" : "no"]]);
+
+    // add as default
+    TEST( ``(YaPI::Samba::AddSAM( "smbpasswd:/var/lib/smbusers" , true)), [r_common,w_common,x_common], nil);
+}

@@ -1,0 +1,58 @@
+{
+
+// test for Samba::EnableServer( boolean ) - enable/disable smb/nmb service
+// $Id$
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    map r = depth_union(r_common, $[]);
+    map w = depth_union(w_common, $[]);
+    map x = depth_union(x_common, $[]);
+
+    TESTSUITE_INIT([r,w,x], nil);
+    import "YaPI::Samba";
+    
+    TEST( ``("Disabled service"), [r,w,x], nil);
+
+    // disabled service
+    TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+
+    TEST( ``("Enabled service"), [r,w,x], nil);
+
+    // enabled service
+    TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 
+	$[ 
+	    "init" : $[ 
+		"scripts" : $[ 
+		    "exists" : true,
+		    "runlevel" : $[
+			"smbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+			"nmbd" : $[
+			    "start" : [ "2", "3", "5" ],
+			],
+		    ],
+		],
+	    ],
+	    
+	],
+	$[],
+	$[ "target" :$[ "bash_output" : 
+	    $[
+		"exit" : 0,
+	    ]
+	] ]
+    ], nil );
+}

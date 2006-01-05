@@ -1,0 +1,93 @@
+{
+
+import "Mode"; 
+Mode::SetTest("testsuite");
+
+map r_common =
+$[
+    "passwd" : $["passwd" : $["pluslines" : [""] ] ],
+    "product" : $["features": $[
+	"USE_DESKTOP_SCHEDULER": "yes",
+	"IO_SCHEDULER": "yes",
+	"UI_MODE": "expert",
+	"ENABLE_AUTOLOGIN": "no",
+	"EVMS_CONFIG": "no"]],
+    "target" : $[
+	"tmpdir" : "/tmp",
+	"stat": $[ "xxx": "yyy" ],
+	"string": "fake string\n",
+        "size" : "0" ],
+    "etc" : $[ 
+	"nsswitch_conf": $[
+	    "passwd": "file",
+	    "group": "file",
+	    "passwd_compat": nil,
+	    "group_compat": nil],
+	"ldap_conf": $[
+	    "v": "3",
+	],
+        "hosts": $[
+	    "h": "987",
+	],
+	"install_inf": $["i":"i"],
+	"resolv_conf": $[
+	    "nameserver": ["fake name server"],
+	    "search": ["fake search"],
+	    "domain": "fake.domain",
+	    "process": ""]],
+    "ldap": $[
+	"search": $[ "fake dn": $["a2":"x2"]],
+	"error": $[ "msg": "FAKE ERROR MESSAGE" ],
+    ],
+    "sysconfig": $[
+	"displaymanager": $["DISPLAYMANAGER": "fake display manager"],
+	"network": $[
+	    "config": $["a1":"x"],
+	    "dhcp": $["a1":"y"]],
+	"ldap": $[
+	    "BASE_CONFIG_DN": "ou=suseconfig,ou=testsuite,o=suse,c=cz",
+	    "FILE_SERVER": "No",
+	    "BIND_DN": "ou=testsuite,o=suse,c=cz"]],
+    "init": $[
+	"scripts": $[
+	    "exists": true,
+	    "runlevel": $[ ],
+	],
+    ],
+
+];
+
+map w_common = 
+$[
+    "etc": $["smb":true]
+];
+
+map x_common =
+$[
+    "passwd" : $[ "init" : true ],
+    "target" : $[ 
+	"bash" : 1,
+	"bash_output" : $[ 
+	    "stdout": "test std out",
+	    "exit": "0",
+	    "stderr": "test std error"]],
+    "background" : $[
+	"run_output" : true ],
+    "ldap": true,
+];
+
+map depth_union(map a, map b) {
+    map result = a;
+    foreach(string key, any val, (map<string,any>)b, {
+	if (is(val,map) && is(a[key]:nil, map)) {
+	    result[key] = depth_union(a[key]:$[], b[key]:$[]);
+	} else if (is(val,list) && is(a[key]:nil,list)) {
+	    result[key] = union(a[key]:[], b[key]:[]);
+	} else {
+	    result[key] = val;
+	}
+    });
+    return result;
+}
+
+}

@@ -1,0 +1,864 @@
+-------------------------------------------------------------------
+Thu Jan  5 14:32:01 CET 2006 - locilka@suse.cz
+
+- Added SetFocus() functions for dialogs when user has to fill-up
+  a password (Enhancement bugzilla #105219).
+- 2.13.3
+
+-------------------------------------------------------------------
+Tue Dec 20 13:30:44 CET 2005 - jsuchome@suse.cz
+
+- fixed testsuite failing due to recent changes in yast2-samba-client
+- 2.13.2 
+
+-------------------------------------------------------------------
+Mon Dec 19 13:45:03 CET 2005 - jsuchome@suse.cz
+
+- merged texts from proofreading
+- 2.13.1  
+
+-------------------------------------------------------------------
+Fri Dec 16 11:10:07 CET 2005 - locilka@suse.cz
+
+- fixed bug #133453, tdbdump has changed output syntax, adding
+  support for the newer version and also leaving the old one
+  supported.
+- 2.13.0
+
+-------------------------------------------------------------------
+Mon Sep 19 13:51:18 CEST 2005 - locilka@suse.cz
+
+- fixed bug #49369, YaST had been changing SID when editing LDAP
+
+-------------------------------------------------------------------
+Thu Sep  1 10:52:19 CEST 2005 - locilka@suse.cz
+
+- fixed bug #106618, Forgotten text marked for getext tranlation.
+- 2.12.8
+
+-------------------------------------------------------------------
+Mon Aug 29 11:33:24 CEST 2005 - locilka@suse.cz
+
+- fixed bug #106047, Samba server hadn't been started/stopped when
+  the status was changed. Samba server wasn't restarted after
+  writting changed settings.
+- 2.12.7 
+
+-------------------------------------------------------------------
+Sat Aug  6 23:30:21 CEST 2005 - locilka@suse.cz
+
+- fixed testsuites
+- 2.12.6 
+
+-------------------------------------------------------------------
+Tue Aug  2 10:29:32 CEST 2005 - locilka@suse.cz
+
+- fixed #78590, Export for AutoYaST didn't work
+  adding some more imports
+- 2.12.5
+
+-------------------------------------------------------------------
+Mon Aug  1 09:57:00 CEST 2005 - locilka@suse.cz
+
+- changed maintainer of the package
+- fixed typo error #99443
+- 2.12.4
+
+-------------------------------------------------------------------
+Mon Jun 27 14:07:49 CEST 2005 - mlazar@suse.cz
+
+- applied proofread texts
+
+-------------------------------------------------------------------
+Mon Jun 27 13:51:15 CEST 2005 - mlazar@suse.cz
+
+- fixed SambaTrustDom.pm
+
+-------------------------------------------------------------------
+Fri May 13 10:09:35 CEST 2005 - mlazar@suse.cz
+
+- 2.12.3
+- fixed SambaSecrets.pm
+- addede testsuite for SambaSecrets.pm
+
+-------------------------------------------------------------------
+Thu May 12 15:24:08 CEST 2005 - mlazar@suse.cz
+
+- 2.12.2
+- fixed testsuites
+- splited testsuites to two directories
+
+-------------------------------------------------------------------
+Fri Apr 22 09:01:15 UTC 2005 - mlazar@suse.cz
+
+- 2.12.1
+- adapted to new interface of ProductFeatures.ycp
+
+-------------------------------------------------------------------
+Tue Mar 15 11:27:58 CET 2005 - mlazar@suse.cz
+
+- fixed AskForJoin dialog
+
+-------------------------------------------------------------------
+Tue Mar 15 11:23:01 CET 2005 - mlazar@suse.cz
+
+- SambaServer.pm: updated Read()/Write() progress bar
+- wizards, dialaog-items.ycp: clean-up
+
+-------------------------------------------------------------------
+Mon Mar 14 11:23:36 CET 2005 - mlazar@suse.cz
+
+- fixed progress status indicator in Read()/Write()
+
+-------------------------------------------------------------------
+Fri Mar 11 11:31:31 CET 2005 - mlazar@suse.cz
+
+- SambaRole.pm: avoid use Switch; better error handling
+- added perl testsuites for SambaRole.pm
+
+-------------------------------------------------------------------
+Fri Mar 11 09:09:33 UTC 2005 - mlazar@suse.cz
+
+- SambaService.pm: fixed Import(), better error handling
+- added perl testsuites for SambaService.pm
+
+-------------------------------------------------------------------
+Fri Mar 11 08:30:21 UTC 2005 - mlazar@suse.cz
+
+- SambaAccount.pm: use Crypt::SmbHash to store passwords in Export/Inport
+- added perl testsuite for SambaAccount.pm
+
+-------------------------------------------------------------------
+Fri Mar 11 08:20:55 UTC 2005 - mlazar@suse.cz
+
+- fixed Read/Write firewall settings
+
+-------------------------------------------------------------------
+Fri Mar  4 10:21:39 UTC 2005 - mlazar@suse.cz
+
+- addeded missing "&", "<p>", "$Id", headers, ...
+
+-------------------------------------------------------------------
+Fri Mar  4 10:13:59 CET 2005 - mlazar@suse.cz
+
+- SambaRole.pm: fixed typo: preffered master -> preferred master
+- updated testsuites
+
+-------------------------------------------------------------------
+Thu Mar  3 12:11:00 CET 2005 - mlazar@suse.cz
+
+- fixed bugs in SambaAccount::Write()
+
+-------------------------------------------------------------------
+Thu Mar  3 11:53:33 CET 2005 - mlazar@suse.cz
+
+- fixed function SambaRole::getLocalSID()
+
+-------------------------------------------------------------------
+Tue Mar  1 16:13:17 CET 2005 - mlazar@suse.cz
+
+- adapted to yast2-samba-client 2.12.0
+
+-------------------------------------------------------------------
+Fri Feb 25 13:52:16 CET 2005 - mlazar@suse.cz
+
+- updated testsuites
+- 2.12.0
+
+-------------------------------------------------------------------
+Fri Feb 18 10:27:40 CET 2005 - mlazar@suse.cz
+
+- ldap-widget.ycp: fixed typo
+
+-------------------------------------------------------------------
+Wed Feb 16 17:36:32 CET 2005 - mlazar@suse.cz
+
+- fixed bug 50736 (save samba root password to autoyast control file)
+- 2.11.7
+
+-------------------------------------------------------------------
+Mon Feb 14 13:02:57 CET 2005 - mlazar@suse.cz
+
+- 2.11.6
+- updated testsuites
+
+-------------------------------------------------------------------
+Tue Feb  8 10:37:57 CET 2005 - jsuchome@suse.cz
+
+- merged texts from proofreading
+- 2.11.5
+
+-----------------------------------------------------------------
+Mon Jan 31 14:19:06 CET 2005 - mlazar@suse.cz
+
+- enabled firewall
+- 2.11.4
+
+-------------------------------------------------------------------
+Mon Jan 31 13:28:13 CET 2005 - mlazar@suse.cz
+
+- fixed testsuites
+- 2.11.3
+
+-------------------------------------------------------------------
+Thu Jan 27 09:57:23 CET 2005 - mlazar@suse.cz
+
+- fixed testsutes
+- 2.11.2
+
+-------------------------------------------------------------------
+Tue Jan 25 09:14:12 CET 2005 - mlazar@suse.cz
+
+- Progress::on()/off() replaced with Progress::set()
+
+-------------------------------------------------------------------
+Tue Jan 25 08:57:44 CET 2005 - mlazar@suse.cz
+
+- removed dependence on yast2-firewall
+
+-------------------------------------------------------------------
+Fri Jan 21 10:24:44 CET 2005 - mlazar@suse.cz
+
+- 2.11.1
+- fixed testsute
+- removed ldap expert setting buttons
+
+-------------------------------------------------------------------
+Wed Dec 29 15:19:37 CET 2004 - mlazar@suse.cz
+
+- fixed many bugs in Samba LDAP Settings
+
+-------------------------------------------------------------------
+Thu Dec 23 13:05:58 CET 2004 - mlazar@suse.cz
+
+- fixed LDAP support
+- added Samba LDAP Settings tab
+- added Samba LDAP Expert Settings dialog
+
+-------------------------------------------------------------------
+Fri Dec 10 13:15:17 CET 2004 - mlazar@suse.cz
+
+- abort button works now
+
+-------------------------------------------------------------------
+Fri Nov 19 14:50:11 CET 2004 - mlazar@suse.cz
+
+- fixed some typo
+- update testsuite
+
+-------------------------------------------------------------------
+Tue Nov 16 16:43:33 CET 2004 - mlazar@suse.cz
+
+- writeable parametr replaced with inverted synonym "read only"
+- added "inherit ACLS" parametr (see bug #39656)
+
+-------------------------------------------------------------------
+Mon Nov 15 16:40:52 CET 2004 - mlazar@suse.cz
+
+- fixed typo: GlobalSetStr => GlobalGetStr
+
+-------------------------------------------------------------------
+Mon Nov 15 11:40:15 CET 2004 - mlazar@suse.cz
+
+- added writable flag to shares list and Add Share dialog (#39656)
+
+-------------------------------------------------------------------
+Fri Nov 12 14:34:07 CET 2004 - mlazar@suse.cz
+
+- fixed CWM handlers
+
+-------------------------------------------------------------------
+Thu Nov 11 12:29:06 CET 2004 - mlazar@suse.cz
+
+- fixed typo "lasp passwd sync" => "ldap passwd sync"
+
+-------------------------------------------------------------------
+Thu Nov 11 11:14:30 CET 2004 - mlazar@suse.cz
+
+- avoid select()
+- avoid computed arguments in sprintf()
+
+-------------------------------------------------------------------
+Wed Nov 10 09:19:01 CET 2004 - mlazar@suse.cz
+
+- fixed YaPI
+
+-------------------------------------------------------------------
+Mon Nov  8 18:32:55 CET 2004 - mlazar@suse.cz
+
+- 2.11.0
+- SambaServer.ycp transformed to peral and splited to
+  SambaAccounts.pm, SambaBackend.pm, SambaBackendLDAP.pm, 
+  SambaBackendSimple.pm, SambaPrinters.pm, SambaRole.pm,
+  SambaSecrets.pm, SambaServices.pm and SambaTrustDom.pm
+
+-------------------------------------------------------------------
+Mon Oct  4 15:31:21 CEST 2004 - mlazar@suse.cz
+
+- fixed #45588 - Samba Server Configuration not shown in Summary in autoyast
+
+-------------------------------------------------------------------
+Mon Sep 20 14:12:31 CEST 2004 - mlazar@suse.cz
+
+- updated testsuite
+- 2.10.7
+
+-------------------------------------------------------------------
+Fri Sep 17 15:20:35 CEST 2004 - mlazar@suse.cz
+
+- fixed Bugzilla Bug 45380: samba-server backend handler not implemented
+
+-------------------------------------------------------------------
+Tue Sep 14 10:52:28 CEST 2004 - mlazar@suse.cz
+
+- adapted testsuite to changes in yast2-firewall 
+
+-------------------------------------------------------------------
+Tue Sep 14 09:23:57 CEST 2004 - mlazar@suse.cz
+
+- fixed testsuite
+
+-------------------------------------------------------------------
+Mon Sep 13 18:38:11 CEST 2004 - mlazar@suse.cz
+
+- 10.2.6
+
+-------------------------------------------------------------------
+Thu Sep  9 15:53:43 CEST 2004 - mlazar@suse.cz
+
+- Required replaced by PackageSystem (see bug 30872)
+
+-------------------------------------------------------------------
+Mon Sep  6 10:23:58 CEST 2004 - mlazar@suse.cz
+
+- 10.2.5
+- Added GetModified, SetModified for autoyast
+
+-------------------------------------------------------------------
+Mon Aug 30 14:37:13 CEST 2004 - mlazar@suse.cz
+
+- 10.2.4 
+
+-------------------------------------------------------------------
+Mon Aug 30 14:35:31 CEST 2004 - mlazar@suse.cz
+
+- fixed Bugzilla Bug 44175 - Unable to complete enabling Samba Server
+  service through YaST
+
+-------------------------------------------------------------------
+Fri Aug 27 15:26:57 CEST 2004 - visnov@suse.cz
+
+- merged proofread texts 
+
+-------------------------------------------------------------------
+Wed Aug 18 15:26:38 CEST 2004 - mlazar@suse.cz
+
+- 2.10.3
+- fixed Bugzilla Bug 41402 - Don't add unset/ unused default options
+- fixed Bugzilla Bug 40059 - mark disabled share as 'disabled by YaST'
+- fixed bug when delete item in expert settings
+- updated testsuite
+- fixed return value for CommandLine::Run()
+
+-------------------------------------------------------------------
+Tue Aug 17 15:30:19 CEST 2004 - jsuchome@suse.cz
+
+- plugin for users and groups only available in expert mode
+
+-------------------------------------------------------------------
+Mon Aug 16 17:49:11 CEST 2004 - mlazar@suse.cz
+
+- fixed testsuite
+
+-------------------------------------------------------------------
+Mon Aug 16 16:11:31 CEST 2004 - mlazar@suse.cz
+
+- Makefile fix
+- 2.10.2
+
+-------------------------------------------------------------------
+Mon Aug 16 12:28:34 CEST 2004 - mlazar@suse.cz
+
+- changed TablePopup::CreateTableDescr attributes
+- no WINS widget initialization when ui_mode is "simple"
+
+-------------------------------------------------------------------
+Fri Aug 13 13:10:25 CEST 2004 - mlazar@suse.cz
+
+- used CWMTab module
+- StartUp custom widget replaced by CWMServiceStart and
+  CWMFirewallInterface widgets
+- Identity custom widget splited to BaseSettings, WinsSetting,
+  NetbiosName and AdvancedSettings custom widgets
+- help modified to respect chanes in UI
+- Instalation_Step2 dialog simplified if ui_mode is "simple"
+
+-------------------------------------------------------------------
+Wed Aug 11 16:02:02 CEST 2004 - mlazar@suse.cz
+
+- code clean-up
+
+-------------------------------------------------------------------
+Wed Aug 11 12:53:46 CEST 2004 - mlazar@suse.cz
+
+- firewall support
+
+-------------------------------------------------------------------
+Tue Aug 10 15:16:41 CEST 2004 - mlazar@suse.cz
+
+- integrated proofreading (proofed-2004-08-09.tar.gz)
+
+-------------------------------------------------------------------
+Mon Aug  9 19:06:08 CEST 2004 - mlazar@suse.cz
+
+- LdapServer module replaced by LdapServerAccess
+- addeded firewall to UI and to #neededforbuild list
+- Simplified UI when ProductFeatures::ui_mode is "simple"
+- 2.10.1
+
+-------------------------------------------------------------------
+Wed Jun 23 08:59:23 CEST 2004 - visnov@suse.cz
+
+- missing marks of text for translation (#41404) 
+
+-------------------------------------------------------------------
+Mon Jun  7 14:23:42 CEST 2004 - rhafer@suse.de
+
+- users-plugin: plugin can be removed when adding a new user (#41645)
+
+-------------------------------------------------------------------
+Fri Jun  4 15:15:43 CEST 2004 - visnov@suse.cz
+
+- even if smb.conf does not contain "ldap suffix", create LDAP objects if necessary (#41633) 
+- 2.9.28
+
+-------------------------------------------------------------------
+Tue Jun  1 18:13:28 CEST 2004 - visnov@suse.cz
+
+- in retry, handle correct success (do not avoid too many LDAP connections) - 41400
+- 2.9.27 
+
+-------------------------------------------------------------------
+Mon May 31 18:58:54 CEST 2004 - visnov@suse.cz
+
+- properly initialize LDAP before creating LDAP objects (#41398)
+- allow to retry LDAP server connection after its restart (#41400)
+- create also idmap suffix object (#41306)
+- 2.9.26 
+
+-------------------------------------------------------------------
+Wed May 26 15:17:35 CEST 2004 - visnov@suse.cz
+
+- create root account if not exists (#41182)
+- setup ACLs for Samba (#41210) 
+- setup and create if needed machine LDAP suffix (#41183)
+- adding indices into slapd.conf, if needed (#41165)
+- 2.9.25
+
+-------------------------------------------------------------------
+Mon May 24 10:03:27 CEST 2004 - visnov@suse.cz
+
+- fixed testsuite
+- 2.9.24 
+
+-------------------------------------------------------------------
+Mon May 24 01:20:02 CEST 2004 - nashif@suse.de
+
+- temp. diasble testuite 
+- 2.9.23
+
+-------------------------------------------------------------------
+Thu May 20 08:15:00 CEST 2004 - visnov@suse.cz
+
+- use secrets.tdb instead of RPC call for trusted domains (#40732) 
+- added version and capabilities info to YaPI (#40796)
+- try to bind before setting LDAP password (#40809)
+- write LDAP settings before storing LDAP password (#40866)
+- propose LDAP URL when adding a new passdb backend (#40849)
+- improve "add machine" script for LDAP (#40365)
+- 2.9.22
+
+-------------------------------------------------------------------
+Wed May 19 09:07:49 CEST 2004 - visnov@suse.cz
+
+- also setup home directory for machine accounts (#40365) 
+
+-------------------------------------------------------------------
+Thu May 13 16:50:48 CEST 2004 - visnov@suse.cz
+
+- if using common LDAP setup, update users plugin list (#40509) 
+- 2.9.21
+
+-------------------------------------------------------------------
+Thu May 13 15:39:42 CEST 2004 - rhafer@suse.de
+
+- users-plugin don't abort when adding new user and SID couldn't
+  be read (#40508)
+- return an error message requesting password change when adding
+  a samba account to an existing user (#40419)
+
+-------------------------------------------------------------------
+Thu May 13 08:13:47 CEST 2004 - visnov@suse.cz
+
+- synchronization between Expert options and Authentication Sources dialogs fixed
+- for LDAP use own script for "add machine script" (#40365)
+
+-------------------------------------------------------------------
+Tue May 11 10:02:47 CEST 2004 - visnov@suse.cz
+
+- use Shares tab as a default when configuration is changed (#40058)
+- refix - remove duplicated warning (#40154)
+- cleanup autoyast summary (#40311)
+- don't show warning is netbios name was empty or in autoyast (#40312)
+- fix gettext use in users-plugin (#40160)
+- fix autoyast (#40314, #40310, #40315)
+- refix schema installation (#40034)
+- handle empty share table correctly (#40349)
+
+-------------------------------------------------------------------
+Mon May 10 17:13:47 CEST 2004 - visnov@suse.cz
+
+- fix neededforbuild and requires
+- 2.9.20 
+
+-------------------------------------------------------------------
+Mon May 10 10:42:29 CEST 2004 - visnov@suse.cz
+
+- install samba3.schema if using local LDAP server - added yast2-ldap-server to neededforbuild and requires (#40034)
+- use "net getlocalsid" to initialize SID (#40034) 
+- fix wizard to handle authentication details dialog correctly (#40146)
+- duplicate the workgroup info in global settings (#40149)
+- select the correct tab in Qt (#40137)
+- merged proofread texts
+- don't allow to add an already existing share (#40235)
+- show only warning with the longest path prefix (#40154)
+- always ask before abort (#40240)
+- don't create "server string" if not present already (#40056)
+
+-------------------------------------------------------------------
+Thu May  6 17:52:04 CEST 2004 - visnov@suse.cz
+
+- 2.9.19
+
+-------------------------------------------------------------------
+Wed May  5 10:31:49 CEST 2004 - visnov@suse.cz
+
+- use proper tab widget if available
+- don't start wizard if the config file is changed (#39779)
+- restore workgroup in wizard if clicked next/back (#39779) 
+- YaPI::Samba implementation fixes (#39971)
+
+-------------------------------------------------------------------
+Tue May  4 12:47:34 CEST 2004 - rhafer@suse.de
+
+- users-plugin: disabled debugging output
+- users-plugin: return appropriate error in initialization fails
+- users-plugin: separated users and groups plugin
+
+-------------------------------------------------------------------
+Tue May  4 08:43:06 CEST 2004 - visnov@suse.cz
+
+- merged in the proofread texts 
+- cleanup buttons (#39779)
+- show abort warning (#39779)
+- complete list of known smb.conf options added (#39779)
+- require ldap:// or ldaps:// scheme prefix for LDAP-based 
+  passdb backend (#38994)
+- warn when using insecure path in a share (#39779)
+- warn when netbios name changes (#39779)
+- don't lookup the package if required packages installation failed
+- store table data between tab switches (#39779)
+
+-------------------------------------------------------------------
+Thu Apr 29 17:26:22 CEST 2004 - visnov@suse.cz
+
+- help texts added
+- dialog buttons fixes
+- 2.9.18 
+
+-------------------------------------------------------------------
+Wed Apr 28 10:02:20 CEST 2004 - visnov@suse.cz
+
+- Samba YaPI improved
+- complete UI redesign
+- plugin for Users module
+- 2.9.17
+
+-------------------------------------------------------------------
+Wed Apr 21 10:51:20 CEST 2004 - visnov@suse.cz
+
+- propose correct bind_dn (#38993)
+- don't split passdb backends by comma (breaks LDAP backends)
+- Samba YaPI improved
+- use Service
+- 2.9.16
+
+-------------------------------------------------------------------
+Fri Apr  2 16:23:02 CEST 2004 - visnov@suse.cz
+
+- YaST2 is now GPL
+- 2.9.15
+
+-------------------------------------------------------------------
+Fri Apr  2 14:42:00 CEST 2004 - visnov@suse.cz
+
+- properly detect enabled shares (#37941)
+- 2.9.14 
+
+-------------------------------------------------------------------
+Thu Apr  1 19:22:44 CEST 2004 - visnov@suse.cz
+
+- fix CWM-related warnings
+- 2.9.13 
+
+-------------------------------------------------------------------
+Wed Mar 31 17:41:12 CEST 2004 - visnov@suse.cz
+
+- removed obsolete code
+- 2.9.12 
+
+-------------------------------------------------------------------
+Mon Mar 22 17:39:29 CET 2004 - visnov@suse.cz
+
+- 2.9.11 
+
+-------------------------------------------------------------------
+Wed Mar 17 14:03:50 CET 2004 - visnov@suse.cz
+
+- fix abort confirmation
+
+-------------------------------------------------------------------
+Wed Mar 17 10:29:53 CET 2004 - visnov@suse.cz
+
+- finished help texts
+- don't show help for passdb backend twice 
+
+-------------------------------------------------------------------
+Mon Mar 15 18:40:36 CET 2004 - visnov@suse.cz
+
+- use "mysql", not "mysqlsam" (#35393)
+- install samba-pdb if needed
+- compilation fixes
+- adapt for new perl convention
+- 2.9.10 
+
+-------------------------------------------------------------------
+Wed Mar 10 09:23:42 CET 2004 - visnov@suse.cz
+
+- don't log undef (#35523)
+- 2.9.8
+
+-------------------------------------------------------------------
+Wed Mar 10 01:45:27 CET 2004 - nashif@suse.de
+
+- Fixed for new wizard
+
+-------------------------------------------------------------------
+Mon Mar  8 17:37:35 CET 2004 - visnov@suse.cz
+
+- add icon into wizard
+
+-------------------------------------------------------------------
+Mon Mar  8 17:18:26 CET 2004 - visnov@suse.cz
+
+- pass correct values to share read/write (#35234)
+- do not show internal values in share edit
+- 2.9.7 
+ 
+-------------------------------------------------------------------
+Sun Mar  7 22:56:31 CET 2004 - kkaempf@suse.de
+
+- fix typing
+- 2.9.6
+
+-------------------------------------------------------------------
+Mon Mar  1 14:21:01 CET 2004 - visnov@suse.cz
+
+- merged back proofread texts
+- use /var/lib/nobody for the add machine script (#35090)
+- better type info
+- 2.9.5
+
+-------------------------------------------------------------------
+Tue Feb 24 14:24:27 CET 2004 - visnov@suse.cz
+
+- netbios name configuration (#34874)
+
+-------------------------------------------------------------------
+Mon Feb 23 17:17:48 CET 2004 - visnov@suse.cz
+
+- 2.9.3 
+
+-------------------------------------------------------------------
+Sat Feb 21 18:49:45 CET 2004 - schwab@suse.de
+
+- Fix typo in specfile.
+
+-------------------------------------------------------------------
+Wed Feb 18 12:32:48 CET 2004 - visnov@suse.cz
+
+- rewritten SAM support. Now multiple passdb backends can be configured
+  (done as Perl module)
+- better support for LDAP
+- fix testsuites
+- drop samba-client from requirements, install it on demand
+- 2.9.2 
+
+-------------------------------------------------------------------
+Mon Feb  9 12:52:06 CET 2004 - visnov@suse.cz
+
+- remove "global"
+- fix testsuite
+- use "net getsid" instead of "smbpasswd -S"
+- drop y2cc
+- 2.9.1
+
+-------------------------------------------------------------------
+Fri Jan 30 13:27:07 CET 2004 - visnov@suse.cz
+
+- first version for new interpreter 
+
+-------------------------------------------------------------------
+Wed Oct 29 15:16:21 CET 2003 - visnov@suse.cz
+
+- adapted for TablePopup
+- fixed testsuite
+- 2.9.0 
+
+-------------------------------------------------------------------
+Fri Sep 19 16:35:58 CEST 2003 - visnov@suse.cz
+
+- fixed testsuite
+- 2.8.17
+
+-------------------------------------------------------------------
+Thu Sep 18 23:16:52 CEST 2003 - nashif@suse.de
+
+- fixed testsuite
+- 2.8.15
+
+-------------------------------------------------------------------
+Tue Sep 16 00:26:23 CEST 2003 - nashif@suse.de
+
+- Dont write configuration into running system if in config
+  mode
+- 2.8.14  
+
+-------------------------------------------------------------------
+Mon Sep 15 21:34:51 CEST 2003 - nashif@suse.de
+
+- Call correct function name in autoinst mode
+- 2.8.13
+
+-------------------------------------------------------------------
+Mon Sep 15 19:09:34 CEST 2003 - msvec@suse.cz
+
+- updated testsuite
+- 2.8.12
+
+-------------------------------------------------------------------
+Mon Sep 15 13:57:50 CEST 2003 - visnov@suse.de
+
+- #30794: set the os level to 65
+- yast2-installation in needed-for-build
+- 2.8.11 
+
+-------------------------------------------------------------------
+Mon Sep  8 21:43:58 CEST 2003 - nashif@suse.de
+
+- #32091: return list of required packages
+- 2.8.10
+
+-------------------------------------------------------------------
+Mon Sep  8 15:25:34 CEST 2003 - visnov@suse.de
+
+- fix autoyast mode problems (#30161)
+- 2.8.9 
+
+-------------------------------------------------------------------
+Fri Sep  5 08:46:03 CEST 2003 - visnov@suse.de
+
+- merged in texts from proofread
+- 2.8.8
+
+-------------------------------------------------------------------
+Wed Sep  3 16:45:16 CEST 2003 - visnov@suse.de
+
+- if the server is disabled, set the radio button of the would-be enabled role 
+
+-------------------------------------------------------------------
+Wed Sep  3 08:46:27 CEST 2003 - visnov@suse.de
+
+- resolve PDC as PDC, not as standalone server (#29888) 
+
+-------------------------------------------------------------------
+Fri Aug 29 18:59:09 CEST 2003 - visnov@suse.de
+
+- 2.8.7
+
+-------------------------------------------------------------------
+Tue Aug 26 10:43:56 CEST 2003 - visnov@suse.de
+
+- mark texts for translation
+
+-------------------------------------------------------------------
+Mon Aug 25 16:21:29 CEST 2003 - visnov@suse.de
+
+- Fix dialog init (#29243)
+- Do not show empty error if not able to change LDAP password
+- Do not save settings if not needed
+- 2.8.6
+
+-------------------------------------------------------------------
+Thu Aug 21 14:59:43 CEST 2003 - visnov@suse.de
+
+- show error dialog if required packages are not installed before quit
+
+-------------------------------------------------------------------
+Wed Aug 20 15:38:58 CEST 2003 - visnov@suse.de
+
+- Do not show Initializing... dialog
+
+-------------------------------------------------------------------
+Tue Aug 19 14:02:35 CEST 2003 - visnov@suse.de
+
+- improve start dialog
+- use Printer::checkSpooler
+- 2.8.5
+
+-------------------------------------------------------------------
+Tue Aug 19 02:03:53 CEST 2003 - nashif@suse.de
+
+- Added yast2-packager to neededforbuild
+
+-------------------------------------------------------------------
+Mon Aug 11 09:02:35 CEST 2003 - visnov@suse.de
+
+- merged in proofread texts
+- 2.8.3 
+
+-------------------------------------------------------------------
+Fri Aug  8 08:46:39 CEST 2003 - visnov@suse.de
+
+- add Browse button for adding a share
+- layout fixes
+- do not depend on samba
+- 2.8.2
+
+-------------------------------------------------------------------
+Tue Aug  5 08:28:59 CEST 2003 - visnov@suse.de
+
+- use LDAP system settings for defaults
+- added desktop file 
+- 2.8.1
+
+-------------------------------------------------------------------
+Mon Jul 28 14:31:59 CEST 2003 - visnov@suse.de
+
+- fix package dependencies 
+
+-------------------------------------------------------------------
+Thu May 29 14:54:23 2003 - visnov@suse.cz
+
+- initial version
+- 2.8.0

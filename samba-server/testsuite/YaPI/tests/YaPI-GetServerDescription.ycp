@@ -1,0 +1,24 @@
+{
+
+// test for YaPI::Samba::GetServerDescription()
+// $Id$
+// testedfiles: Dummy.ycp 
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    SambaConfig::Import( $["global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "server string" : "This is test",
+                        "security" : "user",
+                        "preferred master" : "yes",
+                        "domain logons" : "no",
+                        "local master" : "no"]]);
+
+    import "YaPI::Samba";
+
+    TEST( ``(YaPI::Samba::GetServerDescription()), [r_common,w_common,x_common], nil);
+}

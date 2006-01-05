@@ -1,0 +1,42 @@
+/**
+ * File:	include/samba-server/complex.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Dialogs definitions
+ * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "samba-server";
+
+import "Wizard";
+//import "Wizard_hw";
+
+import "SambaServer";
+
+include "samba-server/helps.ycp";
+
+/**
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol ReadDialog() ``{
+    Wizard::RestoreHelp(HELPS["read"]:"");
+    boolean ret = SambaServer::Read();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+symbol WriteDialog() ``{
+    Wizard::RestoreHelp(HELPS["write"]:"");
+    boolean ret = SambaServer::Write(false);
+    return ret ? `next : `abort;
+}
+
+/* EOF */
+}

@@ -1,0 +1,28 @@
+{
+
+// test for YaPI::Samba::DeleteSAM()
+// $Id$
+
+    import "SambaConfig";
+
+    include "testsuite.ycp";
+    include "./tests/tests-common.yh";
+
+    SambaConfig::Import( $[
+                    "global" : $[
+                        "workgroup" : "Test",
+                        "domain master" : "no",
+                        "security" : "user",
+                        "passdb backend" : "smbpasswd ldapsam:ldap://localhost",
+                        "preferred master" : "yes",
+                        "local master" : "no",
+                        "domain logons" : "no"],
+                    "lp" : $[
+                        "comment" : "testing printer",
+                        "printable" : "yes",
+                        "path" : "/var/spool/lp"]]);
+
+    import "YaPI::Samba";
+
+    TEST( ``(YaPI::Samba::DeleteSAM( "ldapsam:ldap://localhost")), [r_common,w_common,x_common], nil);
+}

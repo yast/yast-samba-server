@@ -1,0 +1,177 @@
+/**
+ * File:	include/samba-server/wizards.ycp
+ * Package:	Configuration of samba-server
+ * Summary:	Wizards definitions
+ * Authors:	Stanislav Visnovsky <stanislav.visnovsky@suse.cz>
+ *
+ * $Id$
+ */
+
+{
+
+textdomain "samba-server";
+
+import "Sequencer";
+import "Wizard";
+import "Label";
+import "Mode";
+
+import "SambaServer";
+
+include "samba-server/complex.ycp";
+include "samba-server/dialogs.ycp";
+
+/**
+ * Main workflow of the samba-server configuration
+ * @return sequence result
+ */
+any MainSequence() {
+
+    map aliases = $[
+	"inst_step1"	: ``( Installation_Step1() ),
+	"inst_step2"	: ``( Installation_Step2() ),
+	"conf_tab"	: ``( Installation_Conf_Tab() ),
+        "share_edit"    : ``( EditShareDialog() ),
+	"share_add"	: ``( AddShareDialog() ),
+        "passdb_edit"   : ``( PassdbDialog() ),
+        "global_settings":``( GlobalSettingsDialog() ),
+	"ensure_root_account": ``( EnsureRootAccountDialog() ),
+	"ask_join_domain": ``( AskJoinDomainDialog() ),
+    ];
+
+    map sequence = $[
+	"ws_start"	: "inst_step1",
+	"inst_step1"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "inst_step2"
+	],
+	"inst_step2"	: $[
+	    `back	: "inst_step1",
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"conf_tab"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `add	: "share_add",
+	    `edit	: "share_edit",
+            `passdb   	: "passdb_edit",
+            `global_settings  	: "global_settings",
+	    `next	: "ask_join_domain",
+	],
+	"ask_join_domain": $[
+	    `cancel	: "conf_tab",
+	    `error	: "conf_tab",
+	    `skip	: `finish,
+	    `abort	: `abort,
+	    `ok		: "ensure_root_account",
+	],
+	"ensure_root_account": $[
+	    `cancel	: "conf_tab",
+	    `back	: "conf_tab",
+	    `abort	: `abort,
+	    `ok		: `finish,
+	],
+	"global_settings" : $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"share_edit"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+	"share_add"	: $[
+	    `cancel	: `cancel,
+	    `abort	: `abort,
+	    `next	: "conf_tab"
+	],
+        "passdb_edit"   : $[
+            `abort  	: `abort,
+	    `cancel 	: `cancel,
+            `next   	: "conf_tab",
+        ]
+    ];
+    
+    // setup the abort function
+//    SambaServer::AbortFunction = SambaServer::ServerReallyAbort;
+    
+    // run wizard only first time and not in autoyast
+    if (Mode::config() || SambaServer::Configured()) {
+	sequence["ws_start"] = "conf_tab";
+	
+	if (!Mode::config())
+	{
+	    return_tab = "shares";	
+	}
+    }
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    return ret;
+}
+
+/**
+ * Whole configuration of samba-server
+ * @return sequence result
+ */
+any SambaServerSequence() {
+
+    map aliases = $[
+	"read"  : [ ``( ReadDialog() ), true ],
+	"main"	:   ``( MainSequence() ),
+	"write" : [ ``( WriteDialog() ), true ]
+    ];
+
+    map sequence = $[
+	"ws_start" : "read",
+	"read" : $[
+	    `abort	: `abort,
+	    `next	: "main"
+	],
+	"main" : $[
+	    `cancel	: `abort,
+	    `abort	: `abort,
+	    `finish	: "write"
+	],
+	"write" : $[
+	    `abort	: `abort,
+	    `next	: `next
+	]
+    ];
+
+    Wizard::CreateDialog();
+
+    any ret = Sequencer::Run(aliases, sequence);
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/**
+ * Whole configuration of samba-server but without reading and writing.
+ * For use with autoinstallation.
+ * @return sequence result
+ */
+any SambaServerAutoSequence() {
+
+    /* Initialization dialog caption */
+    string caption = _("Samba Server Configuration");
+    /* Initialization dialog contents */
+    term contents = `Label(_("Initializing..."));
+
+    Wizard::CreateDialog();
+    Wizard::SetContentsButtons(caption, contents, "",
+	    Label::BackButton(), Label::NextButton());
+
+    any ret = MainSequence();
+
+    UI::CloseDialog();
+    return ret;
+}
+
+/* EOF */
+}

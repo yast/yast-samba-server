@@ -1,0 +1,129 @@
+Author: Stanislav Visnovsky
+Component: SAMBA server
+Release: SL 8.3
+-------------------------
+
+Tasks summary:
+--------------
+- Simple sharing of resources with Windows clients
+- Joining the domain
+- Setting up Backup domain controller
+- Setting up Primary domain controller
+
+
+Simple sharing of resources with Windows clients
+------------------------------------------------
+
+The default Samba package is reasonably configured for this already.
+
+Implementation steps:
+
+1) allow starting smb/nmb service, adopt firewall, enable/disable
+sharing of home directories and printers)
+
+
+Joining a domain
+----------------
+
+SAMBA can join the domain rather easily. The most important part is to
+configure winbindd to allow using user information from DCs
+for validation. Also, nsswitch allows for hostname resolution.
+
+Implementation steps:
+
+1) joining the actual domain
+2) configuration of winbind to automatically validate users against DC
+3) nsswitch.conf configuration to use WINS
+
+Setting up Backup domain controller
+-----------------------------------
+
+To act as a backup DC, SAMBA must replicate the data from PDC. This
+can be done using NIS/LDAP and rsync (to be resolved with
+lmuelle@suse.de).
+
+Implementation steps:
+
+1) configuration of NIS slave server/LDAP to replicate passwd/group
+files
+2) smbpasswd/netlogon synchronization using rsync or LDAP
+3) SAMBA configuration
+
+Setting up Primary domain controller
+------------------------------------
+
+Configuration of PDC is rather straightforward. A minor "issue" is
+creation of machine trust accounts. This should be done on-the-fly.
+
+Implementation steps:
+
+1) Setup of PDC service
+2) Allow creating of Machine accounts
+
+
+Detailed option checklist:
+=========================
+
+1) Turn on/off SAMBA server
+2) Workgroup/domain name, server string settings
+3) Share the printers
+	The "printing" option needs to be adapted depending on CUPS/LPRng
+	used (should be done by YaST2 printer module)
+4) Share the home directories
+5) Allow logons
+	Set the netlogon option, enable [netlogon] share
+6) Configure share options
+	Path
+	Setup of read/write access lists (including guests)
+	Enable/disable share
+	Allow to browse the share
+	Comment setup
+7) Joining the domain
+8) Setup PDC
+9) Setup BDC
+10) Allow to switch between smbpasswd/LDAP backends (for PDC only)
+
+
+Configuration backend:
+======================
+
+Functionality				Input from user Handled by
+------------------------------------------------------------------
+Turn on/off SAMBA server		Yes		YaST Runlevel module
+Workgroup/domain name			Yes		"workgroup"
+Server description			Yes		"server string"
+Share the printers on/off		Yes		"load printers" = no
+Share the home directories on/off	Yes		"available" in [homes]
+Share the netlogon scripts		No		"available" in [netlogon]
+					Yes		"domain logons"
+Configure share options			Yes		"path"
+					Yes		"comment"
+					Yes		"guest ok"
+					Yes		"browseable"
+					Yes		"read list"
+					Yes		"write list"
+Joining a domain			Yes		"password server"
+					Yes (passwd)	smbpasswd -j
+					No		"security" = domain
+							winbindd configuration (TBD)
+Setup PDC				Yes		"security" = user
+					No		"domain logons" = yes
+					No		"os level" = 64
+    					No		"preferred master" = yes
+    					No		"domain master" = yes
+    					No		"local master" = yes
+					No		"add user script"
+Setup BDC				Yes		"domain master = no"
+					No		"domain logons = yes"
+					No		LDAP backend switched on
+Switch of smbpasswd/LDAP		No		"SAMBA_SAM" in /etc/sysconfig/samba
+					No		SuSEconfig.samba
+					Yes		"ldap admin dn"
+					Yes		"ldap server"
+					Yes (passwd)	smbpasswd -w
+
+Open questions:
+
+1) How to support netlogon replication for BDC?
+2) How much needs to be specified by user for LDAP?
+
