@@ -156,6 +156,7 @@ void SambaLDAPSettingsEssentialWidgetInit(string key)
 	UI::ChangeWidget(`id(id), `Enabled, idmap_url!=nil || passdb_url!=nil);
     });
     
+    UI::SetFocus(`id (`passwd1));
 }
 
 symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
@@ -169,6 +170,7 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
 	    // translators: inform text
 	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label( _("Passwords do not match."))));
 	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, false);
+	    UI::SetFocus(`id(`passwd2));
 	} else if (passwd1 == SambaBackendLDAP::GetAdminPassword()) {
 	    UI::ReplaceWidget(`id("passwd_label"), `Left(`Label("")));
 	    UI::ChangeWidget(`id(`ldap_try_connect), `Enabled, true);

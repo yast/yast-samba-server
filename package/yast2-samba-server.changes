@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan  5 14:32:01 CET 2006 - locilka@suse.cz
+
+- Added SetFocus() functions for dialogs when user has to fill-up
+  a password (Enhancement bugzilla #105219).
+- 2.13.3
+
+-------------------------------------------------------------------
 Tue Dec 20 13:30:44 CET 2005 - jsuchome@suse.cz
 
 - fixed testsuite failing due to recent changes in yast2-samba-client

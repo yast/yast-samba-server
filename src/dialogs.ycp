@@ -886,6 +886,7 @@ symbol EnsureRootAccountDialog () ``{
             `HBox(
                 `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
                 `PushButton(`id(`cancel), Label::CancelButton())))));
+    UI::SetFocus(`id(`passwd1));
 
     any ret = nil;
     string passwd = nil;
