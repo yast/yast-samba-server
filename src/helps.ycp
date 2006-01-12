@@ -38,15 +38,11 @@ An additional dialog will inform you whether it is safe to do so.
 </p>
 "),
 
-    /* Samba selecting workgroup or domain 1/2 - Installation step 1 */
+    /* Samba selecting workgroup or domain 1/1 - Installation step 1 */
     "inst_step1" : _("<p><b><big>Workgroup or Domain Selection</big></b><br>
 All available workgroups or domains found on your network are listed here. Select one of them or type your own new name and click <b>Next</b>.
 </p>
-") +
-
-    //rwalter: merged with previous
-    /* Samba selecting workgroup or domain 2/2 - Installation step 1 */
-_(""),
+"),
 
     /* Samba select Samba Server type - Installation step 2 */
     "inst_step2" : _("<p><b><big>Samba Server Type</big></b></p>

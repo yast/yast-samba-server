@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 12 08:44:54 CET 2006 - locilka@suse.cz
+
+- Fixed some typo in translated messages
+- 2.13.4
+
+-------------------------------------------------------------------
 Thu Jan  5 14:32:01 CET 2006 - locilka@suse.cz
 
 - Added SetFocus() functions for dialogs when user has to fill-up

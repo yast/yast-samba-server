@@ -318,9 +318,8 @@ symbol SharesWidgetHandle(string key, map event_descr)
     }
     if (ret == `delete)
     {
-	//rwalter: please check location of /n
         // confirmation dialog before deleting a share
-	if  (Popup::YesNo( sformat( _("If you delete share %1,/n all its settings will be lost./n Really delete it?"), share)))
+	if  (Popup::YesNo( sformat( _("If you delete share %1,\nall its settings will be lost.\nReally delete it?"), share)))
 	{
 	    SambaConfig::ShareRemove(share);
 	    UI::ChangeWidget( `id(`table), `Items, sharesItems(false));
@@ -567,7 +566,7 @@ symbol AddShareDialog () ``{
 	    } else if( !printable && ! Mode::config() && SCR::Read( .target.stat, pathvalue ) == $[] ) {
 		// translators: question popup. A user entered non-existent path
 		// for a share, %1 is entered path
-		if (!Popup::YesNo(sformat( _("The path %1 does not exist./nReally use this path?"), pathvalue)))
+		if (!Popup::YesNo(sformat( _("The path %1 does not exist.\nReally use this path?"), pathvalue)))
 		{
 		    ret = nil;
 		    continue;
