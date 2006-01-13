@@ -3,6 +3,7 @@
  * Package:	Configuration of samba-server
  * Summary:	Dialogs definitions
  * Authors:	Stanislav Visnovsky <visnov@suse.cz>
+ *		Lukas Ocilka <locilka@suse.cz>
  *
  * $Id$
  */
@@ -15,6 +16,9 @@ import "Wizard";
 //import "Wizard_hw";
 
 import "SambaServer";
+import "SambaService";
+import "Progress";
+import "Report";
 
 include "samba-server/helps.ycp";
 
@@ -28,13 +32,43 @@ symbol ReadDialog() ``{
     return ret ? `next : `abort;
 }
 
+// replace with Progress::status() after accepted into the build
+// Function returns current progress status
+boolean ProgressStatus () {
+    // set new progress
+    boolean old_progress = Progress::set(false);
+    // set old progress back
+    Progress::set(old_progress);
+    // return current progress
+    return old_progress;
+}
+
 /**
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
  */
 symbol WriteDialog() ``{
     Wizard::RestoreHelp(HELPS["write"]:"");
+    // Bugzilla #120080 - 'reload' instead of 'restart'
+    // If there some connected users, SAMBA is running and should be running also after the Write() operation
+    //    and the Progress was turned on before Writing SAMBA conf
+    list <string> connected_users = SambaService::ConnectedUsers();
+    y2milestone("Number of connected users: %1", size(connected_users));
+    boolean report_restart_popup = (
+	(size(connected_users)>0) && SambaService::GetServiceRunning() &&
+	SambaService::GetServiceAutoStart() && ProgressStatus()
+    );
+
     boolean ret = SambaServer::Write(false);
+
+    // If popup should be shown and SAMBA is still/again running
+    if (report_restart_popup && SambaService::GetServiceRunning()) {
+	// TRANSLATORS: a popup message
+	Report::Message(_("Because users are currently connected to this Samba server,
+the server configuration has been reloaded instead of restarted.
+To confirm that all settings are applied despite possibly disconnecting the users,
+run `/etc/init.d/smb restart` and `/etc/init.d/nmb restart`"));
+    }
     return ret ? `next : `abort;
 }
 

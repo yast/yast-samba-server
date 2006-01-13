@@ -3,6 +3,7 @@
  * Package:	Configuration of samba-server
  * Summary:	Dialogs definitions
  * Authors:	Stanislav Visnovsky <stanislav.visnovsky@suse.cz>
+ *		Lukas Ocilka <locilka@suse.cz>
  *
  * $Id$
  */

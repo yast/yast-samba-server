@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Jan 13 15:34:07 CET 2006 - locilka@suse.cz
+
+- Added new functionality described in Bugzilla #120080
+  When writing the configuration, Samba server is reloaded instead
+  of restarted when there are some users currently connected.
+  In this case, Samba admin is informed by a pop-up window to run
+  `/etc/init.d/smb restart` and `/etc/init.d/nmb restart` despite
+  the fact that users might be disconnected.
+- Added also a new function returning connected users.
+- 2.13.5
+
+-------------------------------------------------------------------
 Thu Jan 12 08:44:54 CET 2006 - locilka@suse.cz
 
 - Fixed some typo in translated messages

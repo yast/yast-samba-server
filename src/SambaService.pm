@@ -3,6 +3,7 @@
 # Summary:	Data for configuration of samba-server, input and output functions.
 # Authors:	Stanislav Visnovsky <visnov@suse.cz>
 #		Martin Lazar <mlazar@suse.cz>
+#		Lukas Ocilka <locilka@suse.cz>
 #
 # $Id$
 #
@@ -94,6 +95,19 @@ sub GetServiceAutoStart {
     return $Service ? 1 : 0;
 }
 
+# Get Whether SAMBA is running now or not
+BEGIN{$TYPEINFO{GetServiceRunning} = ["function", "boolean"]}
+sub GetServiceRunning {
+    my $running = 1;
+    foreach("nmb", "smb") {
+	# '0' means -> running
+	if (Service->Status($_)) {
+	    $running = 0;
+	}
+    }
+    return $running;
+}
+
 # Start/Stop SAMBA server daemons (smb and nmb) NOW.
 # return @integer	0 on succes, -1 if cannot start, -2 if cannot reload, -3 if cannot stop
 BEGIN{$TYPEINFO{StartStopNow}=["function", "boolean", "boolean"]};
@@ -101,6 +115,10 @@ sub StartStopNow {
     my ($self, $on) = @_;
     my $error = 0;
     
+    # Zero connected users -> restart, einther -> reload
+    my $connected_users = $self->ConnectedUsers();
+    my $run_command = (scalar(@$connected_users)>0 ? "reload":"restart");
+
     foreach("nmb", "smb") {
 	if ($on) {
     	    # check, if the services run
@@ -113,8 +131,10 @@ sub StartStopNow {
 	    } else {
 		# the service runs => relaod it
 		# RunInitScript return exit code, 0 = OK
-		if (Service->RunInitScript($_, "restart")) {
-		    y2error("Service::RunInitScript($_, 'restart') failed");
+		# Bugzilla #120080 - 'reload' instead of 'restart'
+		y2milestone("Number of connected users: ".scalar(@$connected_users).", running ".$_." -> ".$run_command);
+		if (Service->RunInitScript($_, $run_command)) {
+		    y2error("Service::RunInitScript(".$_.", '".$run_command."') failed");
 		    $error = 1;
 		}
 	    }
@@ -145,6 +165,28 @@ sub StartStopReload {
 	y2milestone("stopping samba-server...");
 	$class->StartStopNow(0);
     }
+}
+
+# Returns list of connected users
+BEGIN{$TYPEINFO{ConnectedUsers}=["function",["list","string"]]};
+sub ConnectedUsers {
+    my $connected_users = [];
+    my $command = 'LANG=C /usr/bin/smbstatus --brief';
+    my $run_command = SCR->Execute('.target.bash_output', $command);
+    if ($run_command->{'exit'} ne '0') {
+	y2error("Command '".$command."' failed");
+    } else {
+	my $hr_found = 0;
+	foreach (split(/\n/, $run_command->{'stdout'})) {
+	    # listing of users starts with a horizontal line "----"
+	    if (/^-+$/) { $hr_found = 1; }
+	    # table contains: "[ ]*PID     Username      Group         Machine$"
+	    if (($hr_found == 1) && /^[\t ]*\d+[\t ]+([^\t ]+)[\t ]+/) {
+		push (@$connected_users, $1);
+	    }
+	}
+    }
+    return $connected_users;
 }
 
 8;

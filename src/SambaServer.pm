@@ -3,6 +3,7 @@
 # Summary:	Data for configuration of samba-server, input and output functions.
 # Authors:	Stanislav Visnovsky <visnov@suse.cz>
 #		Martin Lazar <mlazar@suse.cz>
+#		Lukas Ocilka <locilka@suse.cz>
 #
 # $Id$
 #
