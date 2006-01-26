@@ -282,7 +282,7 @@ BEGIN{ $TYPEINFO{Import} = ["function", "void", ["map", "any", "any"]] }
 sub Import {
     my ($self, $settings) = @_;
 
-    if ($settings and $settings->{"config"} and keys %{$settings->{"config"}}) {
+    if ($settings and defined $settings->{"config"} and scalar(@{$settings->{"config"}})) {
 	$GlobalsConfigured = 1;
     } else {
 	$GlobalsConfigured = 0;
