@@ -1,7 +1,7 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages samba-client yast2-samba-client yast2-ldap-client yast2-pam yast2-printer yast2-country yast2-installation yast2-perl-bindings perl-gettext perl-Crypt-SmbHash yast2-ldap perl-X500-DN perl-Digest-SHA1 perl-Parse-RecDescent yast2-network
 
 @HEADER@
+BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-devel-packages yast2-network yast2-printer yast2-samba-client
 Requires:	yast2-perl-bindings yast2 yast2-ldap-client yast2-samba-client yast2-pam yast2-printer perl-Crypt-SmbHash yast2-ldap yast2-network 
 
 BuildArchitectures:	noarch
