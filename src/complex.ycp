@@ -67,7 +67,7 @@ symbol WriteDialog() ``{
 	Report::Message(_("Because users are currently connected to this Samba server,
 the server configuration has been reloaded instead of restarted.
 To confirm that all settings are applied despite possibly disconnecting the users,
-run `/etc/init.d/smb restart` and `/etc/init.d/nmb restart`"));
+run '/etc/init.d/smb restart' and '/etc/init.d/nmb restart'"));
     }
     return ret ? `next : `abort;
 }
