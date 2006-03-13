@@ -28,6 +28,7 @@ import "SambaNetJoin";
 import "SambaTrustDom";
 import "SambaAccounts";
 import "SambaNmbLookup";
+import "Samba";
 
 import "CWM";
 import "CWMTab";
@@ -39,6 +40,7 @@ include "samba-server/dialogs-items.ycp";
 
 include "samba-server/ldap-widget.ycp";
 
+include "samba-client/routines.ycp";
 
 string return_tab = "startup";
 
@@ -276,6 +278,47 @@ symbol AdvancedSettingsWidgetHandle(string key, map event)
     return nil;
 }
 
+// User shares feature, bugzilla #143908
+boolean allow_share = true;
+integer max_shares  = 0;
+string shares_group = "";
+
+void InitUserShareWidgets () {
+    max_shares  = Samba::GetMaxShares ();
+    if (max_shares == 0) {
+	max_shares      = 100;
+	allow_share     = false;
+    }
+    shares_group = Samba::shares_group;
+
+    UI::ChangeWidget (`id(`group), `Value, shares_group);
+    UI::ChangeWidget (`id(`max_shares), `Value, max_shares);
+    UI::ChangeWidget (`id(`share_ch), `Value, allow_share);
+}
+
+void AdjustUserShareWidgets () {
+    foreach (symbol t, [`group, `max_shares], {
+	UI::ChangeWidget (`id(t), `Enabled,
+	    (boolean) UI::QueryWidget(`id(`share_ch),`Value)
+	);
+    });
+}
+
+void StoreUserShareWidgets (string key, map event_descr) {
+    boolean new_share = (boolean)UI::QueryWidget(`id(`share_ch),`Value);
+    if (new_share && ! allow_share && SharesExist (Samba::shares_dir)) {
+	Samba::remove_shares = AskForSharesRemoval ();
+    }
+    integer max = (integer)UI::QueryWidget(`id(`max_shares),`Value);
+    if (!new_share) {
+	max = 0;
+	// Samba::stop_services = AskToStopServices();
+	Samba::stop_services = false;
+    }
+    Samba::SetShares (max,(string)UI::QueryWidget(`id(`group),`Value));
+    SambaServer::SetModified();
+}
+
 void SharesWidgetInit(string key)
 {
     list items = sharesItems(false);
@@ -284,6 +327,9 @@ void SharesWidgetInit(string key)
     UI::ChangeWidget( `id(`edit), `Enabled, size(items)>0 );
     UI::ChangeWidget( `id(`delete), `Enabled, size(items)>0 );
     UI::ChangeWidget( `id(`toggle), `Enabled, size(items)>0 );
+
+    InitUserShareWidgets();
+    AdjustUserShareWidgets();
 }
 
 symbol SharesWidgetHandle(string key, map event_descr)
@@ -292,6 +338,10 @@ symbol SharesWidgetHandle(string key, map event_descr)
     symbol ret = (symbol) event_descr["ID"]:nil;
     return_tab = "shares";
 
+    if (ret == `share_ch) {
+	AdjustUserShareWidgets();
+	return nil;
+    }
     if (ret == `add) {
 	return ret;
     }
@@ -696,7 +746,18 @@ any Installation_Conf_Tab () {
 	],
 	"shares": $[
             "header" : _("&Shares"),
-	    "contents": `VBox("SHARES"),
+	    "contents": `VBox(
+		`VBox (
+		    "SHARES"
+		),
+		`HBox (
+		    `HSpacing(1),
+		    // Bugzilla #143908
+		    GetSharesTerm(allow_share, shares_group, max_shares),
+		    `HSpacing(1)
+		),
+		`VSpacing(1)
+	    ),
 	    "widget_names": ["SHARES"]
 	],
 	"identity": $[
@@ -757,7 +818,8 @@ any Installation_Conf_Tab () {
 	    "custom_widget" : shares_widget,
 	    "init" : SharesWidgetInit,
 	    "handle" : SharesWidgetHandle,
-	    "help": HELPS["smb_conf_tab_shares"]:""
+	    "store" : StoreUserShareWidgets,
+	    "help": HELPS["smb_conf_tab_shares"]:"" + SharesHelp()
 	],
 	"IDENTITY COMMON HELP": $[
 	    "widget" : `custom,

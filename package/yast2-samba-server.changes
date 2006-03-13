@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 13 17:22:25 CET 2006 - locilka@suse.cz
+
+- Adding net 'usershare' feature, bugzilla #143908
+
+-------------------------------------------------------------------
 Mon Mar  6 19:16:12 CET 2006 - locilka@suse.cz
 
 - Adjusting BuildRequires for package

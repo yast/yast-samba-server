@@ -41,6 +41,7 @@ YaST::YCP::Import("SambaSecrets");
 YaST::YCP::Import("SambaNmbLookup");
 YaST::YCP::Import("SambaTrustDom");
 YaST::YCP::Import("SambaAccounts");
+YaST::YCP::Import("Samba");
 }
 
 use constant {
@@ -127,6 +128,7 @@ sub Read {
 	PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) or return 0;
     }
     SambaConfig->Read();
+    Samba->ReadSharesSetting();
     
     # 2: read samba secrets
     Progress->NextStage();
@@ -243,6 +245,8 @@ sub Write {
 	return 0;
     }
     SCR->Execute(".target.bash", "touch " . DONE_ONCE_FILE);
+    # write samba shares feature, only write => 1
+    Samba->WriteShares(1);
     
     # 2: write services settings
     Progress->NextStage();
