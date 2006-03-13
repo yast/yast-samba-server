@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Mar 13 17:55:38 CET 2006 - locilka@suse.cz
+
+- Fixing bug #155708, changing focus in the LDAP configuration
+  with every entered character because of instant password
+  checking. Now the passwords are checked only once.
+- 2.13.7
+
+-------------------------------------------------------------------
 Mon Mar 13 17:22:25 CET 2006 - locilka@suse.cz
 
 - Adding net 'usershare' feature, bugzilla #143908

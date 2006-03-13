@@ -246,7 +246,7 @@ sub Write {
     }
     SCR->Execute(".target.bash", "touch " . DONE_ONCE_FILE);
     # write samba shares feature, only write => 1
-    Samba->WriteShares(1);
+    Samba->WriteShares();
     
     # 2: write services settings
     Progress->NextStage();

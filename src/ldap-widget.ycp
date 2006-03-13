@@ -110,9 +110,10 @@ boolean _try_connect(string url, string admin_dn, string passwd)
 boolean SambaLDAPTryConnect()
 {
     string passwd1 = (string)UI::QueryWidget(`id(`passwd1), `Value);
-    string passwd2 = (string)UI::QueryWidget(`id(`passwd1), `Value);
+    string passwd2 = (string)UI::QueryWidget(`id(`passwd2), `Value);
     if (passwd1 != passwd2) {
 	Popup::Warning(_("Passwords do not match."));
+	UI::SetFocus(`id (`passwd1));
 	return false;
     }
     
@@ -264,13 +265,13 @@ map CreateSambaLDAPSettingsEssentialWidget()
 	// translators: text entry label
 	`TextEntry(`id("ldap suffix"), _("&Search Base DN")));
     term auth = `Frame(_("Authentication"), `VBox(
-	// translators: text enrty label
+	// translators: text entry label
 	`TextEntry(`id("ldap admin dn"), _("&Administration DN")),
 	// TODO: if Mode::config() => no ask for pssword
 	// translators: password enrty label
-	`Password(`id(`passwd1), `opt(`notify), _("Administration &Password")),
-	// translators: reenter password enrty label
-	`Password(`id(`passwd2), `opt(`notify), _("Administration Password (A&gain)")),
+	`Password(`id(`passwd1), _("Administration &Password")),
+	// translators: reenter password entry label
+	`Password(`id(`passwd2), _("Administration Password (A&gain)")),
 	`ReplacePoint(`id("passwd_label"), `Label("")),
 	`Empty(`opt(`vstretch))));
     term passdb = 
