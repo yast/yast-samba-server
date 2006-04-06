@@ -14,23 +14,32 @@ import "Service";
 // get the machine name
 string value = (string)WFM::Args (0);
 
+string GetGlobalVariable (string var_name) {
+    // SCR::Read (.etc.smb.value.global."variable") --> returns list <string>
+    list <string> tmp_read = (list <string>) SCR::Read (add(.etc.smb.value.global, var_name));
+    if (tmp_read == nil)
+	return nil;
+    else
+	return tmp_read[0]:nil;
+}
+
 // get the samba configuration
 
-string bind_dn = (string)SCR::Read (.etc.smb.value.global."ldap admin dn");
+string bind_dn = GetGlobalVariable("ldap admin dn");
 if (bind_dn == nil)
 {
 	y2error ("ldap admin dn not configured");
 	return false;
 }
 
-string ldap_suffix = (string)SCR::Read (.etc.smb.value.global."ldap suffix");
+string ldap_suffix = GetGlobalVariable("ldap suffix");
 if (ldap_suffix == nil)
 {
 	y2error ("ldap suffix not configured");
 	return false;
 }
 
-string ldap_machine_suffix = (string)SCR::Read (.etc.smb.value.global."ldap machine suffix");
+string ldap_machine_suffix = GetGlobalVariable("ldap machine suffix");
 if (ldap_machine_suffix == nil)
 {
     y2error ("ldap machine suffix not configured");
@@ -93,7 +102,11 @@ map<string,any> data_map = $[
 // add the user
 y2milestone (YaPI::USERS::UserAdd (config_map, data_map) );
 
-Service::RunInitScript ("nscd", "try-restart");
+map run_nscd = (map) SCR::Execute (.target.bash_output, "/usr/sbin/nscd -i passwd");
+if ( res["exit"]:-1 != 0 ) {
+	y2error ("nscd failed: %1", run_nscd);
+	return false;
+}
 
 return true;
 

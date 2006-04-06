@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr  6 10:18:37 CEST 2006 - locilka@suse.cz
+
+- Fixing add_machine.ycp script, SCR::Read() for smb.conf doesn't
+  return "string" but "list <string>" (#163227)
+- Running 'nscd -i passwd' instead of restarting the service
+  (#163227).
+- 2.13.8
+
+-------------------------------------------------------------------
 Mon Mar 13 17:55:38 CET 2006 - locilka@suse.cz
 
 - Fixing bug #155708, changing focus in the LDAP configuration
