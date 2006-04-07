@@ -441,9 +441,13 @@ a security threat."));
     
     list<term> domains = [];
     
-    foreach (string key, SambaTrustDom::List(), ``{
-        domains = add (domains, `item ( `id(key), key ) );
-    });
+    // SambaTrustDom::List() might return 'nil'
+    list <string> samba_trust_domain_list = SambaTrustDom::List();
+    if (samba_trust_domain_list != nil || samba_trust_domain_list != []) {
+	foreach (string key, samba_trust_domain_list, {
+	    domains = add (domains, `item ( `id(key), key ) );
+	});
+    }
     
     UI::ReplaceWidget(`id(`domains_tr), `SelectionBox(`id("trusted_domains"), _("&Trusted Domains"), domains));
 

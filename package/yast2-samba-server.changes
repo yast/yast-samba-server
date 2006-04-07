@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Apr  7 15:13:48 CEST 2006 - locilka@suse.cz
+
+- Ask user whether to propose the default configuration when user
+  selects the LDAP support and has no values pre-filled (#163995).
+- 2.13.9
+
+-------------------------------------------------------------------
 Thu Apr  6 10:18:37 CEST 2006 - locilka@suse.cz
 
 - Fixing add_machine.ycp script, SCR::Read() for smb.conf doesn't

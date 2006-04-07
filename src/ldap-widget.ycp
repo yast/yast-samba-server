@@ -161,6 +161,18 @@ void SambaLDAPSettingsEssentialWidgetInit(string key)
     UI::SetFocus(`id (`passwd1));
 }
 
+void ProposeDefaultValues () {
+	    SambaConfig::GlobalSetMap(SambaBackendLDAP::GetSuseDefaultValues());
+	    if (Ldap::server != nil && Ldap::server != "") {
+		SambaConfig::GlobalSetStr("idmap backend", "ldap:ldap://" + Ldap::GetFirstServer(Ldap::server));
+		SambaBackend::AddPassdbBackend("ldapsam", "ldap://" + Ldap::GetFirstServer(Ldap::server));
+	    } else {
+		SambaConfig::GlobalSetStr("idmap backend", nil);
+		SambaBackend::RemovePassdbBackend("ldapsam");
+	    }
+	    SambaLDAPSettingsEssentialWidgetInit(nil);
+}
+
 symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
 {
     any id=event_descr["ID"]:nil;
@@ -191,6 +203,26 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
 	foreach(any id, ["ldap suffix", "ldap admin dn", `passwd1, `passwd2, `ldap_try_connect, `ldap_advanced_settings], {
 	    UI::ChangeWidget(`id(id), `Enabled, idmap || passdb);
 	});
+
+	// Propose default values
+	if (passdb || idmap) {
+	    boolean some_values_filled = false;
+	    foreach (symbol ui_widget_setting, [`passwd1, `passwd2, `ldap_passdb_backend_url, `ldap_passdb_backend_url, `ldap_idmap_backend_url, `ldap_idmap_backend_url], {
+		string read_value = (string) UI::QueryWidget(`id(ui_widget_setting), `Value);
+		if (read_value != "" && read_value != nil) {
+		    some_values_filled = true;
+		    break;
+		}
+	    });
+
+	    if (some_values_filled == false && Popup::YesNo(_("All current LDAP-related values will be rewritten.
+Continue?
+")
+	    )) {
+		y2milestone("Proposing default values...");
+		ProposeDefaultValues();
+	    }
+	}
     } else if (id == `ldap_expert_settings) {
 	SambaLDAPExpertSettingsDialog();
     } else if (id == `ldap_try_connect) {
@@ -203,15 +235,7 @@ symbol SambaLDAPSettingsEssentialWidgetHandle(string key, map event_descr)
 	if (Popup::YesNo(_("All current LDAP-related values will be rewritten.
 Continue?
 "))) {
-	    SambaConfig::GlobalSetMap(SambaBackendLDAP::GetSuseDefaultValues());
-	    if (Ldap::server != nil && Ldap::server != "") {
-		SambaConfig::GlobalSetStr("idmap backend", "ldap:ldap://" + Ldap::GetFirstServer(Ldap::server));
-		SambaBackend::AddPassdbBackend("ldapsam", "ldap://" + Ldap::GetFirstServer(Ldap::server));
-	    } else {
-		SambaConfig::GlobalSetStr("idmap backend", nil);
-		SambaBackend::RemovePassdbBackend("ldapsam");
-	    }
-	    SambaLDAPSettingsEssentialWidgetInit(nil);
+	    ProposeDefaultValues();
 	}
     }
 
