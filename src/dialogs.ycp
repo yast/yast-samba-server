@@ -29,6 +29,7 @@ import "SambaTrustDom";
 import "SambaAccounts";
 import "SambaNmbLookup";
 import "Samba";
+import "SambaAD";
 
 import "CWM";
 import "CWMTab";
@@ -997,6 +998,8 @@ symbol AskJoinDomainDialog() ``{
 	return `ok;
     }
     
+    SambaAD::ReadADS(workgroup);
+    SambaAD::ReadRealm();
     boolean res = SambaNetJoin::Test(workgroup);
     if (res == true) {
 	return `ok;

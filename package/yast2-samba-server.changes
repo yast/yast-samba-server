@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr 10 13:48:20 CEST 2006 - locilka@suse.cz
+
+- Calling SambaAD::ReadADS() and SambaAD::ReadRealm() before
+  the SambaNetJoin::Test() (#160056).
+- 2.13.10
+
+-------------------------------------------------------------------
 Fri Apr  7 15:13:48 CEST 2006 - locilka@suse.cz
 
 - Ask user whether to propose the default configuration when user
