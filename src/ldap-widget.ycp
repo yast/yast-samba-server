@@ -470,14 +470,14 @@ list<list> ldap_yes_no_values = [ ["Yes", _("Yes")],
 list<list> ldap_yes_no_only_values = (list<list>)merge(ldap_yes_no_values, [["Only", _("Only")] ]);
 
 void SambaLDAPSettingsMiscWidgetInit(string key) ``{
-    init_ldap_str("ldap filter");
+    // init_ldap_str("ldap filter");
     init_ldap_combo("ldap delete dn", ldap_yes_no_values);
     init_ldap_combo("ldap passwd sync", ldap_yes_no_only_values);
 }
 
 void SambaLDAPSettingsMiscWidgetStore(string key, map event_descr)
 {
-    store_ldap_str("ldap filter");
+    // store_ldap_str("ldap filter");
     store_ldap_str("ldap delete dn");
     store_ldap_str("ldap passwd sync");
 }
@@ -486,8 +486,10 @@ map CreateSambaLDAPSettingsMiscWidget()
 {
     // translators: frame label
     term misc_widget = `Frame(_("Other Settings"), `VBox(
+	// No such option, bug 169194
 	// translators: text entry label
-	`Left(`TextEntry(`id("ldap filter"), _("Search &Filter"))),
+	// `Left(`TextEntry(`id("ldap filter"), _("Search &Filter"))),
+
 	// translators: combo box label
 	`Left(`ComboBox(`id("ldap delete dn"), _("&Delete DN"),
 		maplist(list l, ldap_yes_no_values, {return `item(`id(l[0]:""),l[1]:"");}))),

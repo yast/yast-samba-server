@@ -920,11 +920,12 @@ map<string, map<string, any> > global_option_widgets = $[
 		"unique" : true,
 	],
 ],
-"ldap filter" : $[
-	"table" : $[
-		"unique" : true,
-	],
-],
+// There is no such option, bug 169194
+//"ldap filter" : $[
+//	"table" : $[
+//		"unique" : true,
+//	],
+//],
 "ldap admin dn" : $[
 	"table" : $[
 		"unique" : true,

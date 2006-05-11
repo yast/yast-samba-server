@@ -55,7 +55,8 @@ my $SambaDefaultValues = {
     "ldap machine suffix" => "",
 
     "ldap delete dn" => "No",
-    "ldap filter" => "(uid=%u)",
+    # no such option, bug 169194
+    # "ldap filter" => "(uid=%u)",
     "ldap passwd sync" => "No",
     "ldap replication sleep" => "1000",
     "ldap ssl" => "Start_tls",

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 11 15:42:49 CEST 2006 - locilka@suse.cz
+
+- Removing "ldap filter" from UI and functions, there is no such
+  option (#169194).
+- 2.13.11
+
+-------------------------------------------------------------------
 Mon Apr 10 13:48:20 CEST 2006 - locilka@suse.cz
 
 - Calling SambaAD::ReadADS() and SambaAD::ReadRealm() before
