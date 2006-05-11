@@ -7,8 +7,6 @@ Write	.etc.smb.value.global."ldap admin dn" [""] true
 Write	.etc.smb.value_type.global."ldap admin dn" [0] true
 Write	.etc.smb.value.global."ldap delete dn" ["No"] true
 Write	.etc.smb.value_type.global."ldap delete dn" [0] true
-Write	.etc.smb.value.global."ldap filter" ["(uid=%u)"] true
-Write	.etc.smb.value_type.global."ldap filter" [0] true
 Write	.etc.smb.value.global."ldap group suffix" [""] true
 Write	.etc.smb.value_type.global."ldap group suffix" [0] true
 Write	.etc.smb.value.global."ldap idmap suffix" [""] true
