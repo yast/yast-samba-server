@@ -4,7 +4,7 @@ Fri Jul 21 13:58:55 CEST 2006 - locilka@suse.cz
 - When creating a new share or editing an old one, the share-path
   is checked for its existency. If the path doesn't exists, it's
   offered to create it. Eventual errors, e.g., path is not
-  a directory, cannot create path are reported.
+  a directory, cannot create path are reported (#186380).
 - 2.13.12
 
 -------------------------------------------------------------------
