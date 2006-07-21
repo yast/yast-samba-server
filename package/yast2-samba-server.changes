@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Jul 21 13:58:55 CEST 2006 - locilka@suse.cz
+
+- When creating a new share or editing an old one, the share-path
+  is checked for its existency. If the path doesn't exists, it's
+  offered to create it. Eventual errors, e.g., path is not
+  a directory, cannot create path are reported.
+- 2.13.12
+
+-------------------------------------------------------------------
 Thu May 11 15:42:49 CEST 2006 - locilka@suse.cz
 
 - Removing "ldap filter" from UI and functions, there is no such

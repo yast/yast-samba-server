@@ -17,7 +17,6 @@ import "Label";
 import "Wizard";
 import "Mode";
 import "Popup";
-
 import "ProductFeatures";
 
 import "SambaRole";
@@ -38,10 +37,9 @@ import "CWMFirewallInterfaces";
 
 include "samba-server/helps.ycp";
 include "samba-server/dialogs-items.ycp";
-
 include "samba-server/ldap-widget.ycp";
-
 include "samba-client/routines.ycp";
+include "samba-server/complex.ycp";
 
 string return_tab = "startup";
 
@@ -533,7 +531,6 @@ symbol GlobalSettingsDialog () ``{
     return res;
 }
 
-
 symbol AddShareDialog () ``{
 
     term contents = `HVSquash(`HBox(
@@ -619,14 +616,9 @@ symbol AddShareDialog () ``{
 	    } else if (!printable && !SharePathWarning(pathvalue)) {
 		ret = nil;
 		continue;
-	    } else if( !printable && ! Mode::config() && SCR::Read( .target.stat, pathvalue ) == $[] ) {
-		// translators: question popup. A user entered non-existent path
-		// for a share, %1 is entered path
-		if (!Popup::YesNo(sformat( _("The path %1 does not exist.\nReally use this path?"), pathvalue)))
-		{
-		    ret = nil;
-		    continue;
-		}
+	    } else if (!printable && !Mode::config() && !CheckAndCreatePath(pathvalue)) {
+		ret = nil;
+		continue;
 	    }
 	    
 	    map<string,string> res = $[
