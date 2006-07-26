@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jul 26 11:44:40 CEST 2006 - locilka@suse.cz
+
+- Function for creating path moved to yast2 package into the
+  FileUtils module.
+
+-------------------------------------------------------------------
 Fri Jul 21 13:58:55 CEST 2006 - locilka@suse.cz
 
 - When creating a new share or editing an old one, the share-path
