@@ -18,6 +18,7 @@ import "Wizard";
 import "Mode";
 import "Popup";
 import "ProductFeatures";
+import "FileUtils";
 
 import "SambaRole";
 import "SambaServer";
@@ -616,7 +617,7 @@ symbol AddShareDialog () ``{
 	    } else if (!printable && !SharePathWarning(pathvalue)) {
 		ret = nil;
 		continue;
-	    } else if (!printable && !Mode::config() && !CheckAndCreatePath(pathvalue)) {
+	    } else if (!printable && !Mode::config() && !FileUtils::CheckAndCreatePath(pathvalue)) {
 		ret = nil;
 		continue;
 	    }

@@ -17,6 +17,7 @@
     import "Popup";
     import "LogView";
     import "TablePopup";
+    import "FileUtils";
     
     import "SambaServer";
     import "SambaConfig";
@@ -224,7 +225,7 @@ boolean ValidateSharePath(any opt_id, string opt_key, map event_descr) {
     string p = (string)UI::QueryWidget (`id(opt_key), `Value);
 
     if (!SharePathWarning (p)) return false;
-    if (!CheckAndCreatePath (p)) return false;
+    if (!FileUtils::CheckAndCreatePath (p)) return false;
     
     return true;
 }
