@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug 28 11:34:35 CEST 2006 - locilka@suse.cz
+
+- Added yast2-ldap-client into BuildRequires.
+- Changed call GetSharesTerm into SharesTerm (bugzilla #144787).
+- 2.13.13
+
+-------------------------------------------------------------------
 Wed Jul 26 11:44:40 CEST 2006 - locilka@suse.cz
 
 - Function for creating path moved to yast2 package into the

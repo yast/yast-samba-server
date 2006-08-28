@@ -751,7 +751,12 @@ any Installation_Conf_Tab () {
 		`HBox (
 		    `HSpacing(1),
 		    // Bugzilla #143908
-		    GetSharesTerm(allow_share, shares_group, max_shares),
+		    // Bugzilla #144787, comment #43
+		    SharesTerm ($[
+			"allow_share" : allow_share,
+			"group"       : shares_group,
+			"max_shares"  : max_shares,
+		    ]),
 		    `HSpacing(1)
 		),
 		`VSpacing(1)
