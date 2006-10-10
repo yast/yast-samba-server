@@ -13,12 +13,13 @@
 textdomain "samba-server";
 
 import "Wizard";
-//import "Wizard_hw";
 
 import "SambaServer";
 import "SambaService";
 import "Progress";
 import "Report";
+import "FileUtils";
+import "Popup";
 
 include "samba-server/helps.ycp";
 

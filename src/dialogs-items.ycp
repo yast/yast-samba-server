@@ -17,13 +17,14 @@
     import "Popup";
     import "LogView";
     import "TablePopup";
+    import "FileUtils";
     
     import "SambaServer";
     import "SambaConfig";
     import "SambaBackend";
     
     include "samba-server/helps.ycp";
-
+    include "samba-server/complex.ycp";
 
     define list ShareEditContents (map descr);
     define void ShareEditPopupInit (any opt_id, string opt_key);
@@ -209,11 +210,7 @@ boolean SharePathWarning (string p)
     if ( p == "/" ) {
 	text = root_warning;
     } else {
-	foreach(string known, maplist (string key, string val, warnings, ``(key)), ``{
-	    if (find (p,known) == 0) {
-		text = warnings [known]:nil;
-	    }
-	});
+	if (warnings[p]:nil != nil) text = warnings[p]:nil;
     }
     
     if (text != nil) {
@@ -227,7 +224,10 @@ boolean ValidateSharePath(any opt_id, string opt_key, map event_descr) {
 
     string p = (string)UI::QueryWidget (`id(opt_key), `Value);
 
-    return SharePathWarning (p);
+    if (!SharePathWarning (p)) return false;
+    if (!FileUtils::CheckAndCreatePath (p)) return false;
+    
+    return true;
 }
 
 
