@@ -1,4 +1,32 @@
 -------------------------------------------------------------------
+Tue Oct 10 15:27:16 CEST 2006 - locilka@suse.cz
+
+- Merged SLES10 SP1 branch to openSUSE 10.2.
+- 2.14.0
+
+-------------------------------------------------------------------
+Mon Aug 28 11:34:35 CEST 2006 - locilka@suse.cz
+
+- Added yast2-ldap-client into BuildRequires.
+- Changed call GetSharesTerm into SharesTerm (bugzilla #144787).
+- 2.13.13
+
+-------------------------------------------------------------------
+Wed Jul 26 11:44:40 CEST 2006 - locilka@suse.cz
+
+- Function for creating path moved to yast2 package into the
+  FileUtils module.
+
+-------------------------------------------------------------------
+Fri Jul 21 13:58:55 CEST 2006 - locilka@suse.cz
+
+- When creating a new share or editing an old one, the share-path
+  is checked for its existency. If the path doesn't exists, it's
+  offered to create it. Eventual errors, e.g., path is not
+  a directory, cannot create path are reported (#186380).
+- 2.13.12
+
+-------------------------------------------------------------------
 Thu May 11 15:42:49 CEST 2006 - locilka@suse.cz
 
 - Removing "ldap filter" from UI and functions, there is no such
