@@ -1,0 +1,88 @@
+default namespace = "http://www.suse.com/1.0/yast2ns"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace config = "http://www.suse.com/1.0/configns"
+
+samba-client = element samba-client { smb_client_global? & smb_client_ad? & smb_client_join? }
+smb_client_global = element smb_client_global {
+    element guest_access { BOOLEAN }? &
+    element max_shares   { INTEGER }? &
+    element mkhomedir    { BOOLEAN }? &
+    element shares_group { text }? &
+    element winbind      { BOOLEAN }? &
+    element winbind_caching { BOOLEAN }? &
+    element workgroup    { text }?
+}
+smb_client_ad = element active_directory {
+    element kdc { text }?
+}
+smb_client_join = element join {
+    element password { text }? &
+    element user     { text }?
+}
+
+winbind =
+  element winbind { BOOLEAN }
+workgroup = element workgroup { text }
+accounts = element accounts {
+    attribute config:type { text }?,
+    element account { text }*
+}
+
+
+samba-server =
+  element samba-server {
+    accounts? &
+    element backend {
+	element fixme { text }*
+    }? &
+    element config {
+	attribute config:type { text }? &
+	element listentry {
+	    element disabled { attribute config:type { text }? & text }? &
+	    element name { text }? &
+	    element parameters {
+		element add_machine_script { text }? &
+		element comment { text }? &
+		element domain_logons { text }? &
+		element domain_master { text }? &
+		element inherit_acls { text }? &
+		element path { text }? &
+		element read_only { text }? &
+		element security { text }? &
+		element workgroup { text }?
+	    }?
+	}*
+    }? &
+    samba-client? &
+    smb_client_global? &
+    role? &
+    element service { text }? &
+    shares? &
+    element trustdom {
+	element fixme { text }*
+    }? &
+    trusteddomains? &
+    version?
+  }
+role = element role { text }
+version = element version { text }
+shares =
+  element shares {
+    LIST,
+    share*
+  }
+trusteddomains =
+  element trusteddomains {
+    trusteddomain*
+  }
+trusteddomain = element trusteddomain { trusteddomain_domain, trusteddomain_password }
+trusteddomain_domain   = element domain { text }
+trusteddomain_password = element password { text }
+y2_share = samba_options | share
+samba_options = element options {
+    option*
+}
+share = element share { (text | y2_share)* }
+option = element option { samba_option_key, samba_option_val? }
+samba_option_key = element key { text }
+samba_option_val = element value { text }

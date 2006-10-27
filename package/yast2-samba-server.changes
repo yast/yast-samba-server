@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 27 11:10:26 CEST 2006 - locilka@suse.cz
+
+- Adding samba-server.rnc for AutoYaST profile validation (#215248)
+- 2.13.14
+
+-------------------------------------------------------------------
 Mon Aug 28 11:34:35 CEST 2006 - locilka@suse.cz
 
 - Added yast2-ldap-client into BuildRequires.
