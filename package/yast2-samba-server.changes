@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 27 11:09:22 CEST 2006 - locilka@suse.cz
+
+- Adding samba-server.rnc for AutoYaST profile validation (#215248) 
+- 2.14.1
+
+-------------------------------------------------------------------
 Tue Oct 10 15:27:16 CEST 2006 - locilka@suse.cz
 
 - Merged SLES10 SP1 branch to openSUSE 10.2.

@@ -27,4 +27,5 @@ Summary:	Configuration of samba-server
 @clientdir@/*.ycp
 @moduledir@/*
 @desktopdir@/samba-server.desktop
+@schemadir@/autoyast/rnc/samba-server.rnc
 %doc @docdir@

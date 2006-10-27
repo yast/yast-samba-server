@@ -48,6 +48,7 @@ ycpchook = samba-server
 
 YCPCFLAGS = -I.
 
+SUBDIRS = config
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA) $(YaPI_perl_DATA) $(ydata_DATA)
 
 include $(top_srcdir)/Makefile.am.common
