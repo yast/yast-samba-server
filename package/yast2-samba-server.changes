@@ -5,6 +5,7 @@ Wed Nov  8 11:17:13 CET 2006 - locilka@suse.cz
   contains quotes or apostrophes (#219001).
 - Fixed evaluation of SambaTrustDom::Establish() function's return
   to show up that the command has failed (#219001).
+- Added new testsuite for SambaTrustDom module.
 - 2.13.15 
 
 -------------------------------------------------------------------
