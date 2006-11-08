@@ -87,9 +87,12 @@ BEGIN{$TYPEINFO{Establish}=["function","boolean","string","string"]}
 sub Establish {
     my ($self, $domain, $passwd) = @_;
     return undef unless defined $domain;
+
+    # escape all quote-strings
+    $passwd =~ s/\"/\\\"/g;
     
-    my $cmd = "net rpc trustdom establish '$domain' -U 'root%$passwd'";
-    y2debug("net rpc trustdom establish '$domain' -U root%".("*"x length($passwd)));
+    my $cmd = 'net rpc trustdom establish "'.$domain.'" -U "root%'.$passwd.'"';
+    y2milestone('Running command >net rpc trustdom establish "'.$domain.'" -U "root%$password"<');
     if (SCR->Execute(".target.bash", $cmd)) {
 	y2error("Cannot establish trusted domain relationship for '$domain'");
 	return undef;
