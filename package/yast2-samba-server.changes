@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Nov  8 11:14:42 CET 2006 - locilka@suse.cz
+
+- Fixed handling of "net rpc trustdom establish" when password
+  contains quotes or apostrophes (#219001).
+- Fixed evaluation of SambaTrustDom::Establish() function's return
+  to show up that the command has failed (#219001).
+- 2.14.2
+
+-------------------------------------------------------------------
 Fri Oct 27 11:09:22 CEST 2006 - locilka@suse.cz
 
 - Adding samba-server.rnc for AutoYaST profile validation (#215248) 

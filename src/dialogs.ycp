@@ -412,7 +412,8 @@ void AddTrustedDomain ()
 		Report::Error (_("Domain name cannot be empty.") );
 		ret = nil;
 	    }
-	    if (SambaTrustDom::Establish(domain, passwd)) {
+	    boolean success = SambaTrustDom::Establish(domain, passwd);
+	    if (success != true) {
 		import "Report";
 		Report::Error (_("Cannot establish trusted domain relationship."));
 		ret = nil;
