@@ -84,7 +84,7 @@ sub Name {
 
     my $self		= shift;
     # plugin name
-    return _("Samba Attributes");
+    return __("Samba Attributes");
 }
 
 # return plugin summary
@@ -94,7 +94,7 @@ sub Summary {
     my $self	= shift;
     my $what	= "user";
     # summary
-    my $ret 	= _("Manage Samba attribute of LDAP groups");
+    my $ret 	= __("Manage Samba attribute of LDAP groups");
 
     return $ret;
 }
@@ -305,18 +305,28 @@ sub init_internal_keys {
 sub update_attributes {
     my ( $self, $config, $data ) = @_;
 
-    my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
-    my $gidNumber = $data->{'gidnumber'};
+    my $SID = "";
+    $SID = $data->{'sambainternal'}->{'sambalocalsid'}
+	if (defined $data->{'sambainternal'}->{'sambalocalsid'});
+
+    my $gidNumber = 0;
+    $gidNumber = $data->{'gidnumber'}
+	if (defined $data->{'gidnumber'});
+
+    my $ridbase = 0;
+    $ridbase = $data->{'sambainternal'}->{'ridbase'}
+	if (defined $data->{'sambainternal'}->{'ridbase'});
+
     if ( $gidNumber ) {
         if ( (! $data->{'sambasid'}) || ($data->{'sambasid'} eq "") ) {
-            $data->{'sambasid'} = $SID."-". (2 * $gidNumber + 
-                            $data->{'sambainternal'}->{'ridbase'} + 1);
+            $data->{'sambasid'} = $SID."-". (2 * $gidNumber + $ridbase + 1);
         }
     }
     if( ! $data->{'displayname'} ) {
-        $data->{'displayname'} = $data->{'cn'};
+        $data->{'displayname'} = (defined $data->{'cn'} ? $data->{'cn'}:"");
     }
     $data->{'sambagrouptype'} = "2";
+
     return undef;
 }
 
