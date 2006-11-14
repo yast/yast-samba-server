@@ -5,6 +5,7 @@ Tue Nov 14 11:22:46 CET 2006 - locilka@suse.cz
   UsersPluginSambaGroups module (#220698).
 - Fixed marking texts for translation to use double-underscore
   (#220698).
+- Added new help, thanks to rhafer (#220698).
 - 2.14.3
 
 -------------------------------------------------------------------
