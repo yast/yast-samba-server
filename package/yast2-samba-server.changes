@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Nov 14 11:25:00 CET 2006 - locilka@suse.cz
+
+- Fixed handling of undefined values (keys in hashes) in
+  UsersPluginSambaGroups module (#220698).
+- Fixed marking texts for translation to use double-underscore
+  (#220698).
+- 2.13.16
+
+-------------------------------------------------------------------
 Wed Nov  8 11:17:13 CET 2006 - locilka@suse.cz
 
 - Fixed handling of "net rpc trustdom establish" when password
