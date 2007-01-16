@@ -17,6 +17,7 @@ X-SuSE-YaST-SortKey=
 X-SuSE-YaST-AutoInstResource=samba-server
 X-SuSE-YaST-AutoInstClonable=true
 X-SuSE-YaST-AutoInstRequires=lan
+X-SuSE-YaST-AutoInstSchema=samba-server.rnc
 
 Icon=yast-samba-server
 Exec=/sbin/yast2 samba-server 

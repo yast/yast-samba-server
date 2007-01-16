@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan 16 13:02:08 CET 2007 - locilka@suse.cz
+
+- Adding X-SuSE-YaST-AutoInstSchema entry into the application
+  desktop file (#235342).
+- 2.13.17
+
+-------------------------------------------------------------------
 Tue Nov 14 11:25:00 CET 2006 - locilka@suse.cz
 
 - Fixed handling of undefined values (keys in hashes) in
