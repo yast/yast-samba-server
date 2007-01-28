@@ -2,26 +2,6 @@ default namespace = "http://www.suse.com/1.0/yast2ns"
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
 namespace config = "http://www.suse.com/1.0/configns"
 
-samba-client = element samba-client { smb_client_global? & smb_client_ad? & smb_client_join? }
-smb_client_global = element smb_client_global {
-    element guest_access { BOOLEAN }? &
-    element max_shares   { INTEGER }? &
-    element mkhomedir    { BOOLEAN }? &
-    element shares_group { text }? &
-    element winbind      { BOOLEAN }? &
-    element winbind_caching { BOOLEAN }? &
-    element workgroup    { text }?
-}
-smb_client_ad = element active_directory {
-    element kdc { text }?
-}
-smb_client_join = element join {
-    element password { text }? &
-    element user     { text }?
-}
-
-winbind =
-  element winbind { BOOLEAN }
 workgroup = element workgroup { text }
 accounts = element accounts {
     attribute config:type { text }?,

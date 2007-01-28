@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sun Jan 28 22:35:47 CET 2007 - locilka@suse.cz
+
+- Removed some samba-client-related content confusingly left in
+  samba-server.rnc definition. Patch made by Uwe Gansert (#239154).
+- 2.13.18
+
+-------------------------------------------------------------------
 Tue Jan 16 13:02:08 CET 2007 - locilka@suse.cz
 
 - Adding X-SuSE-YaST-AutoInstSchema entry into the application
