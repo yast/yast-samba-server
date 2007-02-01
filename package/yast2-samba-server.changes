@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb  1 13:20:41 CET 2007 - locilka@suse.cz
+
+- Another patch for (#239154).
+- 2.13.19
+
+-------------------------------------------------------------------
 Sun Jan 28 22:35:47 CET 2007 - locilka@suse.cz
 
 - Removed some samba-client-related content confusingly left in

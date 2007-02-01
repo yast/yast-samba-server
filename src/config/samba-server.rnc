@@ -34,7 +34,6 @@ samba-server =
 	}*
     }? &
     samba-client? &
-    smb_client_global? &
     role? &
     element service { text }? &
     shares? &
@@ -60,9 +59,8 @@ trusteddomain_domain   = element domain { text }
 trusteddomain_password = element password { text }
 y2_share = samba_options | share
 samba_options = element options {
-    option*
+    element option { samba_option_key, samba_option_val? }*
 }
 share = element share { (text | y2_share)* }
-option = element option { samba_option_key, samba_option_val? }
 samba_option_key = element key { text }
 samba_option_val = element value { text }
