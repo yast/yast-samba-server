@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 22 17:49:12 CET 2007 - locilka@suse.cz
+
+- Fixed using icons in dialogs.
+- 2.15.1
+
+-------------------------------------------------------------------
 Sun Jan 28 22:38:02 CET 2007 - locilka@suse.cz
 
 - Removed some samba-client-related content confusingly left in

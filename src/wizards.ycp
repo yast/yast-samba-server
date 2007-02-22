@@ -144,6 +144,7 @@ any SambaServerSequence() {
     ];
 
     Wizard::CreateDialog();
+    Wizard::SetTitleIcon("yast-samba-server");
 
     any ret = Sequencer::Run(aliases, sequence);
 
