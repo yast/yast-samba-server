@@ -11,6 +11,7 @@ package UsersPluginSambaGroups;
 use strict;
 
 use ycp;
+use YaPI;
 use YaST::YCP;
 our %TYPEINFO;
 

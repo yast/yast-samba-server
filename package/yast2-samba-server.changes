@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar  1 17:53:03 CET 2007 - locilka@suse.cz
+
+- Fixing UsersPluginSambaGroups to be able to use translation
+  macro __ (bugzilla #245786).
+- 2.15.2
+
+-------------------------------------------------------------------
 Thu Feb 22 17:49:12 CET 2007 - locilka@suse.cz
 
 - Fixed using icons in dialogs.
