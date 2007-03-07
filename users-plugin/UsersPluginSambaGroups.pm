@@ -15,7 +15,6 @@ use YaPI;
 use YaST::YCP;
 our %TYPEINFO;
 
-use Locale::gettext;
 use POSIX ();
 
 ## FIXME
@@ -25,7 +24,6 @@ use Crypt::SmbHash;
 YaST::YCP::Import ("ProductFeatures");
 YaST::YCP::Import ("SCR");
 
-POSIX::setlocale(LC_MESSAGES, "");
 textdomain("samba-users");	# TODO own textdomain for new plugins
 
 ##--------------------------------------

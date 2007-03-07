@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar  7 11:18:18 CET 2007 - locilka@suse.cz
+
+- Fixing UsersPluginSambaGroups not to redefine gettext functions
+  and to work with 'strict' (#251857).
+- 2.13.21
+
+-------------------------------------------------------------------
 Thu Mar  1 17:49:54 CET 2007 - locilka@suse.cz
 
 - Fixing UsersPluginSambaGroups to be able to use translation
