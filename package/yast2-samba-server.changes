@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Mar  8 15:12:12 CET 2007 - locilka@suse.cz
+
+- Adding a new feature 'Retrieve WINS Server via DHCP' to the UI.
+  It enables or disables 'include = /etc/samba/dhcp.conf' in
+  in smb.conf (FATE #120090).
+- Adjusted Requires and BuildRequires.
+- 2.15.3
+
+-------------------------------------------------------------------
 Wed Mar  7 11:21:07 CET 2007 - locilka@suse.cz
 
 - Fixing UsersPluginSambaGroups not to redefine gettext functions

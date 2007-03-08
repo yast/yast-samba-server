@@ -212,6 +212,10 @@ void WinsSettingsWidgetInit(string key)
     }
 }
 
+void WinsViaDHCPWidgetInit (string key) {
+    UI::ChangeWidget(`id(`dhcp), `Value, Samba::GetDHCP());
+}
+
 void GlobalConfigStringWidgetInit(string key)
 {
     UI::ChangeWidget(`id(key), `Value, SambaConfig::GlobalGetStr(key, ""));
@@ -243,6 +247,15 @@ void WinsSettingsWidgetStore(string key, map event_descr)
 	    SambaConfig::GlobalSetStr("wins server", (string)UI::QueryWidget(`id("wins_server_name"), `Value));
     	    y2milestone("Disabling wins support, using server '%1'", SambaConfig::GlobalGetStr("wins server", "<none>"));
 	}
+    }
+}
+
+void WinsViaDHCPWidgetStore (string key, map event_descr) {
+    boolean new_value = (boolean) UI::QueryWidget(`id (`dhcp), `Value);
+    if (new_value != nil) {
+	y2milestone ("Setting WINS via DHCP to '%1' returned '%2'",
+	    new_value, Samba::SetDHCP (new_value)
+	);
     }
 }
 
@@ -675,7 +688,7 @@ any Installation_Conf_Tab () {
 		`PushButton(`id(`toggle), _("&Toggle Status"))))),
 	`HWeight(1, `Empty()));
 
-    term wins_widget = `Frame(_("WINS"), `HBox(
+    term wins_widget = `HBox(
 	`HSpacing(1),
 	`VBox(
 	    `VSpacing(0.5),
@@ -685,8 +698,13 @@ any Installation_Conf_Tab () {
 	    `HBox(
 	        `HSpacing(3),
 		`TextEntry(`id("wins_server_name"), _("Na&me"))),
-	    `VStretch()),
-	`HSpacing(1)));
+	    `VSpacing(1)
+	),
+	`HSpacing(1)
+    );
+
+    // TRANSLATORS: check box
+    term wins_via_dhcp = DHCPSupportTerm (Samba::GetDHCP());
 
     list<term> roles = [
 	// translators: combobox item
@@ -771,25 +789,53 @@ any Installation_Conf_Tab () {
 		`HWeight(100, `VBox(
 		    `VSpacing(0.5),
 		    (ProductFeatures::GetFeature("globals", "ui_mode") == "simple" ? 
-			`HBox(
-			    `HWeight(25, `Empty()),
-			    `HWeight(50, `VBox(
-				"BASE SETTINGS",
-				`VSpacing(0.5),
-				"netbios name",
-				"ADVANCED SETTINGS")),
-			    `HWeight(25, `Empty())) :
-			`VBox(
-			    `HBox(
-				`HWeight(1, "BASE SETTINGS"),
+			`HBox (
+			    `HWeight (
+				50, `VBox (
+				    "BASE SETTINGS",
+				    `VSpacing (1),
+				    "netbios name",
+				    "WINS via DHCP",
+				    "ADVANCED SETTINGS"
+				)
+			    ),
+			    `HWeight (
+				50, `Empty ()
+			    )
+			)
+			:
+			`VBox (
+			    `HBox (
+				`HWeight (1,
+				    `VBox (
+					"BASE SETTINGS"
+				    )
+				),
 				`HSpacing(0.5),
-				`HWeight(1, "WINS SETTINGS")),
+				`HWeight (1,
+				    `Frame (_("WINS"), `VBox (
+					"WINS SETTINGS",
+					`HBox (`HSpacing (1), "WINS via DHCP"),
+					`VStretch()
+				    ))
+				)
+			    ),
 			    `VSpacing(0.5),
-			    "netbios name",
-			    "ADVANCED SETTINGS")),
-		    `VStretch())),
-		`HWeight(1, `Empty())),
-	    "widget_names": ["IDENTITY COMMON HELP", "BASE SETTINGS", "WINS SETTINGS", "netbios name", "ADVANCED SETTINGS"]
+			    `HBox (
+				`HWeight (1, `VBox (
+				    "netbios name",
+				    "ADVANCED SETTINGS"
+				)),
+				`HSpacing(0.5),
+				`HWeight (1, `Empty ())
+			    )
+			)
+		    ),
+		    `VStretch())
+		),
+		`HWeight(1, `Empty())
+	    ),
+	    "widget_names": ["IDENTITY COMMON HELP", "BASE SETTINGS", "WINS SETTINGS", "WINS via DHCP", "netbios name", "ADVANCED SETTINGS"]
 	]
     ];
     
@@ -844,6 +890,13 @@ any Installation_Conf_Tab () {
 	    "init": WinsSettingsWidgetInit,
 	    "store": WinsSettingsWidgetStore,
 	    "handle": WinsSettingsWidgetHandle,
+	],
+	"WINS via DHCP" : $[
+	    "widget" : `custom,
+	    "custom_widget" : wins_via_dhcp,
+	    "help": HELPS["smb_conf_tab_wins_via_dhcp"]:"",
+	    "init": WinsViaDHCPWidgetInit,
+	    "store": WinsViaDHCPWidgetStore,
 	],
 	"netbios name": $[
 	    "widget": `textentry,
