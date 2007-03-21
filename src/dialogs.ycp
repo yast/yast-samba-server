@@ -188,6 +188,8 @@ any Installation_Step2 () {
 
 /************************* initial wizard end **************************/
 
+string initial_role = nil;
+
 string getRole() {
     string role = SambaRole::GetRole();
     if (role == "MEMBER") return "STANDALONE";
@@ -198,6 +200,10 @@ void BaseSettingsWidgetInit(string key)
 {
     UI::ChangeWidget(`id("workgroup_domainname"), `Value, SambaConfig::GlobalGetStr("workgroup", ""));
     UI::ChangeWidget(`id("domain_controller"), `Value, getRole());
+
+    // initial for this dialog
+    initial_role = SambaRole::GetRole();
+    y2milestone ("Initial role: %1", initial_role);
 }
 
 void WinsSettingsWidgetInit(string key)
@@ -231,8 +237,15 @@ void BaseSettingsWidgetStore(string key, map event_descr)
     if (role == "STANDALONE" && SambaNmbLookup::IsDomain(sel)) {
 	role = "MEMBER";
     }
-    y2milestone ("Setting role '%1'",role);
-    SambaRole::SetRole(role);
+
+    // Do not set the role if it is unchanged. It would rewrite some expert settings
+    // that might have been set manually (Expert Settings), bugzilla #255824
+    if (toupper (role) != toupper (initial_role)) {
+	y2milestone ("Setting role '%1' (was '%2')", role, SambaRole::GetRole());
+	SambaRole::SetRole (role);
+    } else {
+	y2milestone ("Role type not changed (%1)", role);
+    }
 }
 
 void WinsSettingsWidgetStore(string key, map event_descr)

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 21 12:27:05 CET 2007 - locilka@suse.cz
+
+- Set SambaRole only when changed by user. This avoids rewriting
+  changed made in Expert Settings (255824).
+- 2.15.4
+
+-------------------------------------------------------------------
 Thu Mar  8 15:12:12 CET 2007 - locilka@suse.cz
 
 - Adding a new feature 'Retrieve WINS Server via DHCP' to the UI.
