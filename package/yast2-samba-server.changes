@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 21 15:51:17 CET 2007 - locilka@suse.cz
+
+- Set SambaRole only when changed by user. This avoids rewriting
+  changed made in Expert Settings (255824).
+- 2.13.22
+
+-------------------------------------------------------------------
 Wed Mar  7 11:18:18 CET 2007 - locilka@suse.cz
 
 - Fixing UsersPluginSambaGroups not to redefine gettext functions
