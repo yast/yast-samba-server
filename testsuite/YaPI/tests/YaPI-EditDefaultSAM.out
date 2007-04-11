@@ -27,7 +27,7 @@ Write	.etc.smb.value.global."ldap user suffix" [""] true
 Write	.etc.smb.value_type.global."ldap user suffix" [0] true
 Write	.etc.smb.value.global."local master" ["no"] true
 Write	.etc.smb.value_type.global."local master" [0] true
-Write	.etc.smb.value.global."passdb backend" ["ldapsam:ldap://localhost smbpasswd"] true
+Write	.etc.smb.value.global."passdb backend" ["ldapsam:ldap://localhost"] true
 Write	.etc.smb.value_type.global."passdb backend" [0] true
 Write	.etc.smb.value.global."preferred master" ["yes"] true
 Write	.etc.smb.value_type.global."preferred master" [0] true
