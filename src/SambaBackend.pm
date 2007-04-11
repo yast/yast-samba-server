@@ -44,7 +44,26 @@ use constant {
 BEGIN{$TYPEINFO{GetPassdbBackends}=["function",["list","string"]]}
 sub GetPassdbBackends {
     my ($self) = @_;
-    return [ split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd") ];
+
+    my @current = split (" ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd"));
+    my $backends_found = -1;
+    my @ret;
+
+    # only the first backend can be used
+    # bugzilla #245167
+    foreach my $one (@current) {
+	my $is_backend = $one;
+	$is_backend =~ s/^([^:]+)(:.*)*$/$1/;
+	if (defined $AvailableBackends{$is_backend}) {
+	    ++$backends_found;
+	}
+
+	if ($backends_found <= 0) {
+	    push @ret, $one;
+	}
+    }
+
+    return \@ret;
 }
 
 BEGIN{$TYPEINFO{GetLocation}=["function","string","string"]}
@@ -75,13 +94,34 @@ sub SetPassdbBackends {
 	    y2warning("Unknown or unsupported backend '$name'");
 	}
     }
+
     foreach (keys %toDisable) {
 	$AvailableBackends{$_}->PassdbDisable($_) or $failed++;
     }
+
     foreach (@toEnable) {
 	$_->{backend}->PassdbEnable($_->{name}, $_->{location}) or $failed++;
     }
-    SambaConfig->GlobalSetStr("passdb backend", join(" ", @$backends));
+
+    my $backends_found = -1;
+    my @write;
+
+    # only the first backend can be used
+    # bugzilla #245167
+    foreach my $one (@{$backends}) {
+	my $is_backend = $one;
+	$is_backend =~ s/^([^:]+)(:.*)*$/$1/;
+	if (defined $AvailableBackends{$is_backend}) {
+	    ++$backends_found;
+	}
+
+	if ($backends_found <= 0) {
+	    push @write, $one;
+	}
+    }
+
+    # use only the first passdb
+    SambaConfig->GlobalSetStr ("passdb backend", join (" ", @write));
     return $failed==0;
 }
 

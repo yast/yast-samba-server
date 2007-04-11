@@ -89,34 +89,38 @@ sub Read {
     my $caption = __("Initializing Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 6, [
-	    # translators: progress stage 1/6
+    Progress->New($caption, " ", 7, [
+	    # translators: progress stage
 	    __("Read global Samba settings"),
-	    # translators: progress stage 2/6
+	    # translators: progress stage
 	    __("Read Samba secrets"),
-	    # translators: progress stage 3/6
+	    # translators: progress stage
 	    __("Read Samba service settings"),
-	    # translators: progress stage 4/6
+	    # translators: progress stage
 	    __("Read Samba accounts"),
-	    # translators: progress stage 5/6
+	    # translators: progress stage
 	    __("Read the back-end settings"),
-	    # translators: progress stage 6/6
-	    __("Read the firewall settings")
+	    # translators: progress stage
+	    __("Read the firewall settings"),
+	    # translators: progress stage
+	    __("Read Samba service role settings"),
 	], [
-	    # translators: progress step 1/6
+	    # translators: progress step
 	    __("Reading global Samba settings..."),
-	    # translators: progress step 2/6
+	    # translators: progress step
 	    __("Reading Samba secrets..."),
-	    # translators: progress step 3/6
+	    # translators: progress step
 	    __("Reading Samba service settings..."),
-	    # translators: progress step 4/6
+	    # translators: progress step
 	    __("Reading Samba accounts..."),
-	    # translators: progress step 5/6
+	    # translators: progress step
 	    __("Reading the back-end settings..."),
-	    # translators: progress step 6/6
+	    # translators: progress step
 	    __("Reading the firewall settings..."),
+	    # translators: progress stage
+	    __("Reading Samba service role settings..."),
 	    # translators: progress finished
-	    __("Finished")
+	    __("Finished"),
 	],
 	""
     );
@@ -153,16 +157,18 @@ sub Read {
     my $po = Progress->set(0);
     SuSEFirewall->Read();
     Progress->set($po);
-#    if(Abort()) return false;
 
-    # Read finished
+    # 7: Read other settings
     Progress->NextStage();
     $Modified = 0;
-
+    
     $GlobalsConfigured = $self->Configured();
 
     y2milestone("Service:". (SambaService->GetServiceAutoStart() ? "Enabled" : "Disabled"));
     y2milestone("Role:". SambaRole->GetRoleName());
+
+    # Reading finished
+    Progress->Finish();
     
     return 1;
 }

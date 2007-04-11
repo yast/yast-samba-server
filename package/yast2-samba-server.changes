@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Apr 11 15:43:45 CEST 2007 - locilka@suse.cz
+
+- Changing SambaServer functions to use only one "passdb backend"
+  for the configuration (#245167).
+- 2.15.5
+
+-------------------------------------------------------------------
 Wed Mar 21 12:27:05 CET 2007 - locilka@suse.cz
 
 - Set SambaRole only when changed by user. This avoids rewriting
