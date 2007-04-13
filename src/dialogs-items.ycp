@@ -18,6 +18,7 @@
     import "LogView";
     import "TablePopup";
     import "FileUtils";
+    import "Report";
     
     import "SambaServer";
     import "SambaConfig";
@@ -44,6 +45,7 @@
     define string PassdbId2Key (map desc, any id);
     define boolean PassdbEntryDelete (any opt_id, string opt_key);
     define void PassdbEditOptionInit (any opt_id, string opt_key);
+    define boolean PassdbEditOptionValidate (string key, map event_descr);
     define void PassdbEditOptionStore (any opt_id, string opt_key);
 
 define void ShareInitFun(string key);
@@ -128,33 +130,41 @@ map passdboptions = $[
          "widget" : `textentry,
         ],
     ],
-    "mysql" : $[
-        "table" : $[
-	    // table entry description for MySQL-based SAM
-           "label" : _("MySQL database"),
-        ],
-        "popup" : $[
-         "widget" : `textentry,
-        ],
-    ],
+// MySQL will not be offered, unknown backend
+//    "mysql" : $[
+//        "table" : $[
+//	    // table entry description for MySQL-based SAM
+//           "label" : _("MySQL database"),
+//        ],
+//        "popup" : $[
+//         "widget" : `textentry,
+//        ],
+//    ],
 ];
 
 map passdbwidget =  TablePopup::CreateTableDescr (
-	    $["add_delete_buttons" : true, 
-	      "up_down_buttons" : true, 
-	      "unique_keys" : false]
-	  , $[
+	$[
+	      "add_delete_buttons" : true, 
+	      "up_down_buttons" : false,
+	      "unique_keys" : false
+	],
+	$[
 	    "init" : initPassdb,
 	    "handle" : handlePassdb,
 	    "store" : storePassdb,
 	    "ids" : PassdbEditContents,
 	    "help" : HELPS["passdb_edit"]:"",
 	    "options": passdboptions,
-	    "add_items" : [ "smbpasswd", "ldapsam", "tdbsam", "mysql" ],
+	    "add_items" : [ "smbpasswd", "ldapsam", "tdbsam" ],
 	    "add_unlisted" : false,
 	    "id2key": PassdbId2Key,
 	    "option_delete" : PassdbEntryDelete,
-	    "option_move" : PassdbOptionMove,
+	    "validate_type" : `function,
+	    "validate_function" : PassdbEditOptionValidate,
+
+	    // only one passdb backend is possible
+	    // "option_move" : PassdbOptionMove,
+
 	    "fallback" : $[
 		"init"	  : PassdbEditOptionInit,
 		"store"	  : PassdbEditOptionStore,
@@ -178,29 +188,56 @@ map xx_widgets = $[
  */
 string shareToEdit = nil;
 
-// translators: error message for wrong LDAP source
-string wrong_ldap_url = _("The entered LDAP URL is invalid.");
-
 boolean ValidateLDAPURL(any opt_id, string opt_key, map event_descr) {
 
     import "URL";
     
     string url = (string) UI::QueryWidget ( `id (opt_key), `Value );
 
-    if ( ! URL::Check (url) )
-    {
-	Popup::Error ( wrong_ldap_url );
+    if (regexpmatch (url, "^[ \t]+")) {
+	// TRANSLATORS: popup error
+	Report::Error (_("Optional value must not begin with space character."));
 	return false;
     }
-    
-    map u = URL::Parse (url);
-    if ( u["scheme"]:nil != "ldap" && u["scheme"]:nil != "ldaps" )
-    {
-	Popup::Error ( wrong_ldap_url );
+
+    boolean quotes_used = false;
+
+    // ldapsam:"ldap://ldap1.example.com ldap://ldap2.example.com"
+    if (regexpmatch (url, "^\".*\"[ \t]*$")) {
+	quotes_used = true;
+	url = regexpsub (url, "^\"(.*)\"[ \t]*$", "\\1");
+    }
+
+    list <string> urls = splitstring (url, " \t");
+    urls = filter (string url, urls, { return url != ""; });
+
+    if (size(urls) > 1 && !quotes_used) {
+	// TRANSLATORS: popup error
+	Report::Error (_("Multiple optional values for one back-end must be quoted."));
 	return false;
     }
+
+    boolean ret = true;
+    foreach (string url, urls, {
+	if (ret != true) return;
+
+	if (! URL::Check (url)) {
+	    y2error ("Invalid url '%1'", url);
+	    // TRANSLATORS: popup error, %1 is replaced with some URL
+	    Popup::Error (sformat(_("The entered URL '%1' is invalid"), url));
+	    ret = false;
+	}
     
-    return true;
+	map u = URL::Parse (url);
+	if (u["scheme"]:nil != "ldap" && u["scheme"]:nil != "ldaps") {
+	    y2error ("Invalid url '%1'", url);
+	    // TRANSLATORS: popup error, %1 is replaced with some URL
+	    Popup::Error (sformat(_("The entered URL '%1' is invalid"), url));
+	    ret = false;
+	}
+    });
+    
+    return ret;
 }
 
 boolean SharePathWarning (string p)
@@ -379,6 +416,16 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
     map<string, string> passdb_backends = nil;
     list<string> passdb_order = [];
 
+    boolean SomeBackendsAreInUse () {
+	return size (passdb_backends) > 0;
+    }
+
+    void RedrawPassdbEditButtons () {
+	if (UI::WidgetExists (`id (`_tp_add))) {
+	    UI::ChangeWidget (`id (`_tp_add), `Enabled, (! SomeBackendsAreInUse()));
+	}
+    }
+
     define list PassdbEditContents (map descr) ``{
 	if (passdb_backends != nil)
 	{
@@ -401,6 +448,16 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
 	    return ids;
 	}
     }
+
+    define boolean PassdbEditOptionValidate (string key, map event_descr) {
+	if (! SomeBackendsAreInUse()) {
+	    Report::Error (_("At least one back-end must be specified."));
+
+	    return false;
+	}
+	
+	return true;
+    }
     
     define void PassdbEditOptionInit (any opt_id, string opt_key) ``{
 	if( opt_id != nil ) {
@@ -408,6 +465,8 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
 	    UI::ChangeWidget (`id (opt_key), `Value, SambaBackend::GetLocation(passdb_backends[(string)opt_id]:""));
 	}
 	UI::SetFocus (`id (opt_key));
+
+	RedrawPassdbEditButtons();
     }
 
     define void PassdbEditOptionStore (any opt_id, string opt_key) ``{
@@ -449,18 +508,15 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
 
     define boolean PassdbEntryDelete (any opt_id, string opt_key) ``{
     
-	// don't delete the last one
-	if (size (passdb_backends) == 1)
-	{
-	    import "Report";
-	    
-	    // error message if user tries to delete the last passdb backend
-	    Report::Error (_("At least one back-end must be specified.
-
-The back-end cannot be deleted.
-"));
-	    return false;
-	}
+//	if (size (passdb_backends) == 1)
+//	{
+//	    // error message if user tries to delete the last passdb backend
+//	    Report::Error (_("At least one back-end must be specified.
+//
+//The back-end cannot be deleted.
+//"));
+//	    return false;
+//	}
 	
 	// message popup
 	if (! Popup::YesNo (_("Delete the selected back-end?")))
@@ -469,6 +525,9 @@ The back-end cannot be deleted.
 	string id = (string) opt_id;
 	passdb_backends = (map<string, string>)filter (string k, string v, passdb_backends, ``(k != id));
 	passdb_order = (list<string>)filter (string k, passdb_order, ``(k != id));
+
+	RedrawPassdbEditButtons();
+
 	return true;
     }
     
@@ -484,9 +543,10 @@ The back-end cannot be deleted.
 		    // translators: passdb backend radio button
 		    `Left (`RadioButton ( `id("ldapsam"), `opt (`notify),_("LDAP") ) ),
 		    // translators: passdb backend radio button
-		    `Left (`RadioButton ( `id("tdbsam"), `opt (`notify),_("TDB Database") ) ),
-		    // translators: passdb backend radio button
-		    `Left (`RadioButton ( `id("mysql"), `opt (`notify),_("MySQL Database") ) )
+		    `Left (`RadioButton ( `id("tdbsam"), `opt (`notify),_("TDB Database") ) )
+// Unknown passdb backend
+//		    // translators: passdb backend radio button
+//		    `Left (`RadioButton ( `id("mysql"), `opt (`notify),_("MySQL Database") ) )
 		))),
 		// translators: textentry label to enter details for the selected passdb backend
 		`TextEntry ( `id("details"), _("&Details") ),
@@ -582,6 +642,7 @@ further information.
 
     define void initPassdb(string key) ``{
 	TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], key);
+	RedrawPassdbEditButtons();
     }
 
     define symbol handlePassdb(string key, map event_descr) ``{
@@ -589,6 +650,7 @@ further information.
 	{
 	    AddPassdbBackend ();
 	    TablePopup::TableInit(xx_widgets["passdb_edit"]:$[], key);
+	    RedrawPassdbEditButtons();
 	    // continue
 	    return nil;
 	}
@@ -599,7 +661,9 @@ further information.
 	    return nil;
 	}
     
-	return TablePopup::TableHandle(xx_widgets["passdb_edit"]:$[], key, event_descr);
+	symbol ret = TablePopup::TableHandle(xx_widgets["passdb_edit"]:$[], key, event_descr);
+	RedrawPassdbEditButtons();
+	return ret;
     }
 
     define void storePassdb(string key, map event) ``{

@@ -45,15 +45,69 @@ BEGIN{$TYPEINFO{GetPassdbBackends}=["function",["list","string"]]}
 sub GetPassdbBackends {
     my ($self) = @_;
 
-    my @current = split (" ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd"));
-    my $backends_found = -1;
-    my @ret;
+    my $passdb_backend = SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
+    # limit spaces
+    $passdb_backend =~ s/[ \t]+/ /;
+    # remove unneeded spaces
+    $passdb_backend =~ s/(^[ \t]*|[ \t]*$)//g;
 
+    my @current = ();
+    my $error_count = 0;
+
+    while ($passdb_backend && $error_count < 30) {
+	# ldapsam
+	# ldapsam:ldap://ldap.example.com
+	# ldapsam:"ldap://ldap1.example.com ldap://ldap2.example.com"
+	if ($passdb_backend =~ /^ldapsam[:\"]?/) {
+	    if ($passdb_backend =~ s/^ldapsam(:(\"[^\"]*\"|[^ ]*))?//) {
+		push @current, $&;
+	    } else {
+		++$error_count;
+	    }
+
+	# tdbsam
+	# tdbsam:/etc/passdb.tdb
+	} elsif ($passdb_backend =~ /^tdbsam:?/) {
+	    if ($passdb_backend =~ s/^tdbsam(:[^ ]*)?//) {
+		push @current, $&;
+	    } else {
+		++$error_count;
+	    }
+
+	# smbpasswd
+	# smbpasswd:/etc/smbpasswd
+	} elsif ($passdb_backend =~ /^smbpasswd:?/) {
+	    if ($passdb_backend =~ s/^smbpasswd(:[^ ]*)?//) {
+		push @current, $&;
+	    } else {
+		++$error_count;
+	    }
+
+	# anything else
+	} else {
+	    if ($passdb_backend =~ s/^[^ ]*//) {
+		push @current, $&;
+	    } else {
+		++$error_count;
+	    }
+	}
+	$passdb_backend =~ s/(^[ \t]*|[ \t]*$)//g;
+    }
+
+    if ($passdb_backend) {
+	foreach my $one_unknown (split / /, $passdb_backend) {
+	    push @current, $one_unknown;
+	}
+    }
+
+    my $backends_found = -1;
+
+    my @ret;
     # only the first backend can be used
     # bugzilla #245167
     foreach my $one (@current) {
 	my $is_backend = $one;
-	$is_backend =~ s/^([^:]+)(:.*)*$/$1/;
+	$is_backend =~ s/^([^:]+)(:.*)$/$1/;
 	if (defined $AvailableBackends{$is_backend}) {
 	    ++$backends_found;
 	}
@@ -110,7 +164,7 @@ sub SetPassdbBackends {
     # bugzilla #245167
     foreach my $one (@{$backends}) {
 	my $is_backend = $one;
-	$is_backend =~ s/^([^:]+)(:.*)*$/$1/;
+	$is_backend =~ s/^([^:]+)(:.*)$/$1/;
 	if (defined $AvailableBackends{$is_backend}) {
 	    ++$backends_found;
 	}

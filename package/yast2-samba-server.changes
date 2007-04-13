@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Apr 13 08:42:27 CEST 2007 - locilka@suse.cz
+
+- Disabling MySQL passdb backend which has not support in smb.conf
+- Adjusting UI to allow set only one passdb backend
+- Allowing multiple ldap-server entries in ldapsam backend
+- Better parsing of passdb backend in SambaBackend module
+- Better parsing of passdb backend in SambaBackendLDAP
+
+-------------------------------------------------------------------
 Wed Apr 11 15:43:45 CEST 2007 - locilka@suse.cz
 
 - Changing SambaServer functions to use only one "passdb backend"

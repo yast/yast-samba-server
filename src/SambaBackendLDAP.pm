@@ -106,23 +106,39 @@ sub GetModified {
 # return true if ldapsam is first passdb backend
 sub isLDAPDefault {
     my @backends = split " ", SambaConfig->GlobalGetStr("passdb backend", "sambapasswd");
-    return $backends[0] =~ /^ldapsam(?::.*)?$/ ? 1 : 0;
+    return (defined $backends[0] && $backends[0] =~ /^ldapsam(:.*)?$/ ? 1 : 0);
 }
 
 # return LDAP server URL form first ldapsam backend
 BEGIN{$TYPEINFO{GetPassdbServerUrl}=["function",["map","string","string"]]}
 sub GetPassdbServerUrl {
     # find our host - first LDAP backend
-    my @backends = split " ", SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
-    foreach (@backends) {
-	next unless (/^ldapsam(?::(.*))?/);
-	my $url = $1 ? URL->Parse(String($1)) : { host => "localhost"};
-	my $ssl = SambaConfig->GlobalGetStr("ldap ssl", "Start_tls") =~ /^(Yes|On)$/i;
-#	$url->{port} = $ssl  ? 639 : 389 unless $url->{port};
-	$url->{scheme} = $ssl  ? "ldaps" : "ldap" unless $url->{scheme};
-	return $url;
-    };
-    return undef;
+    my $url_string = SambaConfig->GlobalGetStr("passdb backend", "smbpasswd");
+
+    # ldap not used
+    return undef if ($url_string !~ /^ldapsam:?/);
+
+    # ldapsam:"ldap://a1.example.com ldap://a2.example.com"
+    if ($url_string =~ /^ldapsam:\"[^\"]*\"/) {
+	$url_string =~ s/^ldapsam:\"([^\"]*)\".*$/$1/;
+
+    # ldapsam:ldap://abc.example.com
+    } elsif ($url_string =~ /^ldapsam:.+/) {
+	$url_string =~ s/^ldapsam:([^ \t]+).*$/$1/;
+    }
+
+    # use the first url
+    if ($url_string =~ /^[^ \t]+[ \t]+.*$/) {
+	$url_string =~ s/^([^ \t]+)[ \t]+.*$/$1/;
+    }
+
+    y2milestone ("using URL: ".$url_string);
+
+    my $url = ($url_string ? URL->Parse(String($url_string)) : { host => "localhost"});
+    my $ssl = SambaConfig->GlobalGetStr("ldap ssl", "Start_tls") =~ /^(Yes|On)$/i;
+    $url->{scheme} = $ssl  ? "ldaps" : "ldap" unless $url->{scheme};
+
+    return $url;
 }
 
 # return LDAP server URL form idmap backend
@@ -332,7 +348,7 @@ sub tryBind {
     
     unless ($url->{port}) {
 	my $ssl = SambaConfig->GlobalGetStr("ldap ssl", "Start_tls") =~ /^(Yes|On)$/i;
-	$url->{port} = ($url->{scheme} eq "ldaps" || $ssl) ? 689 : 389;
+	$url->{port} = ((defined $url->{scheme} && $url->{scheme} eq "ldaps") || $ssl) ? 689 : 389;
     }
     
     $passwd = $Passwd unless defined $passwd;
