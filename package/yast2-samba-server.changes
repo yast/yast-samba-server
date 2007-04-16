@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr 16 12:55:40 CEST 2007 - locilka@suse.cz
+
+- Added possibility to rename a share (#263302).
+- 2.15.6
+
+-------------------------------------------------------------------
 Fri Apr 13 08:42:27 CEST 2007 - locilka@suse.cz
 
 - Disabling MySQL passdb backend which has not support in smb.conf

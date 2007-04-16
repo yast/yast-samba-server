@@ -67,7 +67,7 @@
 
 	string help_text =
 # help text
-_("<p>This plugin can be used to enable an LDAP group to be avaiable for Samba.
+_("<p>This plugin can be used to enable an LDAP group to be available for Samba.
 The only setting that you can edit here is the <b>Samba Group Name</b> Attribute,
 which is the Name of the Group as it should appear for Samba-Clients. All other
 settings are computed automatically. If you leave the <b>Samba Group Name</b> empty,

@@ -358,6 +358,91 @@ void SharesWidgetInit(string key)
     AdjustUserShareWidgets();
 }
 
+// Bugzilla #263302
+boolean RenameShare (string share) {
+    if (! SambaConfig::ShareExists (share)) {
+	y2error ("Share %1 doesn't exist", share);
+	return false;
+    }
+
+    term content = `VBox (
+	// TRANSLATORS: dialog caption
+	`Heading (_("Rename Share")),
+	`HSquash (`MinWidth (
+	    35,
+	    `VBox (
+		// TRANSLATORS: text entry
+		`TextEntry (`id ("share_name"), `opt(`hstretch), _("New Share &Name"), share)
+	    )
+	)),
+	`VSpacing (1),
+	`HBox (
+	    `PushButton (`id (`ok), Label::OKButton()),
+	    `PushButton (`id (`cancel), Label::CancelButton())
+	)
+    );
+
+    UI::OpenDialog (content);
+    UI::SetFocus (`id ("share_name"));
+
+    boolean fc_ret = false;
+
+    any ret = nil;
+    while (true) {
+	ret = UI::UserInput();
+
+	if (ret == `ok) {
+	    string new_share_name = (string) UI::QueryWidget (`id ("share_name"), `Value);
+
+	    if (new_share_name == "") {
+		// TRANSLATORS: popup error message
+		Report::Error (_("Enter a new share name, please."));
+		continue;
+	    } else if (share == new_share_name) {
+		y2milestone ("Old and new share names are the same");
+		break;
+	    } else if (SambaConfig::ShareExists (new_share_name)) {
+		// TRANSLATORS: popup error message, %1 is a variable share name
+		Report::Error (sformat (
+		    _("Share '%1' already exists.\nChoose another share name, please."),
+		    new_share_name
+		));
+		continue;
+	    }
+
+	    // Renaming share
+	    map <string, string> old_share_settings = SambaConfig::ShareGetMap (share);
+	    boolean old_share_enabled = SambaConfig::ShareEnabled (share);
+
+	    y2milestone (
+		"Creating new share '%1' %2 -> %3",
+		new_share_name, old_share_settings,
+		SambaConfig::ShareSetMap (new_share_name, old_share_settings)
+	    );
+	    y2milestone (
+		"Removing share '%1' -> %2",
+		share,
+		SambaConfig::ShareRemove (share)
+	    );
+
+	    // enable or disable new share according the old one
+	    if (SambaConfig::ShareEnabled (new_share_name) != old_share_enabled) {
+		SambaConfig::ShareAdjust(new_share_name, !SambaConfig::ShareEnabled (new_share_name));
+	    }
+	    
+	    fc_ret = true;
+	    break;
+	# cancel
+	} else {
+	    break;
+	}
+    }
+    
+    UI::CloseDialog();
+
+    return fc_ret;
+}
+
 symbol SharesWidgetHandle(string key, map event_descr)
 {
     if (! is(event_descr["ID"]:nil, symbol)) return nil;
@@ -398,9 +483,19 @@ symbol SharesWidgetHandle(string key, map event_descr)
         // confirmation dialog before deleting a share
 	if  (Popup::YesNo( sformat( _("If you delete share %1,\nall its settings will be lost.\nReally delete it?"), share)))
 	{
-	    SambaConfig::ShareRemove(share);
+	    y2milestone (
+		"Removing share '%1' -> %2",
+		share,
+		SambaConfig::ShareRemove (share)
+	    );
 	    UI::ChangeWidget( `id(`table), `Items, sharesItems(false));
 	}
+    }
+    if (ret == `rename) {
+	if (RenameShare (share)) {
+	    UI::ChangeWidget (`id(`table), `Items, sharesItems(false));
+	}
+	return nil;
     }
     
     return nil;
@@ -698,8 +793,12 @@ any Installation_Conf_Tab () {
 		`PushButton(`id(`edit), Label::EditButton() + "..."),
 		`PushButton(`id(`delete), Label::DeleteButton()),
 		`HStretch(),
-		`PushButton(`id(`toggle), _("&Toggle Status"))))),
-	`HWeight(1, `Empty()));
+		`PushButton(`id(`rename), _("&Rename...")),
+		`PushButton(`id(`toggle), _("&Toggle Status"))
+	    )
+	)),
+	`HWeight(1, `Empty())
+    );
 
     term wins_widget = `HBox(
 	`HSpacing(1),
@@ -984,7 +1083,7 @@ symbol PassdbDialog () {
 
 /*
     UI::ReplaceWidget( `id(`_tp_table_repl),
-        // translators: menu button label for accessing the LDAP-related settings and actions
+        // TRANSLATORS: menu button label for accessing the LDAP-related settings and actions
         `MenuButton( "LDAP",
 	    // translators: menu item to show a LDAP-related settings
 	    [ `item( `id(`ldap), _("Global LDAP Settings") ),
@@ -1014,7 +1113,7 @@ symbol EnsureRootAccountDialog () ``{
         `VBox(
 	    `Label( _("For a proper function, Samba server needs an\nadministrative account (root).\nIt will be created now.")),
 	    `Password(`id(`passwd1), _("Samba root &Password")),
-            `Password(`id(`passwd2), _("Verify Password")),
+            `Password(`id(`passwd2), _("&Verify Password")),
             `HBox(
                 `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
                 `PushButton(`id(`cancel), Label::CancelButton())))));
@@ -1029,6 +1128,7 @@ symbol EnsureRootAccountDialog () ``{
             string passwd1 = (string) UI::QueryWidget(`id(`passwd1), `Value);
 	    string passwd2 = (string) UI::QueryWidget(`id(`passwd2), `Value);
 	    if ( passwd1 != passwd2 ) {
+		// TRANSLATORS: popup error message
 		Popup::Error (_("The first and the second version\nof the password do not match."));
 		ret = nil;
 	    } else {
@@ -1041,7 +1141,7 @@ symbol EnsureRootAccountDialog () ``{
     if (ret == `cancel) return `cancel;
 
     if (SambaAccounts::UserAdd("root", passwd)) {
-	//%1 is username
+	// TRANSLATORS: popup error message, %1 is a username
 	Popup::Error ( sformat(_("Cannot create account for user %1."), "root" ) );
 	return `error;
     }
