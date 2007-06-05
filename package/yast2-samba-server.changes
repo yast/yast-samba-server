@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun  5 13:32:13 CEST 2007 - locilka@suse.cz
+
+- Removed SambaNmbLookup::GetAvailableNeighbours call because this
+  feature has been dropped from samba-client (#240045).
+- 2.15.7
+
+-------------------------------------------------------------------
 Mon Apr 16 12:55:40 CEST 2007 - locilka@suse.cz
 
 - Added possibility to rename a share (#263302).

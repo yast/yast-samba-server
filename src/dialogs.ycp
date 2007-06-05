@@ -78,17 +78,23 @@ any Installation_Step1 () {
 
     string caption = _("Samba Installation") + ": " + _("Step 1 of 2");
 
-    list <string> workgroups = SambaNmbLookup::GetAvailableNeighbours(nil);
+    // feature dropped
+    // list <string> workgroups = SambaNmbLookup::GetAvailableNeighbours(nil);
 
     // always add the currently configured workgroup
     string workgroup = SambaConfig::GlobalGetStr("workgroup", "");
-    if (size(workgroup) > 0 && !contains(workgroups, workgroup)) {
-	workgroups = add(workgroups, workgroup);
-    }
+//    if (size(workgroup) > 0 && !contains(workgroups, workgroup)) {
+//	workgroups = add(workgroups, workgroup);
+//    }
     
     term contents = `VBox (
 	    `VSquash (
-		`Left ( `ComboBox ( `id( "workgroups" ), `opt( `editable ), _("&Workgroup or Domain Name"), workgroups ) )
+		`Left (
+		    // `ComboBox ( `id( "workgroups" ), `opt( `editable ), _("&Workgroup or Domain Name"), workgroups )
+		    
+		    // TRANSLATORS: text entry
+		    `TextEntry (`id ("workgroups"), _("&Workgroup or Domain Name"), workgroup)
+		)
 	    ),
 	    `VStretch ()
 	);
@@ -833,11 +839,13 @@ any Installation_Conf_Tab () {
     term basesettings_widget = `Frame(_("Base Settings"), `HBox(
         `HSpacing(1),
 	`VBox(
-	    `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name"),
-		SambaNmbLookup::GetAvailableNeighbours(nil)),
+	    // `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name"),
+	    //	SambaNmbLookup::GetAvailableNeighbours(nil)),
+	    `TextEntry (`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name")),
 	    // translators: combobox label
 	    `ComboBox(`id("domain_controller"), `opt(`hstretch), _("Domain &Controller"),  roles),
-	    `VStretch()),
+	    `VStretch()
+	),
 	`HSpacing(1)));
     
     term advanced_settings_widget = `MenuButton(_("Advanced Settings..."), [
