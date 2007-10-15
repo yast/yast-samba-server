@@ -101,7 +101,7 @@ any Installation_Step1 () {
 
     Wizard::SetContents( caption, contents, HELPS["inst_step1"]:"", false, true);
 	
-    Wizard::HideBackButton();
+    Wizard::DisableBackButton();
     
     if (size(workgroup)>0) {
 	UI::ChangeWidget(`id("workgroups"), `Value, workgroup);
@@ -317,10 +317,14 @@ string shares_group = "";
 
 void InitUserShareWidgets () {
     max_shares  = Samba::GetMaxShares ();
+
     if (max_shares == 0) {
 	max_shares      = 100;
 	allow_share     = false;
+    } else {
+	allow_share	= true;
     }
+
     shares_group = Samba::shares_group;
 
     UI::ChangeWidget (`id(`group), `Value, shares_group);
@@ -1059,8 +1063,8 @@ any Installation_Conf_Tab () {
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
 
-    Wizard::SetContentsButtons(caption, contents, help, Label::NextButton (), Label::FinishButton ());
-    Wizard::HideBackButton();
+    Wizard::SetContentsButtons(caption, contents, help, Label::BackButton (), Label::FinishButton ());
+    Wizard::DisableBackButton();
     
     any ret = CWM::Run(w, $[`abort: confirmAbort ]);
     
