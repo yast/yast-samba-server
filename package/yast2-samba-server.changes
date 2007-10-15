@@ -4,7 +4,7 @@ Mon Oct 15 16:36:19 CEST 2007 - locilka@suse.cz
 - Correctly display user-shares status when adjusting it and
   switching between different tabs at one YaST run (#332838).
 - Changing position of dialog buttons to fit the YaST Style Guide.
-- 2.16.1
+- 2.16.0
 
 -------------------------------------------------------------------
 Tue Jun  5 13:32:13 CEST 2007 - locilka@suse.cz
