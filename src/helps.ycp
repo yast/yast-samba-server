@@ -186,8 +186,7 @@ _("<p><b>Note:</b> Settings are saved before the LDAP administration password is
   "passdb_edit" : _("<p><b><big>User Authentication Information Back-Ends</big></b><br>
 Here, choose where the Samba server should look for the authentication
 information. Samba does not support multiple back-ends at once anymore,
-only one is allowed. <b>To add a new authentication source, delete the old one,
-then you can add it.</b></p>
+only one is allowed.</p>
 ") + 
     /* passdb backend configuration dialog help 2/7 */
 _("<p><b>smbpasswd file</b> is the file using the same format as
