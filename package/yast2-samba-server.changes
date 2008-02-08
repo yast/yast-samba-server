@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb  8 14:09:03 CET 2008 - locilka@suse.cz
+
+- Removed searching for neighborous workgroups (bnc #359632).
+- 2.13.23
+
+-------------------------------------------------------------------
 Wed Mar 21 15:51:17 CET 2007 - locilka@suse.cz
 
 - Set SambaRole only when changed by user. This avoids rewriting
