@@ -25,3 +25,4 @@ Exec=/sbin/yast2 samba-server
 Name=Samba Server
 GenericName=Configure a Samba server
 X-KDE-SubstituteUID=true
+StartupNotify=true
