@@ -1,4 +1,3 @@
-Read	.target.tmpdir "/tmp"
 Write	.etc.smb.value.global."domain logons" ["no"] true
 Write	.etc.smb.value_type.global."domain logons" [0] true
 Write	.etc.smb.value.global."domain master" ["no"] true

@@ -3,6 +3,8 @@
 // test for YaPI::Samba::AddSAM()
 // $Id$
 
+    // testedfiles: Samba.pm
+
     import "SambaConfig";
 
     include "testsuite.ycp";

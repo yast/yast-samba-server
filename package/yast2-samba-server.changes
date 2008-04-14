@@ -2,6 +2,7 @@
 Mon Apr 14 12:33:47 CEST 2008 - locilka@suse.cz
 
 - Unified Button Labels: OK instead of Accept (fate #120373).
+- Fixed testsuites.
 - 2.16.1
 
 -------------------------------------------------------------------
