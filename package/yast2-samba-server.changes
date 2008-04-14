@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr 14 12:33:47 CEST 2008 - locilka@suse.cz
+
+- Unified Button Labels: OK instead of Accept (fate #120373).
+- 2.16.1
+
+-------------------------------------------------------------------
 Mon Mar 17 12:43:32 CET 2008 - jsrain@suse.cz
 
 - added 'StartupNotify=true' to the desktop file (bnc #304964)

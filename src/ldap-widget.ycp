@@ -532,7 +532,7 @@ symbol SambaLDAPExpertSettingsDialog()
 	// translators: dialog caption
 	"caption": _("Expert LDAP Settings"),
 	"back_button": Label::CancelButton(),
-	"next_button": Label::AcceptButton(),
+	"next_button": Label::OKButton(),
 	"abort_button": nil
     ]);
     UI::CloseDialog();
