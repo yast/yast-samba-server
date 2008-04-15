@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 15 09:22:40 CEST 2008 - jsuchome@suse.cz
+
+- adapted to new API of SambaNetJoin::Join
+- 2.16.2 
+
+-------------------------------------------------------------------
 Mon Apr 14 12:33:47 CEST 2008 - locilka@suse.cz
 
 - Unified Button Labels: OK instead of Accept (fate #120373).

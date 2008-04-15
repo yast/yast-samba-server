@@ -1219,7 +1219,7 @@ symbol AskJoinDomainDialog() ``{
     }
     
     // try to join the domain
-    string error = SambaNetJoin::Join(workgroup, tolower(role), user, passwd);
+    string error = SambaNetJoin::Join(workgroup, tolower(role), user, passwd,"");
     if (error != nil) {
 	Popup::Error(error);
 	return `error;
