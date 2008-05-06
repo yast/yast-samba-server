@@ -11,6 +11,9 @@ Requires:	yast2-perl-bindings
 Requires:	yast2-samba-client >= 2.16.5
 Requires:	yast2-users
 
+# bnc #386473, recommend yast2-samba-server when installaing these packages
+Supplements:	samba
+
 BuildArchitectures:	noarch
 
 Summary:	Configuration of samba-server

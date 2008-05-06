@@ -240,11 +240,15 @@ sub Write {
     Progress->NextStage();
     return 1 unless $self->GetModified();
 
-    # check, if we need samba-pdb package
-    my %backends = map {/:/;$`||$_,1} split " ", SambaConfig->GlobalGetStr("passdb backend", "");
-    if($backends{mysql}) {
-	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
-    }
+# bnc #387085
+# package not available anymore
+#
+#    # check, if we need samba-pdb package
+#    my %backends = map {/:/;$`||$_,1} split " ", SambaConfig->GlobalGetStr("passdb backend", "");
+#    if($backends{mysql}) {
+#	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
+#    }
+
     if (!SambaConfig->Write($write_only)) {
 	# /etc/samba/smb.conf is filename
     	Report->Error(__("Cannot write settings to /etc/samba/smb.conf."));
