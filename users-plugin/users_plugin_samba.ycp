@@ -74,33 +74,33 @@
             `VSpacing(0.5),
 	    `Frame ( _("Home Drive"),
 		     `VBox(
-			   `TextEntry(`id(`homeDrive), "", data["sambahomedrive"]:"" ),
+			   `TextEntry(`id(`homeDrive), "", data["sambaHomeDrive"]:"" ),
 			   `Left(`CheckBox( `id(`defhomeDrive ), `opt(`notify), _("Use Default Values"),
-				      size (data["sambahomedrive"]:"") <= 0
+				      size (data["sambaHomeDrive"]:"") <= 0
 					    ))
 			   )
 		     ),
 	    `Frame ( _("Home Path"),
 		     `VBox(
-			   `TextEntry(`id(`homePath), "", data["sambahomepath"]:"" ),
+			   `TextEntry(`id(`homePath), "", data["sambaHomePath"]:"" ),
 			   `Left(`CheckBox( `id(`defhomePath ), `opt(`notify), _("Use Default Values"),
-				      size (data["sambahomepath"]:"") <= 0
+				      size (data["sambaHomePath"]:"") <= 0
 					    ))
 			   )
 		     ),
 	    `Frame ( _("Profile Path"),
 		     `VBox(
-			   `TextEntry(`id(`profilePath), "", data["sambaprofilepath"]:"" ),
+			   `TextEntry(`id(`profilePath), "", data["sambaProfilePath"]:"" ),
 			   `Left(`CheckBox( `id(`defprofilePath ), `opt(`notify), _("Use Default Values"),
-					    size (data["sambaprofilepath"]:"") <= 0))
+					    size (data["sambaProfilePath"]:"") <= 0))
 			   )
 		     ),
 	    // translators: logon is the Windows synonym for login
 	    `Frame ( _("Logon Script"),
 		     `VBox(
-			   `TextEntry(`id(`logonScript), "", data["sambalogonscript"]:"" ),
+			   `TextEntry(`id(`logonScript), "", data["sambaLogonScript"]:"" ),
 			   `Left(`CheckBox( `id(`deflogonScript ), `opt(`notify), _("Use Default Values"),
-					    size (data["sambalogonscript"]:"") <= 0))
+					    size (data["sambaLogonScript"]:"") <= 0))
 			   )
 		     ),
             `VSpacing (1.5),
@@ -138,35 +138,35 @@
 		string err = UsersPluginSamba::Check ( config, data);
 		if ((boolean) UI::QueryWidget(`id(`defhomeDrive), `Value))
 		{
-		    data["sambahomedrive"] = "";
+		    data["sambaHomeDrive"] = "";
 		}
 		else
 		{
-		    data["sambahomedrive"] = UI::QueryWidget(`id(`homeDrive), `Value );
+		    data["sambaHomeDrive"] = UI::QueryWidget(`id(`homeDrive), `Value );
 		}
 		if ((boolean) UI::QueryWidget(`id(`defhomePath), `Value))
 		{
-		    data["sambahomepath"] = "";
+		    data["sambaHomePath"] = "";
 		}
 		else
 		{
-		    data["sambahomepath"] = UI::QueryWidget(`id(`homePath), `Value );		    
+		    data["sambaHomePath"] = UI::QueryWidget(`id(`homePath), `Value );		    
 		}
 		if ((boolean) UI::QueryWidget(`id(`defprofilePath), `Value))
 		{		
-		    data["sambaprofilepath"] = "";
+		    data["sambaProfilePath"] = "";
 		}
 		else
 		{		
-		    data["sambaprofilepath"] = UI::QueryWidget(`id(`profilePath), `Value );
+		    data["sambaProfilePath"] = UI::QueryWidget(`id(`profilePath), `Value );
 		}
 		if ((boolean) UI::QueryWidget(`id(`deflogonScript), `Value))
 		{		
-		    data["sambalogonscript"] = "";
+		    data["sambaLogonScript"] = "";
 		}
 		else
 		{
-		    data["sambalogonscript"] = UI::QueryWidget(`id(`logonScript), `Value );
+		    data["sambaLogonScript"] = UI::QueryWidget(`id(`logonScript), `Value );
 		}
                 data["sambanoexpire"] = ( UI::QueryWidget(`id(`noExpire), `Value ) == true ) ? "1" : "0";
                 data["sambadisabled"] = ( UI::QueryWidget(`id(`disable), `Value ) == true ) ? "1" : "0";

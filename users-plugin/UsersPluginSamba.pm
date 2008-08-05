@@ -137,7 +137,7 @@ sub PluginPresent {
     my $config    = shift;
     my $data    = shift;
 
-    if ( grep /^sambasamaccount$/i, @{$data->{'objectclass'}} ) {
+    if ( grep /^sambasamaccount$/i, @{$data->{'objectClass'}} ) {
         y2milestone( "SambaPlugin: Plugin Present");
         return 1;
     } else {
@@ -204,8 +204,8 @@ sub AddBefore {
     }
     my $ret = $self->update_object_classes( $config, $data );
     if( $ret ) {
-        y2internal("Could not update objectclass attribute");
-        $error	= __("Could not update objectclass attribute.");
+        y2internal("Could not update objectClass attribute");
+        $error	= __("Could not update objectClass attribute.");
         return undef;
     }
     return $data;
@@ -293,7 +293,7 @@ sub Edit {
     if( ! $data->{'sambainternal'}->{'initialized'} ) {
         $self->init_internal_keys( $config,  $data );
         $data->{'sambainternal'}->{'initialized'} = 1;
-    } elsif ( (! $data->{'sambalmpassword'}) && 
+    } elsif ( (! $data->{'sambaLMPassword'}) && 
               ( (! $data->{'text_userpassword'} ) || ($data->{'text_userpassword'} eq "" )) ){
             $error	= __("Change the password to create the Samba account");
             return undef;
@@ -306,7 +306,7 @@ sub Edit {
     }
 
     $self->update_attributes ($config, $data);
-    if ( (! $data->{'sambalmpassword'})  ) {
+    if ( (! $data->{'sambaLMPassword'})  ) {
         y2debug ("no samba password hashes present yet");
     }
 
@@ -329,10 +329,10 @@ sub update_object_classes {
     my $oc = "sambaSamAccount";
 
     # define the object class for new user/groupa
-    if (defined $data->{"objectclass"} && ref $data->{"objectclass"} eq "ARRAY")
+    if (defined $data->{"objectClass"} && ref $data->{"objectClass"} eq "ARRAY")
     {
-        if ( ! grep /^$oc$/i, @{$data->{'objectclass'}} ) {
-	    push @{$data->{'objectclass'}}, $oc;
+        if ( ! grep /^$oc$/i, @{$data->{'objectClass'}} ) {
+	    push @{$data->{'objectClass'}}, $oc;
             y2milestone("added ObjectClass $oc");
         }
     }
@@ -342,10 +342,10 @@ sub update_object_classes {
 sub init_internal_keys {
     my ($self, $config, $data) = @_;
     
-    if ( $data->{'sambaacctflags'} ) {
+    if ( $data->{'sambaAcctFlags'} ) {
         if ( ! defined( $data->{'sambadisabled'} ) ) {
             y2internal("    UsersPluginSamba::init_internal_keys sambadisabled undefined ");
-            if ( $data->{'sambaacctflags'} =~ /^\[.*D.*\]/ ) {
+            if ( $data->{'sambaAcctFlags'} =~ /^\[.*D.*\]/ ) {
                 $data->{'sambadisabled'} = "1";
             } else {
                 $data->{'sambadisabled'} = "0";
@@ -353,7 +353,7 @@ sub init_internal_keys {
         }
         if ( ! defined( $data->{'sambanoexpire'} ) ) {
             y2internal("    UsersPluginSamba::init_internal_keys sambanoexpire undefined ");
-            if ( $data->{'sambaacctflags'} =~ /^\[.*X.*\]/ ) {
+            if ( $data->{'sambaAcctFlags'} =~ /^\[.*X.*\]/ ) {
                 $data->{'sambanoexpire'} = "1";
             } else {
                 $data->{'sambanoexpire'} = "0";
@@ -367,18 +367,18 @@ sub update_attributes {
     my ( $self, $config, $data ) = @_;
 
     my $SID     = $data->{'sambainternal'}->{'sambalocalsid'};
-    my $uidNumber = $data->{'uidnumber'};
+    my $uidNumber = $data->{'uidNumber'};
     if ( $uidNumber ) {
-        if ( (! $data->{'sambasid'}) || ($data->{'sambasid'} eq "") ) {
-            $data->{'sambasid'} = $SID."-". ( 2 * $uidNumber +
+        if ( (! $data->{'sambaSID'}) || ($data->{'sambaSID'} eq "") ) {
+            $data->{'sambaSID'} = $SID."-". ( 2 * $uidNumber +
                                 $data->{'sambainternal'}->{'ridbase'} );
         }
     }
-    my $gidNumber = $data->{'gidnumber'};
+    my $gidNumber = $data->{'gidNumber'};
     if ( $gidNumber ) {
-        if ( (! $data->{'sambaprimarygroupsid'}) || 
-                ($data->{'sambaprimarygroupsid'} eq "") ) {
-            $data->{'sambaprimarygroupsid'} = $SID."-". (2 * $gidNumber + 
+        if ( (! $data->{'sambaPrimaryGroupSID'}) || 
+                ($data->{'sambaPrimaryGroupSID'} eq "") ) {
+            $data->{'sambaPrimaryGroupSID'} = $SID."-". (2 * $gidNumber + 
                                 $data->{'sambainternal'}->{'ridbase'} + 1 );
         }
     }
@@ -398,7 +398,7 @@ sub update_attributes {
 sub update_samba_acctflags {
     my ($self, $config, $data) = @_;
 
-    my $acctflags = $data->{'sambaacctflags'} || "[U         ]";
+    my $acctflags = $data->{'sambaAcctFlags'} || "[U         ]";
 
     $acctflags =~ s/^\[(\w+)\s*\]$/$1/g;
     
@@ -425,7 +425,7 @@ sub update_samba_acctflags {
     for( my $i=0; $i < ( 11 - $len ); $i++ ) {
         $acctflags .= " ";
     }
-    $data->{'sambaacctflags'} = "[". $acctflags ."]";
+    $data->{'sambaAcctFlags'} = "[". $acctflags ."]";
     return undef;
 }
 
@@ -435,19 +435,19 @@ sub update_samba_pwhash {
     if ( $data->{'sambainternal'}->{'sambacleartextpw'} ) {
         my $update_timestamp = 0;
         my ($lmHash, $ntHash) = ntlmgen($data->{'sambainternal'}->{'sambacleartextpw'});
-        if ( (!$data->{'sambalmpassword'}) || ($lmHash ne $data->{'sambalmpassword'}) ) {
-            $data->{'sambalmpassword'} = $lmHash;
+        if ( (!$data->{'sambaLMPassword'}) || ($lmHash ne $data->{'sambaLMPassword'}) ) {
+            $data->{'sambaLMPassword'} = $lmHash;
             $update_timestamp = 1;
         }
-        if ( (! $data->{'sambantpassword'}) || ( $ntHash ne $data->{'sambantpassword'} ) ) {
-            $data->{'sambantpassword'} = $ntHash;
+        if ( (! $data->{'sambaNTPassword'}) || ( $ntHash ne $data->{'sambaNTPassword'} ) ) {
+            $data->{'sambaNTPassword'} = $ntHash;
             $update_timestamp = 1;
         }
         if ( $update_timestamp ) {
-            $data->{'sambapwdlastset'} = time ();
-            $data->{'sambapwdcanchange'} = $data->{'sambapwdlastset'};
+            $data->{'sambaPwdLastSet'} = time ();
+            $data->{'sambaPwdCanChange'} = $data->{'sambaPwdLastSet'};
         }
-        $data->{'sambapwdmustchange'} = ( 1 << 31 ) - 1;
+        $data->{'sambaPwdMustChange'} = ( 1 << 31 ) - 1;
     }
     return undef;
 }
@@ -460,7 +460,7 @@ sub init_samba_sid {
         my $res = SCR->Read(".ldap.search", { base_dn => $base_dn,
                                               scope => YaST::YCP::Integer(2),
                                               filter => "(objectClass=sambaDomain)",
-                                              attrs => ['sambasid', 'sambaalgorithmicridbase']
+                                              attrs => ['sambaSID', 'sambaAlgorithmicRidBase']
                                             } 
                             ); 
         if ( ! $res ){
@@ -471,9 +471,9 @@ sub init_samba_sid {
             return "error reading samba sid";
         } else {
             #y2milestone( Data::Dumper->Dump( [$res] ));
-            if ( $res->[0]->{'sambasid'}->[0] ) {
-                $data->{'sambainternal'}->{'sambalocalsid'} = $res->[0]->{'sambasid'}->[0];
-                $data->{'sambainternal'}->{'ridbase'} = $res->[0]->{'sambaalgorithmicridbase'}->[0];
+            if ( $res->[0]->{'sambaSID'}->[0] ) {
+                $data->{'sambainternal'}->{'sambalocalsid'} = $res->[0]->{'sambaSID'}->[0];
+                $data->{'sambainternal'}->{'ridbase'} = $res->[0]->{'sambaAlgorithmicRidBase'}->[0];
                 return undef;
             } else {
                 return "error reading samba sid";
@@ -486,7 +486,7 @@ sub remove_plugin_data {
     my ( $self, $config, $data ) = @_;
   
     my @updated_oc;
-    foreach my $oc ( @{$data->{'objectclass'}} ) {
+    foreach my $oc ( @{$data->{'objectClass'}} ) {
         if ( lc($oc) ne "sambasamaccount" ) {
             push @updated_oc, $oc;
         }
@@ -495,7 +495,7 @@ sub remove_plugin_data {
     delete( $data->{'sambadisabled'});
     delete( $data->{'sambainternal'});
 
-    $data->{'objectclass'} = \@updated_oc;
+    $data->{'objectClass'} = \@updated_oc;
 }
 1;
 # EOF

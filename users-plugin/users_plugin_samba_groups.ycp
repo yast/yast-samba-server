@@ -77,7 +77,7 @@ the same name as configured in the Global Settings of this Group will be used.</
 
         contents = `HBox(`HSpacing (1.5), `VBox(
             `VSpacing(0.5),
-            `TextEntry(`id(`smbName), _("Samba Group Name"), data["displayname"]:"" ),
+            `TextEntry(`id(`smbName), _("Samba Group Name"), data["displayName"]:"" ),
             `VSpacing (0.5)
             ),
             `HSpacing (1.5)
@@ -99,7 +99,7 @@ the same name as configured in the Global Settings of this Group will be used.</
 	    if ( ret == `next )
 	    {
 		string err = UsersPluginSambaGroups::Check ( config, data);
-                data["displayname"] = UI::QueryWidget(`id(`smbName), `Value );
+                data["displayName"] = UI::QueryWidget(`id(`smbName), `Value );
 		if (err != "")
 		{
 		    Report::Error (err);

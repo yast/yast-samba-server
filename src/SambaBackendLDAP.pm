@@ -280,14 +280,14 @@ sub setupUsersPlugin {
 		    
     my $templates = Ldap->GetTemplates();
     while(my ($dn, $content) = each %$templates) {
-	my %objectclass = map {lc $_, 1} @{$content->{objectclass}};
-	my %suseplugin = map {$_, 1} @{$content->{suseplugin}};
-	if ($objectclass{suseusertemplate} and not $suseplugin{UsersPluginSamba}) {
-	    push @{$content->{suseplugin}}, "UsersPluginSamba";
+	my %objectClass = map {$_, 1} @{$content->{objectClass}};
+	my %susePlugin = map {$_, 1} @{$content->{susePlugin}};
+	if ($objectClass{suseUserTemplate} and not $susePlugin{UsersPluginSamba}) {
+	    push @{$content->{susePlugin}}, "UsersPluginSamba";
 	    $modified = $content->{modified} = "edited";
 	}
-	if ($objectclass{susegrouptemplate} and not $suseplugin{UsersPluginSambaGroup}) {
-	    push @{$content->{suseplugin}}, "UsersPluginSambaGroup";
+	if ($objectClass{suseGroupTemplate} and not $susePlugin{UsersPluginSambaGroup}) {
+	    push @{$content->{susePlugin}}, "UsersPluginSambaGroup";
 	    $modified = $content->{modified} = "edited";
 	}
     }
@@ -326,8 +326,8 @@ sub addLdapDn {
     y2milestone("Creating dn: $dn");
     my $map;
     given($attr) {
-	when ("dc") {$map = {objectclass => ["top", "dcobject"], dc => $value}}
-	when ("ou") {$map = {objectclass => ["top", "organizationalunit"], ou => $value}}
+	when ("dc") {$map = {objectClass => ["top", "dcobject"], dc => $value}}
+	when ("ou") {$map = {objectClass => ["top", "organizationalunit"], ou => $value}}
 	# translators: error message, followed by class giving error
 	default {return __("Unknown Class:")." $dn\n".__("Only dcObject (dc) and organizationalUnit (ou) classes are supported.")}
     };
@@ -476,9 +476,9 @@ sub readSuseDefaultValues {
 	Ldap->ReadConfigModules();
 	my $conf = Ldap->GetConfigModules();
 	while(my ($dn, $c) = each %$conf) {
-    	    my %classes = map {lc $_, 1} @{$c->{objectclass}};
-	    @user = split ",", $c->{susedefaultbase}[0] if $classes{"suseuserconfiguration"};
-	    @group = split ",", $c->{susedefaultbase}[0] if $classes{"susegroupconfiguration"};
+    	    my %classes = map {$_, 1} @{$c->{objectClass}};
+	    @user = split ",", $c->{suseDefaultBase}[0] if $classes{"suseUserConfiguration"};
+	    @group = split ",", $c->{suseDefaultBase}[0] if $classes{"suseGroupConfiguration"};
 	}
 	y2milestone("SuseDefaultBase: user=".join(",",@user)." group=",join(",",@group));
     }
