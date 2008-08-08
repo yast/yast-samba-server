@@ -326,8 +326,8 @@ sub addLdapDn {
     y2milestone("Creating dn: $dn");
     my $map;
     given($attr) {
-	when ("dc") {$map = {objectClass => ["top", "dcobject"], dc => $value}}
-	when ("ou") {$map = {objectClass => ["top", "organizationalunit"], ou => $value}}
+	when ("dc") {$map = {objectClass => ["top", "dcObject"], dc => $value}}
+	when ("ou") {$map = {objectClass => ["top", "organizationalUnit"], ou => $value}}
 	# translators: error message, followed by class giving error
 	default {return __("Unknown Class:")." $dn\n".__("Only dcObject (dc) and organizationalUnit (ou) classes are supported.")}
     };
