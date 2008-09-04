@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Sep  4 15:34:33 CEST 2008 - locilka@suse.cz
+
+- Adapted to yast2-ldap API changes (patch created by rhafer)
+  (bnc #422524)
+- Adjusted RPM dependencies.
+- 2.17.1
+
+-------------------------------------------------------------------
 Tue Aug  5 10:36:39 CEST 2008 - locilka@suse.cz
 
 - Adjusted to the newest LDAP SCR agent (patch written by jsuchome)

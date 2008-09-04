@@ -5,8 +5,10 @@ BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN s
 
 Requires:	perl-Crypt-SmbHash
 Requires:	yast2
+Requires:	yast2-ldap >= 2.17.3
 Requires:	yast2-ldap-client
 Requires:	yast2-perl-bindings
+Requires:	yast2-network
 # SambaNetJoin::Join
 Requires:	yast2-samba-client >= 2.16.5
 Requires:	yast2-users

@@ -167,7 +167,6 @@ sub installSchema {
     }
     return unless DNS->IsHostLocal($url->{host});
 
-    my $restart_server;
     my $suffix = SambaConfig->GlobalGetStr("ldap suffix", "");
     my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", "");
 	
@@ -176,8 +175,6 @@ sub installSchema {
     if (not defined $ret) {
 	y2error("Add LDAP Samba3 schema failed");
 	return;
-    } elsif ($ret) {
-        $restart_server = 1;
     }
 
     # add indices
@@ -186,26 +183,15 @@ sub installSchema {
         if (not defined $ret) {
     	    y2error("Add Index '$_' failed");
 	    return;
-	} elsif ($ret) {
-    	    $restart_server = 1;
 	}
     }
 
     # setup ACLs
     if ($admin_dn) {
-	$ret = LdapServerAccess->AddSambaACLHack($admin_dn, 0);
+	$ret = LdapServerAccess->AddSambaACL($admin_dn, $suffix);
         if (not defined $ret) {
-	    y2error("Samba ACL Hack failed");
+	    y2error("adding Samba ACLs failed");
 	    return;
-	} elsif ($ret) {
-    	    $restart_server = 1;
-	}
-    }
-    
-    # restart server if running
-    if ($restart_server && not Service->Status("ldap")) {
-	unless (Service->Restart("ldap")) {
-	    y2error("Error when restarting service 'ldap'");
 	}
     }
 }
