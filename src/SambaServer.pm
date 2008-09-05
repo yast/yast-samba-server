@@ -249,6 +249,9 @@ sub Write {
 #	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
 #    }
 
+    y2milestone ("Writing WINS Host Resolution=", Samba->GetHostsResolution());
+    Samba->WriteHostsResolution();
+
     if (!SambaConfig->Write($write_only)) {
 	# /etc/samba/smb.conf is filename
     	Report->Error(__("Cannot write settings to /etc/samba/smb.conf."));

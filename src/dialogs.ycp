@@ -70,7 +70,10 @@ list sharesItems(boolean filt) {
 
 boolean confirmAbort() {
     y2warning("confirm abort");
-    return !SambaServer::GetModified() || Popup::ReallyAbort(true);
+    if (! SambaServer::GetModified())
+	return true;
+
+    return Popup::ReallyAbort (true);
 }
 
 
@@ -93,7 +96,7 @@ any Installation_Step1 () {
 		    // `ComboBox ( `id( "workgroups" ), `opt( `editable ), _("&Workgroup or Domain Name"), workgroups )
 		    
 		    // TRANSLATORS: text entry
-		    `TextEntry (`id ("workgroups"), _("&Workgroup or Domain Name"), workgroup)
+		    `InputField (`id ("workgroups"), `opt (`hstretch), _("&Workgroup or Domain Name"), workgroup)
 		)
 	    ),
 	    `VStretch ()
@@ -228,6 +231,10 @@ void WinsViaDHCPWidgetInit (string key) {
     UI::ChangeWidget(`id(`dhcp), `Value, Samba::GetDHCP());
 }
 
+void WinsHostResolutionWidgetInit (string key) {
+    UI::ChangeWidget(`id(`wins_dns), `Value, Samba::GetHostsResolution());
+}
+
 void GlobalConfigStringWidgetInit(string key)
 {
     UI::ChangeWidget(`id(key), `Value, SambaConfig::GlobalGetStr(key, ""));
@@ -274,6 +281,15 @@ void WinsViaDHCPWidgetStore (string key, map event_descr) {
     if (new_value != nil) {
 	y2milestone ("Setting WINS via DHCP to '%1' returned '%2'",
 	    new_value, Samba::SetDHCP (new_value)
+	);
+    }
+}
+
+void WinsHostResolutionWidgetStore (string key, map event_descr) {
+    boolean new_value = (boolean) UI::QueryWidget(`id (`wins_dns), `Value);
+    if (new_value != nil) {
+	y2milestone ("Setting WINS Host Resolution '%1' returned '%2'",
+	    new_value, Samba::SetHostsResolution (new_value)
 	);
     }
 }
@@ -382,13 +398,13 @@ boolean RenameShare (string share) {
 	    35,
 	    `VBox (
 		// TRANSLATORS: text entry
-		`TextEntry (`id ("share_name"), `opt(`hstretch), _("New Share &Name"), share)
+		`InputField (`id ("share_name"), `opt(`hstretch), _("New Share &Name"), share)
 	    )
 	)),
 	`VSpacing (1),
-	`HBox (
-	    `PushButton (`id (`ok), Label::OKButton()),
-	    `PushButton (`id (`cancel), Label::CancelButton())
+	`ButtonBox (
+	    `PushButton (`id (`ok), `opt (`okButton), Label::OKButton()),
+	    `PushButton (`id (`cancel), `opt (`cancelButton), Label::CancelButton())
 	)
     );
 
@@ -516,12 +532,12 @@ void AddTrustedDomain ()
 {
     //rwalter I couldn't make this one show up. Please make sure my deletions didn't make it too confusing.
     term contents = `VBox (
-	`TextEntry (`id(`domain), _("Trusted &Domain") ),
+	`InputField (`id(`domain), `opt (`hstretch), _("Trusted &Domain")),
 	`Password (`id(`password), _("&Password") ),
 	`VSpacing (1),
 	`HBox (
-	    `PushButton (`id (`ok), `opt (`default), Label::OKButton () ),
-	    `PushButton (`id (`cancel), Label::CancelButton () )
+	    `PushButton (`id (`ok), `opt (`default), Label::OKButton ()),
+	    `PushButton (`id (`cancel), Label::CancelButton ())
 	)
     );
     
@@ -671,8 +687,8 @@ symbol AddShareDialog () ``{
 	`VBox(`opt(`hstretch),
 	    `VSpacing(1),
 	    `Frame(_("Identification"), `VBox(
-		`TextEntry(`id(`name), _("Share &Name")),
-		`TextEntry(`id(`comment), _("Share &Description")))),
+		`InputField (`id(`name), `opt (`hstretch), _("Share &Name")),
+		`InputField (`id(`comment), `opt (`hstretch), _("Share &Description")))),
 	    `Frame(_("Share Type"), `HBox(
 		`HSpacing ( 1 ),
 		`VBox(`opt(`hstretch ),
@@ -825,8 +841,10 @@ any Installation_Conf_Tab () {
 	`HSpacing(1)
     );
 
-    // TRANSLATORS: check box
     term wins_via_dhcp = DHCPSupportTerm (Samba::GetDHCP());
+
+    // TRANSLATORS: check box
+    term wins_host_resolution = `Left (`CheckBox (`id (`wins_dns), _("Use WINS for Hostname Resolution")));
 
     list<term> roles = [
 	// translators: combobox item
@@ -845,7 +863,7 @@ any Installation_Conf_Tab () {
 	`VBox(
 	    // `ComboBox(`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name"),
 	    //	SambaNmbLookup::GetAvailableNeighbours(nil)),
-	    `TextEntry (`id("workgroup_domainname"), `opt(`editable, `hstretch), _("&Workgroup or Domain Name")),
+	    `InputField (`id("workgroup_domainname"), `opt(`hstretch), _("&Workgroup or Domain Name")),
 	    // translators: combobox label
 	    `ComboBox(`id("domain_controller"), `opt(`hstretch), _("Domain &Controller"),  roles),
 	    `VStretch()
@@ -920,6 +938,7 @@ any Installation_Conf_Tab () {
 				    `VSpacing (1),
 				    "netbios name",
 				    "WINS via DHCP",
+				    "WINS Host Resolution",
 				    "ADVANCED SETTINGS"
 				)
 			    ),
@@ -940,6 +959,7 @@ any Installation_Conf_Tab () {
 				    `Frame (_("WINS"), `VBox (
 					"WINS SETTINGS",
 					`HBox (`HSpacing (1), "WINS via DHCP"),
+					`HBox (`HSpacing (1), "WINS Host Resolution"),
 					`VStretch()
 				    ))
 				)
@@ -959,7 +979,7 @@ any Installation_Conf_Tab () {
 		),
 		`HWeight(1, `Empty())
 	    ),
-	    "widget_names": ["IDENTITY COMMON HELP", "BASE SETTINGS", "WINS SETTINGS", "WINS via DHCP", "netbios name", "ADVANCED SETTINGS"]
+	    "widget_names": ["IDENTITY COMMON HELP", "BASE SETTINGS", "WINS SETTINGS", "WINS via DHCP", "WINS Host Resolution", "netbios name", "ADVANCED SETTINGS"]
 	]
     ];
     
@@ -1010,7 +1030,7 @@ any Installation_Conf_Tab () {
 	"WINS SETTINGS": $[
 	    "widget" : `custom,
 	    "custom_widget" : wins_widget,
-	    "help": HELPS["smb_conf_tab_wins_settings"]:"",
+	    "help": HostsResolutionHelp(),
 	    "init": WinsSettingsWidgetInit,
 	    "store": WinsSettingsWidgetStore,
 	    "handle": WinsSettingsWidgetHandle,
@@ -1021,6 +1041,13 @@ any Installation_Conf_Tab () {
 	    "help": HELPS["smb_conf_tab_wins_via_dhcp"]:"",
 	    "init": WinsViaDHCPWidgetInit,
 	    "store": WinsViaDHCPWidgetStore,
+	],
+	"WINS Host Resolution" : $[
+	    "widget" : `custom,
+	    "custom_widget" : wins_host_resolution,
+	    "help" : HELPS["smb_conf_tab_wins_host_resolution"]:"",
+	    "init": WinsHostResolutionWidgetInit,
+	    "store": WinsHostResolutionWidgetStore,
 	],
 	"netbios name": $[
 	    "widget": `textentry,

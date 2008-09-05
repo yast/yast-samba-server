@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  5 16:15:54 CEST 2008 - locilka@suse.cz
+
+- Added WINS Hostname Resolution support (FATE #300971).
+- 2.17.2
+
+-------------------------------------------------------------------
 Thu Sep  4 15:34:33 CEST 2008 - locilka@suse.cz
 
 - Adapted to yast2-ldap API changes (patch created by rhafer)
