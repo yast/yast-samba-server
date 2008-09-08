@@ -198,7 +198,7 @@ boolean ValidateLDAPURL(any opt_id, string opt_key, map event_descr) {
 
     if (regexpmatch (url, "^[ \t]+")) {
 	// TRANSLATORS: popup error
-	Report::Error (_("Optional value must not begin with space character."));
+	Report::Error (_("Optional value must not begin with a space character."));
 	return false;
     }
 

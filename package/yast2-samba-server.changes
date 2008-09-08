@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  8 17:52:34 CEST 2008 - locilka@suse.cz
+
+- merged texts from proofread
+
+-------------------------------------------------------------------
 Fri Sep  5 16:15:54 CEST 2008 - locilka@suse.cz
 
 - Added WINS Hostname Resolution support (FATE #300971).
