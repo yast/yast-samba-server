@@ -121,8 +121,7 @@ NetBIOS name is the name the server uses in the SMB network.</p>"),
 
     /* Samba role dialog help 5/5 */
     "smb_conf_tab_advanced_settings": _("<p><b>Advanced Settings</b> provides access to 
-detailed configuration, such as LDAP settings, user authentication sources, and
-expert global settings.</p>
+detailed configuration, user authentication sources, and expert global settings.</p>
 "),
 
     "smb_conf_tab_trusted_domains" : _("<p><b><big>Trusted Domains</big></b><br>
@@ -285,6 +284,10 @@ string root_warning =
 entire file system browsable from Samba clients.
 ");
 
+string obsolete = _("<p><b>Advanced Settings</b> provides access to 
+detailed configuration, such as LDAP settings, user authentication sources, and
+expert global settings.</p>
+");
 
 /* EOF */
 }
