@@ -1090,12 +1090,14 @@ any Installation_Conf_Tab () {
     string help = CWM::MergeHelps(w);
     contents = CWM::PrepareDialog(contents, w);
 
-    Wizard::SetContentsButtons(caption, contents, help, Label::BackButton (), Label::FinishButton ());
-    Wizard::DisableBackButton();
+    Wizard::SetContentsButtons(caption, contents, help, Label::BackButton (), Label::OKButton ());
+
+    // BNC #440538
+    // Adjusted according to the YaST Style Guide
+    Wizard::SetAbortButton (`abort, Label::CancelButton());
+    Wizard::HideBackButton();
     
     any ret = CWM::Run(w, $[`abort: confirmAbort ]);
-    
-    Wizard::RestoreBackButton ();
     
     return ret;
 }
