@@ -23,6 +23,8 @@ our %TYPEINFO;
 
 BEGIN {
 YaST::YCP::Import("SCR");
+YaST::YCP::Import("FileUtils");
+YaST::YCP::Import("Directory");
 }
 
 my %Pdb = ();
@@ -41,6 +43,8 @@ sub Read {
 BEGIN{$TYPEINFO{Write}=["function","boolean"]}
 sub Write {
     my $error = 0;
+    my $tmpfile = Directory->tmpdir()."/samba-server-pdbedit-tmpfile";
+
     foreach my $user (keys %Pdb) {
 	my $nthash = $Pdb{$user}{nthash};
 	$nthash = "X"x32 unless $nthash;
@@ -59,13 +63,23 @@ sub Write {
 	
 	y2debug("add user '$user'");
 	my $smbpasswd=sprintf "%s:%d:%s:%s:[%-11s]:LCT-%08X\n", $user, $uid, $lmhash, $nthash, "U", time;
-	my $cmd = "echo '$smbpasswd' | pdbedit -i smbpasswd:/dev/stdin";
+
+	y2milestone ("Writing user (".$user.") settings to: ".$tmpfile);
+	SCR->Write (".target.string", $tmpfile, $smbpasswd);
+
+	my $cmd = "pdbedit -i smbpasswd:$tmpfile";
 	if (SCR->Execute(".target.bash", $cmd)) {
 	    y2error("Failed to execute '$cmd'");
 	    $error = 1;
 	    next;
 	}
     }
+
+    if (FileUtils->Exists ($tmpfile)) {
+	y2milestone ("Removing temporary file: ".$tmpfile);
+	SCR->Execute (".target.remove", $tmpfile);
+    }
+
     return $error == 0;
 }
 
