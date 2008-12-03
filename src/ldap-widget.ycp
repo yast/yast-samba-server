@@ -288,16 +288,25 @@ map CreateSambaLDAPSettingsEssentialWidget()
     term basedn = `VBox(
 	// translators: text entry label
 	`TextEntry(`id("ldap suffix"), _("&Search Base DN")));
-    term auth = `Frame(_("Authentication"), `VBox(
-	// translators: text entry label
-	`TextEntry(`id("ldap admin dn"), _("&Administration DN")),
-	// TODO: if Mode::config() => no ask for pssword
-	// translators: password enrty label
-	`Password(`id(`passwd1), _("Administration &Password")),
-	// translators: reenter password entry label
-	`Password(`id(`passwd2), _("Administration Password (A&gain)")),
-	`ReplacePoint(`id("passwd_label"), `Label("")),
-	`Empty(`opt(`vstretch))));
+    term auth = `Frame (
+	_("Authentication"),
+	`VBox(
+	    // translators: text entry label
+	    `TextEntry(`id("ldap admin dn"), _("&Administration DN")),
+	    // BNC #446794
+	    `HSquash (
+		`VBox (
+		    // TODO: if Mode::config() => no ask for pssword
+		    // translators: password enrty label
+		    `Password (`id(`passwd1), `opt (`hstretch), _("Administration &Password")),
+		    // translators: reenter password entry label
+		    `Password (`id(`passwd2), `opt (`hstretch), _("Administration Password (A&gain)"))
+		)
+	    ),
+	    `ReplacePoint(`id("passwd_label"), `Label("")),
+	    `Empty(`opt(`vstretch))
+	)
+    );
     term passdb = 
 	// translators: frame title (passdb == password database)
 	`Frame(_("Passdb Back-End"), `VBox(
