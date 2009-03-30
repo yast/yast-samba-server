@@ -139,7 +139,6 @@ any Installation_Step2 () {
     string workgroup = SambaConfig::GlobalGetStr("workgroup", "");
     boolean has_pdc = SambaNmbLookup::HasPDC(workgroup);
     boolean has_bdc = SambaNmbLookup::HasBDC(workgroup);
-    boolean simple = ProductFeatures::GetFeature("globals", "ui_mode") == "simple";
 
     term contents = `VBox(
 	//header of status-like information. followed by domain name
@@ -153,23 +152,21 @@ any Installation_Step2 () {
 		    `HSpacing(4),
 		    // appears on new line after Primary Domain Controller radio button
 		    `Left(`Label(has_pdc?_("Not available because a PDC is present."):""))),
-		(simple ? `Empty() : `VBox(
+		`VBox(
 			`Left(`RadioButton(`id("BDC"), bdc, false)),
 			`HBox(
 			    `HSpacing(4),
-			    `Left(`Label(""))))),
+			    `Left(`Label("")))
+		),
 		`Left(`RadioButton(`id ("Standalone"), standalone, has_pdc)),
 		`VSpacing(1)))))),
 	`VStretch());
 	
-    string help = simple ? HELPS["inst_step2_no_bdc"]:"" :  HELPS["inst_step2"]:"";
+    string help = HELPS["inst_step2"]:"";
 
     Wizard::SetContents( caption, contents, help, true, true );
 	
     UI::ChangeWidget(`id(`pdc), `Enabled, !has_pdc);
-//    if (simple) {
-//	UI::ChangeWidget(`id(`bdc), `Enabled, true);
-//    }
 
     any ret = nil;
     while(true) {
@@ -217,14 +214,12 @@ void BaseSettingsWidgetInit(string key)
 
 void WinsSettingsWidgetInit(string key)
 {
-    if (ProductFeatures::GetFeature("globals", "ui_mode") != "simple") {
 	boolean wins = SambaConfig::GlobalGetTruth("wins support", false);
 
 	UI::ChangeWidget(`id("wins_server_support"), `Value, wins);
 	UI::ChangeWidget(`id("remote_wins_server"), `Value, ! wins);
 	UI::ChangeWidget(`id("wins_server_name"), `Enabled, ! wins);
         UI::ChangeWidget(`id("wins_server_name"), `Value, SambaConfig::GlobalGetStr("wins server",""));
-    }
 }
 
 void WinsViaDHCPWidgetInit (string key) {
@@ -263,7 +258,6 @@ void BaseSettingsWidgetStore(string key, map event_descr)
 
 void WinsSettingsWidgetStore(string key, map event_descr)
 {
-    if (ProductFeatures::GetFeature("globals", "ui_mode") != "simple") {
 	if ( (boolean)UI::QueryWidget(`id("wins_server_support"), `Value)) {
 	    y2milestone("Enabling wins support");
 	    SambaConfig::GlobalSetTruth("wins support", true);
@@ -273,7 +267,6 @@ void WinsSettingsWidgetStore(string key, map event_descr)
 	    SambaConfig::GlobalSetStr("wins server", (string)UI::QueryWidget(`id("wins_server_name"), `Value));
     	    y2milestone("Disabling wins support, using server '%1'", SambaConfig::GlobalGetStr("wins server", "<none>"));
 	}
-    }
 }
 
 void WinsViaDHCPWidgetStore (string key, map event_descr) {
@@ -308,12 +301,10 @@ void GlobalConfigStringWidgetStore(string key, map event_descr)
 
 symbol WinsSettingsWidgetHandle(string key, map event_descr)
 {
-    if (ProductFeatures::GetFeature("globals", "ui_mode") != "simple") {
 	any event = event_descr["ID"]:nil;
 	if ( event == "wins_server_support" || event == "remote_wins_server" ) {
 	    UI::ChangeWidget(`id("wins_server_name"), `Enabled, event == "remote_wins_server");
 	}
-    }
     return nil;
 }
 
@@ -853,10 +844,8 @@ any Installation_Conf_Tab () {
 	`item(`id("PDC"), _("Primary (PDC)"))
     ];
 
-    if (ProductFeatures::GetFeature("globals", "ui_mode") != "simple") {
 	// translators: combobox item
 	roles = add( roles, `item ( `id("BDC"), _("Backup (BDC)") ));
-    }
     
     term basesettings_widget = `Frame(_("Base Settings"), `HBox(
         `HSpacing(1),
@@ -930,23 +919,6 @@ any Installation_Conf_Tab () {
 		`HWeight(1, `Empty()),
 		`HWeight(100, `VBox(
 		    `VSpacing(0.5),
-		    (ProductFeatures::GetFeature("globals", "ui_mode") == "simple" ? 
-			`HBox (
-			    `HWeight (
-				50, `VBox (
-				    "BASE SETTINGS",
-				    `VSpacing (1),
-				    "netbios name",
-				    "WINS via DHCP",
-				    "WINS Host Resolution",
-				    "ADVANCED SETTINGS"
-				)
-			    ),
-			    `HWeight (
-				50, `Empty ()
-			    )
-			)
-			:
 			`VBox (
 			    `HBox (
 				`HWeight (1,
@@ -973,8 +945,7 @@ any Installation_Conf_Tab () {
 				`HSpacing(0.5),
 				`HWeight (1, `Empty ())
 			    )
-			)
-		    ),
+			),
 		    `VStretch())
 		),
 		`HWeight(1, `Empty())
@@ -983,7 +954,6 @@ any Installation_Conf_Tab () {
 	]
     ];
     
-    if (ProductFeatures::GetFeature("globals", "ui_mode") != "simple") {
 	tabs_descr = union(tabs_descr, $[
 	    "trusted_domains_tab": $[
 		"header": _("&Trusted Domains"),
@@ -996,7 +966,6 @@ any Installation_Conf_Tab () {
 		"widget_names": ["LDAP ESSENTIAL"]
 	    ]
 	]);
-    }
     
     map tabs_widget_descr = $[
 	"SERVICE START": CWMServiceStart::CreateAutoStartWidget($[
@@ -1024,7 +993,7 @@ any Installation_Conf_Tab () {
 	"BASE SETTINGS": $[
 	    "widget" : `custom,
 	    "custom_widget" : basesettings_widget,
-	    "help": ProductFeatures::GetFeature("globals", "ui_mode") == "simple" ? HELPS["smb_conf_tab_base_settings_no_bdc"]:"" : HELPS["smb_conf_tab_base_settings"]:"",
+	    "help": HELPS["smb_conf_tab_base_settings"]:"",
 	    "init": BaseSettingsWidgetInit,
 	    "store": BaseSettingsWidgetStore,
 	],
@@ -1075,9 +1044,7 @@ any Installation_Conf_Tab () {
 
     map widget_descr = $[
 	"tab": CWMTab::CreateWidget($[
-	    "tab_order": ProductFeatures::GetFeature("globals", "ui_mode") != "simple" ?
-		["startup", "shares", "identity", "trusted_domains_tab", "ldap_settings_tab"] :
-		["startup", "shares", "identity"],
+	    "tab_order": ["startup", "shares", "identity", "trusted_domains_tab", "ldap_settings_tab"],
 	    "tabs": tabs_descr,
 	    "widget_descr": tabs_widget_descr,
 	    "initial_tab" : return_tab,
