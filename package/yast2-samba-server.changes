@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 30 15:58:03 CEST 2009 - locilka@suse.cz
+
+- Enabling all expert settings that were hidden because of obsolete
+  globals->ui_mode control file option (bnc #480820).
+- 2.18.1
+
+-------------------------------------------------------------------
 Fri Jan 16 13:35:48 CET 2009 - locilka@suse.cz
 
 - Enabling the UsersPlugin* for all configurations (bnc #460555).
