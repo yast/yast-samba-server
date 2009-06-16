@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 16 14:27:56 CEST 2009 - mvidner@suse.cz
+
+- Using autodocs-ycp.ami, which contains a fix for automake 1.11.
+
+-------------------------------------------------------------------
 Mon Mar 30 15:58:03 CEST 2009 - locilka@suse.cz
 
 - Enabling all expert settings that were hidden because of obsolete
