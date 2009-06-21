@@ -18,7 +18,7 @@ Supplements:	samba
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of samba-server
+Summary:	YaST2 - Samba Server Configuration
 
 %description
 -
