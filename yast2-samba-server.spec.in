@@ -21,7 +21,8 @@ BuildArchitectures:	noarch
 Summary:	YaST2 - Samba Server Configuration
 
 %description
--
+This package contains the YaST2 component for Samba server
+configuration.
 
 @PREP@
 
