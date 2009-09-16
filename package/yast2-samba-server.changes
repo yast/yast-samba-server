@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 16 11:42:06 CEST 2009 - jsuchome@suse.cz
+
+- use correct names for LDAP keys in add_machine.ycp (bnc#515991)
+- 2.18.2
+
+-------------------------------------------------------------------
 Tue Jun 16 14:27:56 CEST 2009 - mvidner@suse.cz
 
 - Using autodocs-ycp.ami, which contains a fix for automake 1.11.

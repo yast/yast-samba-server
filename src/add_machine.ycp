@@ -85,7 +85,7 @@ map<string,any> config_map = $[
 	"bind_dn"		: bind_dn,
 	"user_base"		: ldap_machine_suffix+","+ldap_suffix,
 	"type"			: "ldap",
-	"plugins": [ "UsersPluginLDAPAll" ],
+	"plugins": [ "UsersPluginLDAPAll", "UsersPluginSamba" ],
     ];
     
 map<string,any> data_map = $[
@@ -93,9 +93,9 @@ map<string,any> data_map = $[
 	"givenName" : "Machine",
 	"cn" : value,
 	"sn" : "Machine",
-	"userpassword"	: "*",
-	"loginshell" : "/bin/false",
-	"homedirectory" : "/var/lib/nobody",
+	"userPassword"	: "*",
+	"loginShell" : "/bin/false",
+	"homeDirectory" : "/var/lib/nobody",
 	"create_home" : false,
     ];
 
