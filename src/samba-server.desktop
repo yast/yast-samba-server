@@ -20,9 +20,8 @@ X-SuSE-YaST-AutoInstRequires=lan
 X-SuSE-YaST-AutoInstSchema=samba-server.rnc
 
 Icon=yast-samba-server
-Exec=/sbin/yast2 samba-server 
+Exec=xdg-su -c "/sbin/yast2 samba-server"
 
 Name=Samba Server
 GenericName=Configure a Samba server
-X-KDE-SubstituteUID=true
 StartupNotify=true
