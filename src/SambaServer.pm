@@ -304,7 +304,7 @@ sub Import {
     } else {
 	$GlobalsConfigured = 0;
     }
-    $Modified = 0;
+    $Modified = 1;
 	
     y2debug("Importing: ", Dumper($settings));
 
@@ -323,7 +323,8 @@ sub Export {
     my ($self) = @_;
 
     $GlobalsConfigured = 1 if $self->GetModified();
-    $Modified = 0;
+    # Export does not change the status, only Import and Write
+    # $Modified = 0;
     
     return {
 	version =>	"2.11",

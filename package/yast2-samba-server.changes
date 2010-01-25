@@ -1,4 +1,9 @@
 ------------------------------------------------------------------
+Mon Jan 25 17:00:20 CET 2010 - locilka@suse.cz
+
+- Import sets Modified to true (BNC #572670).
+
+------------------------------------------------------------------
 Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
 
 - Adjusted .desktop file(s) to wrap /sbin/yast2/ calls in xdg-su
