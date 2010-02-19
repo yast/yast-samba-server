@@ -205,10 +205,11 @@ string getRole() {
 void BaseSettingsWidgetInit(string key)
 {
     UI::ChangeWidget(`id("workgroup_domainname"), `Value, SambaConfig::GlobalGetStr("workgroup", ""));
-    UI::ChangeWidget(`id("domain_controller"), `Value, getRole());
 
     // initial for this dialog
-    initial_role = SambaRole::GetRole();
+    // see also BNC #553349
+    initial_role = getRole();
+    UI::ChangeWidget(`id("domain_controller"), `Value, initial_role);
     y2milestone ("Initial role: %1", initial_role);
 }
 
@@ -321,6 +322,8 @@ symbol AdvancedSettingsWidgetHandle(string key, map event)
 boolean allow_share = true;
 integer max_shares  = 0;
 string shares_group = "";
+// Guest Access check-box, BNC #579993
+boolean guest_access = false;
 
 void InitUserShareWidgets () {
     max_shares  = Samba::GetMaxShares ();
@@ -332,11 +335,14 @@ void InitUserShareWidgets () {
 	allow_share	= true;
     }
 
+    guest_access = allow_share && Samba::GetGuessAccess();
+
     shares_group = Samba::shares_group;
 
     UI::ChangeWidget (`id(`group), `Value, shares_group);
     UI::ChangeWidget (`id(`max_shares), `Value, max_shares);
     UI::ChangeWidget (`id(`share_ch), `Value, allow_share);
+    UI::ChangeWidget (`id(`guest_ch), `Value, guest_access);
 }
 
 void AdjustUserShareWidgets () {
@@ -906,6 +912,8 @@ any Installation_Conf_Tab () {
 			"allow_share" : allow_share,
 			"group"       : shares_group,
 			"max_shares"  : max_shares,
+			// BNC #579993, Allow guest access
+			"guest_access": guest_access,
 		    ]),
 		    `HSpacing(1)
 		),
