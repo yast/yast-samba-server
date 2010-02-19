@@ -1,4 +1,13 @@
 ------------------------------------------------------------------
+Fri Feb 19 16:55:02 CET 2010 - locilka@suse.cz
+
+- Re-added possibility to allow guest access (BNC #579993).
+- Fixed buggy behavior when security settings were manually
+  changed by user in advanced options (BNC #553349).
+- Adjusted help according the current UI (BNC #580102).
+- 2.18.3
+
+------------------------------------------------------------------
 Mon Jan 25 17:00:20 CET 2010 - locilka@suse.cz
 
 - Import sets Modified to true (BNC #572670).
