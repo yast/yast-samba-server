@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan  4 17:18:23 CET 2011 - locilka@suse.cz
+
+- Also accepting samba-gplv3 packages (BNC #657414)
+- 2.13.25
+
+-------------------------------------------------------------------
 Fri Feb 19 16:55:02 CET 2010 - locilka@suse.cz
 
 - Re-added possibility to allow guest access (BNC #579993).
