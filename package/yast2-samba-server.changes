@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan  4 17:18:23 CET 2011 - locilka@suse.cz
+
+- Also accepting samba-gplv3 packages (BNC #657414)
+- 2.13.25
+
+-------------------------------------------------------------------
 Thu Feb 21 15:48:51 CET 2008 - jsuchome@suse.cz
 
 - merged texts from proofreading

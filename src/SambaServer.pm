@@ -54,6 +54,8 @@ my $Modified;
 
 # list of required packages
 my $RequiredPackages = ["samba", "samba-client"];
+# ... or another packages (BNC #657414)
+my $RequiredPackages_gplv3 = ["samba-gplv3", "samba-gplv3-client"];
 
 my $GlobalsConfigured = 0;
 
@@ -76,6 +78,17 @@ sub GetModified {
 	|| SambaTrustDom->GetModified()
 	|| SambaAccounts->GetModified();
 };
+
+# Check that packages are installed or offer their installation
+BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
+sub CheckAndInstallPackages {
+  # installed_required_packages? or installed_packages_gplv3? or install_packages!
+  PackageSystem->InstalledAll($RequiredPackages) ||
+    PackageSystem->InstalledAll($RequiredPackages_gplv3) ||
+      PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) ||
+        return 0;
+  return 1;
+}
 
 # Read all samba-server settings
 # @param force_reread force reread configuration
@@ -125,7 +138,7 @@ sub Read {
     Progress->NextStage();
     # check installed packages
     unless (Mode->test()) {
-	PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) or return 0;
+	CheckAndInstallPackages() or return 0;
     }
     SambaConfig->Read();
     Samba->ReadSharesSetting();
