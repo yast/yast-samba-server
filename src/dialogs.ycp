@@ -980,9 +980,9 @@ any Installation_Conf_Tab () {
 	    "get_service_auto_start": SambaService::GetServiceAutoStart,
 	    "set_service_auto_start": SambaService::SetServiceAutoStart,
 	]),
-	// BNC #247344
+	// BNC #247344, BNC #541958 (comment #18)
 	"FIREWALL": CWMFirewallInterfaces::CreateOpenFirewallWidget($[
-	    "services": [ "service:samba-server" ],
+	    "services": [ "service:samba-server", "service:netbios-server" ],
 	    "display_details": true
 	]),
 	"SHARES": $[

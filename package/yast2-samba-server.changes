@@ -1,8 +1,14 @@
 -------------------------------------------------------------------
+Thu Jan  6 17:00:30 CET 2011 - locilka@suse.cz
+
+- Added 'netbios-server' firewall service to list of services
+  required to be open during firewall configuration (BNC #541958)
+- 2.20.1
+
+-------------------------------------------------------------------
 Tue Jan  4 17:18:23 CET 2011 - locilka@suse.cz
 
 - Also accepting samba-gplv3 packages (BNC #657414)
-- 2.13.25
 
 ------------------------------------------------------------------
 Fri Feb 19 16:55:02 CET 2010 - locilka@suse.cz
