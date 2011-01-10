@@ -309,14 +309,16 @@ sub addLdapDn {
 
     # create dn
     y2milestone("Creating dn: $dn");
-    my $map;
-    given($attr) {
-	when ("dc") {$map = {objectClass => ["top", "dcObject"], dc => $value}}
-	when ("ou") {$map = {objectClass => ["top", "organizationalUnit"], ou => $value}}
-	# translators: error message, followed by class giving error
-	default {return __("Unknown Class:")." $dn\n".__("Only dcObject (dc) and organizationalUnit (ou) classes are supported.")}
-    };
-    
+    my $map = {};
+
+    if ($attr eq "dc") {
+	$map = {objectClass => ["top", "dcObject"], dc => $value};
+    } elsif ($attr eq "ou") {
+	$map = {objectClass => ["top", "organizationalUnit"], ou => $value};
+    } else {
+	return __("Unknown Class:")." $dn\n".__("Only dcObject (dc) and organizationalUnit (ou) classes are supported.");
+    }
+
     if ($map && !SCR->Write(".ldap.add", {dn=>$dn}, $map)) {
 	return getLdapError();
     }
