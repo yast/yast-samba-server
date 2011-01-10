@@ -982,7 +982,7 @@ any Installation_Conf_Tab () {
 	]),
 	// BNC #247344, BNC #541958 (comment #18)
 	"FIREWALL": CWMFirewallInterfaces::CreateOpenFirewallWidget($[
-	    "services": [ "service:samba-server", "service:netbios-server" ],
+	    "services": [ "service:samba-server", "service:netbios-server", "service:samba-client" ],
 	    "display_details": true
 	]),
 	"SHARES": $[
