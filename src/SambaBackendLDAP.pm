@@ -11,6 +11,7 @@
 package SambaBackendLDAP;
 
 use strict;
+use Switch 'perl6';
 
 use YaST::YCP qw(:DATA :LOGGING);
 use YaPI;

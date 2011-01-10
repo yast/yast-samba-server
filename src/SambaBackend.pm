@@ -11,6 +11,7 @@
 package SambaBackend;
 
 use strict;
+use Switch 'Perl6';
 
 use Data::Dumper;
 

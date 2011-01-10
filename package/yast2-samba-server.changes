@@ -6,11 +6,6 @@ Mon Jan 10 10:56:57 CET 2011 - locilka@suse.cz
 - 2.17.13
 
 -------------------------------------------------------------------
-Fri Jan  7 10:24:11 CET 2011 - locilka@suse.cz
-
-- 'switch' wiped out (BNC #635820)
-
--------------------------------------------------------------------
 Thu Jan  6 17:00:30 CET 2011 - locilka@suse.cz
 
 - Added 'netbios-server' firewall service to list of services
