@@ -82,12 +82,13 @@ sub GetModified {
 # Check that packages are installed or offer their installation
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
 sub CheckAndInstallPackages {
-  # installed_required_packages? or installed_packages_gplv3? or install_packages!
-  PackageSystem->InstalledAll($RequiredPackages) ||
-    PackageSystem->InstalledAll($RequiredPackages_gplv3) ||
-      PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) ||
-        return 0;
-  return 1;
+    # Check whether samba is installed as 'samba' or 'samba-gplv3' and install the rest of packages
+    # GPLv3 packages are preferred
+    PackageSystem->InstalledAny($RequiredPackages) && PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) ||
+	PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages_gplv3) ||
+	return 0;
+
+    return 1;
 }
 
 # Read all samba-server settings
@@ -391,7 +392,14 @@ sub Summary {
 BEGIN{$TYPEINFO{AutoPackages}=["function",["map","string",["list","string"]]]}
 sub AutoPackages {
     my ($self) = @_;
-    return { install=> $RequiredPackages, remove => []};
+
+    # Check whether any 'samba' is installed and keep it
+    if PackageSystem->InstalledAny($RequiredPackages) {
+	return { install => $RequiredPackages, remove => []};
+    # If any other samba (GPLv3) or none is installed, prefer the GPLv3
+    } else {
+	return { install => $RequiredPackages_gplv3, remove => []};
+    }
 }
 
 8;
