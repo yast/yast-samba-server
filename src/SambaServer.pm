@@ -395,8 +395,8 @@ sub AutoPackages {
 
     # Check whether any 'samba' is installed and keep it
     if (PackageSystem->InstalledAny($RequiredPackages_gplv3)) {
-	return { install => $RequiredPackages, remove => []};
-    # If any other samba (GPLv3) or none is installed, prefer the GPLv3
+	return { install => $RequiredPackages_gplv3, remove => []};
+    # If any other samba or none is installed
     } else {
 	return { install => $RequiredPackages, remove => []};
     }
