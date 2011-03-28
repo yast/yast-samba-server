@@ -255,8 +255,35 @@ directory.</p>
     _("<p><b>Inherit ACLS</b> can be used to ensure
 that if default ACLs exist on parent directories, they are always
 honored when creating a subdirectory.</p>
-")
+"),
 
+
+    // help for LDAP Settings dialog
+    "samba_ldap_setting_auth_widget"	: _("<p><b><big>LDAP Settings</big></b><br>
+Here, it is possible to determine the LDAP server to use for authentication.
+</p>
+<p>
+Setting <b>LDAP Password Back-End</b> allows storing user information in LDAP tree specified by URL. With <b>LDAP Idmap Back-End</b>, store SID/uid/gid mapping tables in LDAP.
+</p><p>
+In Authentication section, set the credentials for LDAP server, including full Administrator DN.
+</p>
+<b>Search Base DN</b> is the LDAP suffix appended to Samba specific LDAP objects.
+</p><p>
+To test the connection to your LDAP server, click <b>Test Connection</b>. To set expert LDAP settings or use default values, click <b>Advanced Settings</b>.<p>"),
+
+    // help for SambaLDAPSettingsSuffixesWidget
+    "samba_ldap_setting_suffixes_widget"	: _("<p><b>User Suffix</b> specifies where users are added to LDAP tree. The value is pre-pended to the value of <b>Search Base DN</b>. Similarly, <b>Group Suffix</b> specifies the place for groups, <b>Machine Suffix</b> for machines and <b>Idmap Suffix</b> for idmap mappings.</p>"),
+
+    // help for SambaLDAPSettingsTimeoutsWidget
+    "samba_ldap_settings_timeouts_widget"	: _("<p><b>Replication Sleep</b> is the amount of milliseconds Samba will wait after writing to LDAP server, so LDAP replicas can catch up.</p>
+<p><b>Time-Out</b> specifies the timeout for LDAP operations (in seconds).</p>"),
+
+    // help for SambaLDAPSettingsSecurityWidget
+    "samba_ldap_settings_security_widget"	: _("<p>Define whether to use SSL for LDAP connection with <b>Use SSL or TLS</b>.</p>"),
+
+    // help for SambaLDAPSettingsMiscWidget
+    "samba_ldap_settings_misc_widget"		: _("<p><b>Delete DN</b> specifies if delete operation deletes the complete LDAP entry or only the Samba specific attributes.</p>
+<p>With <b>Synchronize Passwords</b>, define possible synchronization of LDAP password with the NT and LM hashes. See <tt>smb.conf</tt> manual page for details.</p>"),
 ];
 
 map <string,string> warnings = $[

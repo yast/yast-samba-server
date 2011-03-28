@@ -437,9 +437,7 @@ map CreateSambaLDAPSettingsTimeoutsWidget()
 // translators: combo box value
 list<list> ldap_ssl_values = [ ["Off", _("No")], 
 // translators: combo box value
-["Start_tls", _("TLS")], 
-// translators: combo box value
-["On", _("SSL")] ];
+["Start_tls", _("TLS")], ];
 
 void SambaLDAPSettingsSecurityWidgetInit(string key) ``{
     init_ldap_combo("ldap ssl", ldap_ssl_values);
