@@ -166,7 +166,7 @@ any Installation_Step2 () {
 
     Wizard::SetContents( caption, contents, help, true, true );
 	
-    UI::ChangeWidget(`id(`pdc), `Enabled, !has_pdc);
+    UI::ChangeWidget(`id("PDC"), `Enabled, !has_pdc);
 
     any ret = nil;
     while(true) {
