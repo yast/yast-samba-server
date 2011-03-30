@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 30 11:09:37 CEST 2011 - jsuchome@suse.cz
+
+- adapted help text in first dialog (bnc#579992) 
+
+-------------------------------------------------------------------
 Mon Mar 28 13:48:28 CEST 2011 - jsuchome@suse.cz
 
 - removed obsolete On value from 'ldap ssl' option 

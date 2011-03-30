@@ -41,7 +41,7 @@ An additional dialog will inform you whether it is safe to do so.
 
     /* Samba selecting workgroup or domain 1/1 - Installation step 1 */
     "inst_step1" : _("<p><b><big>Workgroup or Domain Selection</big></b><br>
-All available workgroups or domains found on your network are listed here. Select one of them or type your own new name and click <b>Next</b>.
+Select existing name of workgroup or domain or type your own new name and click <b>Next</b>.
 </p>
 "),
 
