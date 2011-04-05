@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  5 16:07:10 CEST 2011 - jsuchome@suse.cz
+
+- set "Allow Guest Access" option (bnc#621618)
+- 2.21.1
+
+-------------------------------------------------------------------
 Wed Mar 30 11:09:37 CEST 2011 - jsuchome@suse.cz
 
 - adapted help text in first dialog (bnc#579992) 

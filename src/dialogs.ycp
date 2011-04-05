@@ -346,7 +346,7 @@ void InitUserShareWidgets () {
 }
 
 void AdjustUserShareWidgets () {
-    foreach (symbol t, [`group, `max_shares], {
+    foreach (symbol t, [`group, `max_shares, `guest_ch], {
 	UI::ChangeWidget (`id(t), `Enabled,
 	    (boolean) UI::QueryWidget(`id(`share_ch),`Value)
 	);
@@ -365,6 +365,9 @@ void StoreUserShareWidgets (string key, map event_descr) {
 	Samba::stop_services = false;
     }
     Samba::SetShares (max,(string)UI::QueryWidget(`id(`group),`Value));
+    Samba::SetGuessAccess (new_share &&
+	(boolean)UI::QueryWidget(`id(`guest_ch), `Value));
+
     SambaServer::SetModified();
 }
 
