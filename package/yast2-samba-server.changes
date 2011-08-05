@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug  5 12:34:59 CEST 2011 - tgoettlicher@suse.de
+
+- fixed .desktop file (bnc #681249)
+
+-------------------------------------------------------------------
 Tue Apr  5 16:07:10 CEST 2011 - jsuchome@suse.cz
 
 - set "Allow Guest Access" option (bnc#621618)
