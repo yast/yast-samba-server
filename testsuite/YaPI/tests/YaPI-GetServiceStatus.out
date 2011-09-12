@@ -4,5 +4,5 @@ Read	.init.scripts.runlevel "smb" nil
 Return	0
 Return	Enabled service
 Read	.init.scripts.exists "smb" true
-Read	.init.scripts.runlevel "smb" $["nmbd":$["start":["2", "3", "5"]], "smbd":$["start":["2", "3", "5"]]]
-Return	0
+Read	.init.scripts.runlevel "smb" $["nmb":$["start":["2", "3", "5"]], "smb":$["start":["2", "3", "5"]]]
+Return	1

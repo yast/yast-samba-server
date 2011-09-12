@@ -37,10 +37,10 @@
 		"scripts" : $[ 
 		    "exists" : true,
 		    "runlevel" : $[
-			"smbd" : $[
+			"smb" : $[
 			    "start" : [ "2", "3", "5" ],
 			],
-			"nmbd" : $[
+			"nmb" : $[
 			    "start" : [ "2", "3", "5" ],
 			],
 		    ],
