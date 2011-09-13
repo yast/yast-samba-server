@@ -19,13 +19,9 @@
 
     // disabled service
     TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 
-	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[ "init" : $[ "scripts" : $[ "exists" : true ] ], "target" : $["tmpdir":"/tmp"] ],
 	$[],
-	$[ "target" :$[ "bash_output" : 
-	    $[
-		"exit" : 0,
-	    ]
-	] ]
+	$[ "target" :$[ "bash" : 1] ]
     ], nil );
 
     TEST( ``("Enabled service"), [r,w,x], nil);
@@ -49,10 +45,6 @@
 	    
 	],
 	$[],
-	$[ "target" :$[ "bash_output" : 
-	    $[
-		"exit" : 0,
-	    ]
-	] ]
+	$[ "target" :$[ "bash" :  0 ] ]
     ], nil );
 }

@@ -1,8 +1,9 @@
 Return	Disabled service
-Read	.init.scripts.exists "smb" true
-Read	.init.scripts.runlevel "smb" nil
+Read	.target.tmpdir "/tmp"
+Read	.target.stat "/etc/init.d/smb" nil
+Execute	.target.bash "/sbin/chkconfig -l smb | /usr/bin/grep -q '[0-6]:on'" 1
 Return	0
 Return	Enabled service
-Read	.init.scripts.exists "smb" true
-Read	.init.scripts.runlevel "smb" $["nmb":$["start":["2", "3", "5"]], "smb":$["start":["2", "3", "5"]]]
+Read	.target.stat "/etc/init.d/smb" nil
+Execute	.target.bash "/sbin/chkconfig -l smb | /usr/bin/grep -q '[0-6]:on'" 0
 Return	1

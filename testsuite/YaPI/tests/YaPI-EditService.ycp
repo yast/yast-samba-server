@@ -25,7 +25,8 @@
 	$[ "target" :$[ "bash_output" : 
 	    $[
 		"exit" : 0,
-	    ]
+	    ],
+	    "bash" : 1
 	] ]
     ], nil );
 
@@ -38,7 +39,8 @@
 	$[ "target" :$[ "bash_output" : 
 	    $[
 		"exit" : 0,
-	    ]
+	    ],
+	    "bash" : 1
 	] ]
     ], nil );
 
@@ -66,11 +68,14 @@
 	$[ "target" :$[ "bash_output" : 
 	    $[
 		"exit" : 0,
-	    ]
+	    ],
+	    "bash" : 0
 	] ]
     ], nil );
 
     TEST( ``("Disable enabled service"), [r,w,x], nil);
+
+    import "SambaService";
 
     // disable service, but it's enabled
     TEST( ``( YaPI::Samba::EditService( false ) ), [
@@ -94,7 +99,8 @@
 	$[ "target" :$[ "bash_output" : 
 	    $[
 		"exit" : 0,
-	    ]
+	    ],
+	    "bash" : 0
 	] ]
     ], nil );
 }

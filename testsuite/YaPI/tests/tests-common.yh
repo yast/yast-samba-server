@@ -54,7 +54,9 @@ $[
 	    "runlevel": $[ ],
 	],
     ],
-
+    "target" : $[
+	"tmpdir" : "/tmp"
+    ]
 ];
 
 map w_common = 
