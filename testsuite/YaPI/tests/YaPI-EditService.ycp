@@ -20,7 +20,14 @@
 
     // enable service, but it's disabled
     TEST( ``( YaPI::Samba::EditService( true ) ), [ 
-	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[
+          "init"        : $[
+            "scripts"   : $[ "exists" : true ]
+          ],
+          "target"      : $[
+            "stat"        : $[ 1:2 ]
+          ],
+        ],
 	$[],
 	$[ "target" :$[ "bash_output" : 
 	    $[
@@ -34,7 +41,14 @@
 
     // disable service, but it's already disabled
     TEST( ``( YaPI::Samba::EditService( false ) ), [
-	$[ "init" : $[ "scripts" : $[ "exists" : true ] ] ],
+	$[
+          "init"        : $[
+            "scripts"   : $[ "exists" : true ]
+          ],
+          "target"      : $[
+            "stat"        : $[ 1:2 ]
+          ],
+        ],
 	$[],
 	$[ "target" :$[ "bash_output" : 
 	    $[
@@ -62,7 +76,9 @@
 		    ],
 		],
 	    ],
-	    
+	    "target"    : $[
+                "stat"  : $[ 1:2 ]
+            ],
 	],
 	$[],
 	$[ "target" :$[ "bash_output" : 
@@ -93,7 +109,9 @@
 		    ],
 		],
 	    ],
-	    
+	    "target"    : $[
+                "stat"  : $[ 1:2 ]
+            ],
 	],
 	$[],
 	$[ "target" :$[ "bash_output" : 

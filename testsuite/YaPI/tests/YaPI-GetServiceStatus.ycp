@@ -19,7 +19,16 @@
 
     // disabled service
     TEST( ``( YaPI::Samba::GetServiceStatus() ), [ 
-	$[ "init" : $[ "scripts" : $[ "exists" : true ] ], "target" : $["tmpdir":"/tmp"] ],
+	$[
+          "init" : $[
+              "scripts" : $[ "exists" : true ] 
+          ],
+          "target" : $[
+              "tmpdir"  : "/tmp",
+              // FileUtils::Exists returns true
+              "stat"  : $[ 1: 2 ],
+          ]
+        ],
 	$[],
 	$[ "target" :$[ "bash" : 1] ]
     ], nil );
@@ -42,7 +51,9 @@
 		    ],
 		],
 	    ],
-	    
+            "target"    : $[
+                "stat"  : $[ 1: 2 ],
+            ],
 	],
 	$[],
 	$[ "target" :$[ "bash" :  0 ] ]
