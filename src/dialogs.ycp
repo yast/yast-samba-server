@@ -442,7 +442,7 @@ boolean RenameShare (string share) {
 
 	    if (new_share_name == "") {
 		// TRANSLATORS: popup error message
-		Report::Error (_("Please enter a new share name."));
+		Report::Error (_("Enter a new share name."));
 		continue;
 	    } else if (share == new_share_name) {
 		y2milestone ("Old and new share names are the same");
@@ -450,7 +450,9 @@ boolean RenameShare (string share) {
 	    } else if (SambaConfig::ShareExists (new_share_name)) {
 		// TRANSLATORS: popup error message, %1 is a variable share name
 		Report::Error (sformat (
-		    _("Share '%1' already exists.\nPlease choose another share name."),
+		    _("Share '%1' already exists.
+Choose another share name.
+"),
 		    new_share_name
 		));
 		continue;

@@ -235,7 +235,7 @@ boolean ValidateLDAPURL(any opt_id, string opt_key, map event_descr) {
 
     if (size(urls) > 1 && !quotes_used) {
 	// TRANSLATORS: popup error
-	Report::Error (_("Multiple optional values for one back-end must be quoted."));
+	Report::Error (_("Multiple optional values for one backend must be quoted."));
 	return false;
     }
 
@@ -473,7 +473,7 @@ define symbol ShareHandleFun(string key, map event_descr) ``{
 
     define boolean PassdbEditOptionValidate (string key, map event_descr) {
 	if (! SomeBackendsAreInUse()) {
-	    Report::Error (_("At least one back-end must be specified."));
+	    Report::Error (_("At least one backend must be specified."));
 
 	    return false;
 	}
