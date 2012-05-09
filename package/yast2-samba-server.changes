@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May  9 10:19:43 CEST 2012 - jsuchome@suse.cz
+
+- enhanced check for password requirement in Users plugin
+- 2.22.3 
+
+-------------------------------------------------------------------
 Thu Mar 29 15:56:35 CEST 2012 - jsuchome@suse.cz
 
 - merge proofread texts 
