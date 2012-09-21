@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 21 11:53:52 CEST 2012 - jsuchome@suse.cz
+
+- enhanced check for password requirement in Users plugin
+  (bnc#756426)
+- 2.17.14
+
+-------------------------------------------------------------------
 Mon Jan 10 10:56:57 CET 2011 - locilka@suse.cz
 
 - Added 'samba-client' firewall service to list of services

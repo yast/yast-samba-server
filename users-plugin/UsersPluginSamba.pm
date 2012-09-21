@@ -288,7 +288,8 @@ sub Edit {
     if( ! $data->{'sambainternal'}->{'initialized'} ) {
         $self->init_internal_keys( $config,  $data );
         $data->{'sambainternal'}->{'initialized'} = 1;
-    } elsif ( (! $data->{'sambaLMPassword'}) && 
+    } elsif ( (! $data->{'sambaLMPassword'}) &&
+	      (! $data->{'sambaNTPassword'}) &&
               ( (! $data->{'text_userpassword'} ) || ($data->{'text_userpassword'} eq "" )) ){
             $error	= __("Change the password to create the Samba account");
             return undef;
@@ -301,7 +302,8 @@ sub Edit {
     }
 
     $self->update_attributes ($config, $data);
-    if ( (! $data->{'sambaLMPassword'})  ) {
+    if ( (! $data->{'sambaLMPassword'}) &&
+	 (! $data->{'sambaNTPassword'}) ) {
         y2debug ("no samba password hashes present yet");
     }
 
