@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan  4 14:13:47 UTC 2013 - locilka@suse.com
+
+- Testsuites adapted to switching Service module to systemd
+  (yast2-2.23.15)
+- 2.23.0
+
+-------------------------------------------------------------------
 Wed May  9 10:19:43 CEST 2012 - jsuchome@suse.cz
 
 - enhanced check for password requirement in Users plugin
