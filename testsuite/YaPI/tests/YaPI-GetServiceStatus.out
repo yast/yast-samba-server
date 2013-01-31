@@ -1,9 +1,9 @@
 Return	Disabled service
 Read	.target.tmpdir "/tmp"
-Read	.target.stat "/lib/systemd/system/smb.service" $[1:2]
+Read	.target.stat "/usr/lib/systemd/system/smb.service" $[1:2]
 Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
 Return	0
 Return	Enabled service
-Read	.target.stat "/lib/systemd/system/smb.service" $[1:2]
+Read	.target.stat "/usr/lib/systemd/system/smb.service" $[1:2]
 Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
 Return	1

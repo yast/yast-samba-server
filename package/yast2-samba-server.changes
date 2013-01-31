@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 31 14:03:22 CET 2013 - tgoettlicher@suse.de
+
+- Fixed test suite
+- 2.23.1
+
+-------------------------------------------------------------------
 Fri Jan  4 14:13:47 UTC 2013 - locilka@suse.com
 
 - Testsuites adapted to switching Service module to systemd
