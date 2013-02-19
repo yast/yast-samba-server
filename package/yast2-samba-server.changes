@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Feb 19 10:19:05 CET 2013 - jsuchome@suse.cz
+
+- Shares table:  show share specific guest access status, added
+  button to toggle the it (bnc#803512)
+- disable Allow guest access when Allow users is off
+- save Allow guest access (backport of bnc#621618)
+- 2.17.15
+
+-------------------------------------------------------------------
 Fri Sep 21 11:53:52 CEST 2012 - jsuchome@suse.cz
 
 - enhanced check for password requirement in Users plugin
