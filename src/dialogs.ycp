@@ -84,7 +84,8 @@ list sharesItems(boolean filt) {
 	string enabled = SambaConfig::ShareEnabled(name) ? _("Enabled") : _("Disabled");
 	string comment = SambaConfig::ShareGetStr(name, "comment", "");
 	boolean ro = SambaConfig::ShareGetTruth(name, "read only", true);
-	return `item( `id(index), enabled, ro ? _("Yes") : _("No"), name, pth , comment);
+        boolean ga = SambaConfig::ShareGetTruth(name, "guest ok", false);
+	return `item( `id(index), enabled, ro ? _("Yes") : _("No"), name, pth, ga ? _("Yes") : _("No"), comment);
     });
 }
 
@@ -399,6 +400,7 @@ void SharesWidgetInit(string key)
     UI::ChangeWidget( `id(`edit), `Enabled, size(items)>0 );
     UI::ChangeWidget( `id(`delete), `Enabled, size(items)>0 );
     UI::ChangeWidget( `id(`toggle), `Enabled, size(items)>0 );
+    UI::ChangeWidget( `id(`guest), `Enabled, size(items)>0 );
 
     InitUserShareWidgets();
     AdjustUserShareWidgets();
@@ -525,6 +527,12 @@ symbol SharesWidgetHandle(string key, map event_descr)
 	UI::ChangeWidget( `id(`table), `Items, sharesItems(false) );
 	UI::ChangeWidget( `id(`table), `CurrentItem, id );
 	return nil;
+    }
+    if (ret == `guest) {
+        SambaConfig::ShareSetTruth (share, "guest ok", !SambaConfig::ShareGetTruth (share, "guest ok", false));
+        UI::ChangeWidget( `id(`table), `Items, sharesItems(false) );
+        UI::ChangeWidget( `id(`table), `CurrentItem, id );
+        return nil;
     }
     if (ret == `delete)
     {
@@ -835,13 +843,16 @@ any Installation_Conf_Tab () {
 		    `item(`id(`filter_all), _("Show &All Shares") ),
 		    `item(`id(`filter_non_system), _("Do Not Show &System Shares") )]))),
 	    // translators: table header texts
-	    `Table( `id(`table ), `opt(`hvstretch), `header(_("Status"), _("Read-Only"), _("Name"),  _("Path"), _("Comment")), []),
+	    `Table (`id (`table), `opt (`hvstretch),
+                `header (_("Status"), _("Read-Only"), _("Name"),  _("Path"), _("Guest Access"), _("Comment")), []
+            ),
 	    `HBox(
 		`PushButton(`id(`add), Label::AddButton() + "..."),
 		`PushButton(`id(`edit), Label::EditButton() + "..."),
 		`PushButton(`id(`delete), Label::DeleteButton()),
 		`HStretch(),
 		`PushButton(`id(`rename), _("&Rename...")),
+		`PushButton(`id(`guest), _("Guest Access")),
 		`PushButton(`id(`toggle), _("&Toggle Status"))
 	    )
 	)),
