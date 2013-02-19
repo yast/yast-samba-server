@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Feb 19 17:36:01 CET 2013 - jsuchome@suse.cz
+
+- Shares table:  show share specific guest access status, added
+  button to toggle the it (bnc#803512)
+- 2.23.2   
+
+-------------------------------------------------------------------
 Thu Jan 31 14:03:22 CET 2013 - tgoettlicher@suse.de
 
 - Fixed test suite

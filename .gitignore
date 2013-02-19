@@ -1,7 +1,7 @@
 Makefile
 Makefile.am
 Makefile.in
-aclocal.m4
+*.m4
 config.cache
 config.guess
 config.h.in
@@ -15,7 +15,7 @@ install-sh
 missing
 mkinstalldirs
 stamp-h
-samba-server.pot
-samba-users.pot
+*.pot
 autom4te.cache
 Makefile.am.common
+*.ami
