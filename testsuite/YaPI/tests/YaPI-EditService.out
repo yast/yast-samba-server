@@ -1,10 +1,8 @@
 Return	Enable disabled service
 Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
-Read	.init.scripts.runlevel "nmb" nil
-Read	.init.scripts.comment "nmb" nil
+Execute	.target.bash "/bin/systemctl is-enabled nmb.service" 1
 Execute	.target.bash_output "/bin/systemctl enable nmb.service" $["exit":0]
-Read	.init.scripts.runlevel "smb" nil
-Read	.init.scripts.comment "smb" nil
+Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
 Execute	.target.bash_output "/bin/systemctl enable smb.service" $["exit":0]
 Return	true
 Return	Disable disabled service
@@ -15,10 +13,8 @@ Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
 Return	true
 Return	Disable enabled service
 Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
-Read	.init.scripts.runlevel "nmb" $["nmb":$["start":["2", "3", "5"]], "smb":$["start":["2", "3", "5"]]]
-Read	.init.scripts.comment "nmb" nil
+Execute	.target.bash "/bin/systemctl is-enabled nmb.service" 0
 Execute	.target.bash_output "/bin/systemctl  disable nmb.service" $["exit":0]
-Read	.init.scripts.runlevel "smb" $["nmb":$["start":["2", "3", "5"]], "smb":$["start":["2", "3", "5"]]]
-Read	.init.scripts.comment "smb" nil
+Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
 Execute	.target.bash_output "/bin/systemctl  disable smb.service" $["exit":0]
 Return	true

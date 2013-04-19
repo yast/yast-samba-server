@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr 19 10:50:57 CEST 2013 - jsuchome@suse.cz
+
+- testsuite adapted to last change of Service.ycp
+- 2.24.0 
+
+-------------------------------------------------------------------
 Tue Feb 19 17:36:01 CET 2013 - jsuchome@suse.cz
 
 - Shares table:  show share specific guest access status, added
