@@ -2,7 +2,7 @@
 
 // test for YaPI::Samba::EditServerAsBDC()
 // $Id$
-// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+// testedfiles: SambaRole.pm SambaConfig.pm
 
     import "SambaConfig";
 

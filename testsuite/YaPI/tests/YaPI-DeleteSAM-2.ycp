@@ -1,6 +1,6 @@
 {
 
-    // testedfiles: Samba.pm
+// testedfiles: SambaConfig.pm
 
 // test for YaPI::Samba::DeleteSAM()
 // $Id$

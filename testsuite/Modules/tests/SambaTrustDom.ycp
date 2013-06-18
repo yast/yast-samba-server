@@ -1,5 +1,5 @@
 {
-    //testedfiles: SambaTrustDom.ycp
+    //testedfiles: SambaTrustDom.pm
 
     include "testsuite.ycp";
 
