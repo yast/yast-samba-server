@@ -3,7 +3,7 @@
 // test for YaPI::Samba::DeleteSAM()
 // $Id$
 
-    // testedfiles: Samba.pm
+// testedfiles: SambaConfig.pm
 
     import "SambaConfig";
 

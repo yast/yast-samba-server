@@ -2,7 +2,7 @@
 
 // test for YaPI::Samba::EditServerDescription()
 // $Id$
-// testedfiles: SambaServer.ycp 
+// testedfiles: SambaConfig.pm
 
     import "SambaConfig";
 
