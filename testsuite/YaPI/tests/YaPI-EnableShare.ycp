@@ -2,7 +2,7 @@
 
 // test for YaPI::Samba::EnablePrinters()
 // $Id$
-// testedfiles: Samba.ycp Service.ycp SambaServer.ycp Ldap.ycp
+// testedfiles: SambaConfig.pm
 
     import "SambaConfig";
 
