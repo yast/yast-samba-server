@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jul  1 09:00:06 CEST 2013 - jsuchome@suse.cz
+
+- sort arrays so the test output is deterministic
+- 2.24.1 
+
+-------------------------------------------------------------------
 Fri Apr 19 10:50:57 CEST 2013 - jsuchome@suse.cz
 
 - testsuite adapted to last change of Service.ycp
