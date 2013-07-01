@@ -661,7 +661,7 @@ sub GetAllDirectories {
     my @res;
     
     # filter out the printers
-    foreach my $key (@$shares) {
+    foreach my $key (sort @$shares) {
 	push @res, $key unless SambaConfig->ShareGetTruth($key, "printable", 0);
     }
     
