@@ -460,7 +460,7 @@ BEGIN{$TYPEINFO{UpdateScripts}=["function","boolean","string","string"]}
 sub UpdateScripts {
     my ($self,$name,$location) = @_;
     SambaConfig->GlobalSetMap({
-	"add machine script" => "/sbin/yast /usr/share/YaST2/data/add_machine.ycp %m\$",
+	"add machine script" => "/sbin/yast /usr/share/YaST2/data/add_machine.rb %m\$",
     });
     return TRUE;
 }

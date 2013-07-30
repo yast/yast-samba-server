@@ -6,7 +6,7 @@
     import "SambaConfig";
 
     include "testsuite.ycp";
-    include "./tests/tests-common.yh";
+    include "tests-common.yh";
 
     map r = depth_union(r_common, $[]);
     map w = depth_union(w_common, $[]);

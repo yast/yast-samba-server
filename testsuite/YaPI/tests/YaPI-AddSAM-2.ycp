@@ -8,7 +8,7 @@
     import "SambaConfig";
 
     include "testsuite.ycp";
-    include "./tests/tests-common.yh";
+    include "tests-common.yh";
 
     import "YaPI::Samba";
 

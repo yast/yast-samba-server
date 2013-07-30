@@ -23,6 +23,8 @@ Supplements:	samba
 
 BuildArchitectures:	noarch
 
+Requires:       yast2-ruby-bindings >= 1.0.0
+
 Summary:	YaST2 - Samba Server Configuration
 
 %description
@@ -41,8 +43,8 @@ configuration.
 %defattr(-,root,root)
 %dir @yncludedir@/samba-server
 @yncludedir@/samba-server/*
-@ydatadir@/*.ycp
-@clientdir@/*.ycp
+@ydatadir@/*.rb
+@clientdir@/*.rb
 @moduledir@/*
 @desktopdir@/samba-server.desktop
 @schemadir@/autoyast/rnc/samba-server.rnc
