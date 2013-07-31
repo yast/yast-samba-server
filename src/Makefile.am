@@ -1,55 +1,50 @@
-#
-# Makefile.am for devtools/devtools/skeletons/config/src
-#
+# Sources for samba-server
+
+module_DATA = \
+  modules/SambaBackend.pm \
+  modules/SambaBackendLDAP.pm \
+  modules/SambaRole.pm \
+  modules/UsersPluginSambaGroups.pm \
+  modules/SambaServer.pm \
+  modules/SambaTrustDom.pm \
+  modules/SambaAccounts.pm \
+  modules/UsersPluginSamba.pm \
+  modules/SambaSecrets.pm \
+  modules/SambaService.pm \
+  modules/SambaBackendSimple.pm \
+  modules/SambaPrinters.pm
+
+module1dir = @moduledir@/YaPI
+module1_DATA = \
+  modules/YaPI/Samba.pm
+
+client_DATA = \
+  clients/users_plugin_samba.rb \
+  clients/samba-server_auto.rb \
+  clients/users_plugin_samba_groups.rb \
+  clients/samba-server.rb
 
 yncludedir = @yncludedir@/samba-server
+ynclude_DATA = \
+  include/samba-server/samba-options-local.rb \
+  include/samba-server/wizards.rb \
+  include/samba-server/dialogs-items.rb \
+  include/samba-server/ldap-widget.rb \
+  include/samba-server/dialogs.rb \
+  include/samba-server/samba-options-global.rb \
+  include/samba-server/complex.rb \
+  include/samba-server/helps.rb
 
-client_DATA =			\
-	samba-server.ycp		\
-	samba-server_auto.ycp	
+schemafilesdir = $(schemadir)/autoyast/rnc
+schemafiles_DATA = \
+  autoyast-rnc/samba-server.rnc
 
-ynclude_DATA =			\
-	samba-options-global.ycp	\
-	samba-options-local.ycp		\
-	helps.ycp		\
-	wizards.ycp		\
-	dialogs.ycp		\
-	dialogs-items.ycp	\
-	complex.ycp		\
-	ldap-widget.ycp
+ydata_DATA = \
+  data/add_machine.rb
 
-desktop_DATA =			\
-	samba-server.desktop
+desktop_DATA = \
+  desktop/samba-server.desktop
 
-module_DATA =			\
-	SambaRole.pm		\
-	SambaServer.pm		\
-	SambaService.pm		\
-	SambaSecrets.pm		\
-	SambaPrinters.pm	\
-	SambaTrustDom.pm	\
-	SambaAccounts.pm	\
-	SambaBackend.pm		\
-	SambaBackendLDAP.pm	\
-	SambaBackendSimple.pm
-
-YaPI_perldir = @moduledir@/YaPI
-
-YaPI_perl_DATA = \
-        YaPI/Samba.pm
-
-ydata_DATA =                     \
-	add_machine.ycp
-
-samba-server:
-	ln -sf . samba-server
-
-ycpchook = samba-server
-
-YCPCFLAGS = -I.
-
-SUBDIRS = config
-EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA) $(YaPI_perl_DATA) $(ydata_DATA)
+EXTRA_DIST = $(module_DATA) $(module1_DATA) $(client_DATA) $(ynclude_DATA) $(schemafiles_DATA) $(ydata_DATA) $(desktop_DATA)
 
 include $(top_srcdir)/Makefile.am.common
- 
