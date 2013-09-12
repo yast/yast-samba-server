@@ -865,61 +865,45 @@ module Yast
     end
 
     def AddShareDialog
-      contents = HVSquash(
-        HBox(
-          HSpacing(1),
-          VBox(
-            Opt(:hstretch),
-            VSpacing(1),
-            Frame(
-              _("Identification"),
-              VBox(
-                InputField(Id(:name), Opt(:hstretch), _("Share &Name")),
-                InputField(
-                  Id(:comment),
-                  Opt(:hstretch),
-                  _("Share &Description")
-                )
-              )
-            ),
-            Frame(
-              _("Share Type"),
+      contents = HVSquash(HBox(
+        HSpacing(1),
+        VBox(Opt(:hstretch),
+          VSpacing(1),
+          # frame label
+          Frame(_("Identification"), VBox(
+            # text entry label
+            InputField(Id(:name), Opt(:hstretch), _("Share &Name")),
+            # text entry label
+            InputField(Id(:comment), Opt(:hstretch), _("Share &Description"))
+          )),
+          VSpacing(1),
+          # frame label
+          Frame(_("Share Type"), HBox(
+            HSpacing(1),
+            VBox(Opt(:hstretch),
+              RadioButtonGroup(VBox(
+                # radio button label
+                Left(RadioButton(Id(:printer), Opt(:notify), _("&Printer"))),
+                # radio button label
+                Left(RadioButton(Id(:directory), Opt(:notify), _("&Directory"), true))
+              )),
               HBox(
-                HSpacing(1),
+                # translators: text entry label
+                InputField(Id(:path), _("Share &Path"), "/home"),
                 VBox(
-                  Opt(:hstretch),
-                  RadioButtonGroup(
-                    VBox(
-                      Left(
-                        RadioButton(Id(:printer), Opt(:notify), _("&Printer"))
-                      ),
-                      Left(
-                        RadioButton(
-                          Id(:directory),
-                          Opt(:notify),
-                          _("&Directory"),
-                          true
-                        )
-                      )
-                    )
-                  ),
-                  HBox(
-                    # translators: text entry label
-                    TextEntry(Id(:path), _("Share &Path"), "/home"),
-                    Bottom(PushButton(Id(:browse), Label.BrowseButton))
-                  ),
-                  HBox(
-                    # translators: checkbox label, setting for share
-                    Left(CheckBox(Id(:read_only), _("&Read-Only"), false)),
-                    Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true))
-                  )
-                ),
-                HSpacing(1)
-              )
-            )
-          )
+                  Label(""),
+                  PushButton(Id(:browse), Label.BrowseButton)
+                )
+              ),
+              # translators: checkbox label, setting for share
+              Left(CheckBox(Id(:read_only), _("&Read-Only"), false)),
+              # checkbox label
+              Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true))
+            ),
+            HSpacing(1)
+          ))
         )
-      )
+      ))
 
       # translators: dialog caption
       caption = _("New Share")
