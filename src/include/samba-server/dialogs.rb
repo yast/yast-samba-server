@@ -81,9 +81,32 @@ module Yast
       @guest_access = false
 
       @autoyast_warning_done = false
+
+      @snapper_available        = nil
     end
 
     # routines
+
+    # check if snapper support is available (initial check)
+    def snapper_available?
+      if @snapper_available.nil?
+        @snapper_available      = Package.Installed("snapper")
+      end
+      @snapper_available
+    end
+
+    # check if given path points to btrfs subvolume
+    def subvolume?(path)
+      return false unless path
+      stat      = SCR.Read(path(".target.stat"), path)
+
+      return true if
+        # 1. is btrfs subvolume
+        stat["inode"] == 256 &&
+        # 2. has snapper config
+        SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
+      false
+    end
 
 
     def sharesItems(filt)
@@ -653,7 +676,7 @@ module Yast
       )
       return nil if share == nil
 
-      if ret == :edit
+      if ret == :edit || ret == :table
         @shareToEdit = share
         return :edit
       end
@@ -825,9 +848,7 @@ module Yast
           "caption"            => caption,
           "back_button"        => Label.BackButton,
           "next_button"        => Label.OKButton,
-          "fallback_functions" => {
-            :abort => fun_ref(method(:confirmAbort), "boolean ()")
-          }
+          "abort_button"        => nil
         }
       )
     end
@@ -865,6 +886,8 @@ module Yast
     end
 
     def AddShareDialog
+      default_path      = "/home"
+
       contents = HVSquash(HBox(
         HSpacing(1),
         VBox(Opt(:hstretch),
@@ -889,7 +912,7 @@ module Yast
               )),
               HBox(
                 # translators: text entry label
-                InputField(Id(:path), _("Share &Path"), "/home"),
+                InputField(Id(:path), Opt(:notify), _("Share &Path"), default_path),
                 VBox(
                   Label(""),
                   PushButton(Id(:browse), Label.BrowseButton)
@@ -898,64 +921,75 @@ module Yast
               # translators: checkbox label, setting for share
               Left(CheckBox(Id(:read_only), _("&Read-Only"), false)),
               # checkbox label
-              Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true))
+              Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true)),
+              # checkbox label
+              Left(CheckBox(Id(:snapper_support), _("Snapper Support"), false))
             ),
             HSpacing(1)
           ))
         )
       ))
 
-      # translators: dialog caption
-      caption = _("New Share")
-
       Wizard.SetContentsButtons(
-        caption,
+        # translators: dialog caption
+        _("New Share"),
         contents,
-        Ops.get_string(@HELPS, "add_share", ""),
+        @HELPS["add_share"] || "",
         Label.BackButton,
         Label.OKButton
       )
+      Wizard.HideAbortButton
 
       UI.SetFocus(Id(:name))
+      UI.ChangeWidget(Id(:snapper_support), :Enabled, snapper_available? && subvolume?(default_path))
 
       ret = nil
       begin
         # enable/disable path
-        on = Convert.to_boolean(UI.QueryWidget(Id(:directory), :Value))
+        on = UI.QueryWidget(Id(:directory), :Value)
         UI.ChangeWidget(Id(:path), :Enabled, on)
         UI.ChangeWidget(Id(:browse), :Enabled, on)
         UI.ChangeWidget(Id(:read_only), :Enabled, on)
         UI.ChangeWidget(Id(:inherit_acls), :Enabled, on)
 
-        ret = Convert.to_symbol(UI.UserInput)
+        ret = UI.UserInput
+
+        if ret == :cancel
+          break if confirmAbort
+          ret = nil
+          next
+        end
 
         if ret == :printer || ret == :directory
           ret = nil
           next
         end
 
-        if ret == :browse
+        pathvalue = UI.QueryWidget(Id(:path), :Value)
+
+        if ret == :path
+          if snapper_available?
+            UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume?(pathvalue))
+          end
+          ret = nil
+        elsif ret == :browse
           # translators: file selection dialog title
-          dir = UI.AskForExistingDirectory(
-            Convert.to_string(UI.QueryWidget(Id(:path), :Value)),
-            _("Path for a Share")
-          )
-          UI.ChangeWidget(Id(:path), :Value, dir) if dir != nil
+          dir = UI.AskForExistingDirectory(pathvalue, _("Path for a Share"))
+          UI.ChangeWidget(Id(:path), :Value, dir) unless dir
           ret = nil
         elsif ret == :next
           # OK was pressed
 
-          name = Convert.to_string(UI.QueryWidget(Id(:name), :Value))
-          pathvalue = Convert.to_string(UI.QueryWidget(Id(:path), :Value))
-          comment = Convert.to_string(UI.QueryWidget(Id(:comment), :Value))
-          printable = Convert.to_boolean(UI.QueryWidget(Id(:printer), :Value))
+          name          = UI.QueryWidget(Id(:name), :Value)
+          comment       = UI.QueryWidget(Id(:comment), :Value)
+          printable     = UI.QueryWidget(Id(:printer), :Value)
 
-          if Builtins.size(name) == 0
+          if name.empty?
             # translators: error message
             Popup.Error(_("Share name cannot be empty."))
             ret = nil
             next
-          elsif Builtins.size(pathvalue) == 0 && !printable
+          elsif pathvalue.empty? && !printable
             # translators: error message
             Popup.Error(_("Share path cannot be empty."))
             ret = nil
@@ -972,18 +1006,17 @@ module Yast
           res = { "comment" => comment }
 
           if printable
-            Ops.set(res, "printable", "Yes")
-            Ops.set(res, "path", "/var/tmp")
+            res["printable"]    = "Yes"
+            res["path"]         = "/var/tmp"
           else
-            read_only = Convert.to_boolean(
-              UI.QueryWidget(Id(:read_only), :Value)
-            )
-            inherit_acls = Convert.to_boolean(
-              UI.QueryWidget(Id(:inherit_acls), :Value)
-            )
-            Ops.set(res, "read only", read_only ? "Yes" : "No")
-            Ops.set(res, "inherit acls", inherit_acls ? "Yes" : "No")
-            Ops.set(res, "path", pathvalue)
+            read_only           = UI.QueryWidget(Id(:read_only), :Value)
+            inherit_acls        = UI.QueryWidget(Id(:inherit_acls), :Value)
+
+            res["read only"]    = read_only ? "Yes" : "No"
+            res["inherit acls"] = inherit_acls ? "Yes" : "No"
+            res["path"]         = pathvalue
+            res["vfs objects"]  = "snapper" if
+              snapper_available? && UI.QueryWidget(Id(:snapper_support), :Value)
           end
 
           if SambaConfig.ShareExists(name)
@@ -1024,7 +1057,7 @@ module Yast
             # translators: table header texts
             Table(
               Id(:table),
-              Opt(:hvstretch),
+              Opt(:hvstretch,:notify),
               Header(
                 _("Status"),
                 _("Read-Only"),
