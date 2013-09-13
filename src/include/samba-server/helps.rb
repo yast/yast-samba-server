@@ -271,7 +271,9 @@ module Yast
           ) +
           # add new share dialog help
           _("<p>With <b>Expose Snapshots</b> selected, Samba exposes snapshots created by Snapper for access and manipulation by CIFS/SMB clients.
-This option is only available if Samba offers Snapper support, and the Share Path corresponds to a Btrfs backed Snapper configuration subvolume.</p>"),
+This option is only available if Samba offers Snapper support, and the Share Path corresponds to a Btrfs backed Snapper configuration subvolume.</p>") +
+          _("<p><b>Utilize Btrfs Features</b> instructs Samba to take advantage of features specific to the Btrfs filesystem.
+This option is only available if Samba offers Btrfs support, and the Share Path is a Btrfs subvolume.</p>"),
         # help for LDAP Settings dialog
         "samba_ldap_setting_auth_widget"      => _(
           "<p><b><big>LDAP Settings</big></b><br>\n" +
