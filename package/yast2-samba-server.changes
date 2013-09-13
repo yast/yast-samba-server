@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep 13 15:57:19 UTC 2013 - ddiss@suse.com
+
+- Add "Utilize Btrfs Features" checkbox for shares.
+- 3.0.3
+
+-------------------------------------------------------------------
 Fri Sep 13 16:08:59 CEST 2013 - jsuchome@suse.cz
 
 - check if Share value was changed by Browse button
