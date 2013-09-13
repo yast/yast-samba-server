@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 12 17:11:20 CEST 2013 - jsuchome@suse.cz
+
+- added "Snapper Support" checkbox for shares (fate#313349)
+- 3.0.1
+
+-------------------------------------------------------------------
 Wed Jul 31 08:38:58 UTC 2013 - yast-devel@opensuse.org
 
 - converted from YCP to Ruby by YCP Killer
