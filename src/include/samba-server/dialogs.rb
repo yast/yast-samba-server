@@ -90,7 +90,10 @@ module Yast
     # check if snapper support is available (initial check)
     def snapper_available?
       if @snapper_available.nil?
-        @snapper_available      = Package.Installed("snapper")
+        @snapper_available      =
+          Package.Installed("snapper") &&
+          # check for the presence of Samba's Snapper VFS module
+          0 == SCR.Execute(path(".target.bash"), "smbd --build-options | grep vfs_snapper_init")
       end
       @snapper_available
     end
@@ -103,7 +106,7 @@ module Yast
       # 1. is btrfs subvolume
       if stat["inode"] == 256 &&
         # 2. has snapper config
-        SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
+        0 == SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
         return true
       else
         return false
