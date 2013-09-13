@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Sep 13 16:08:59 CEST 2013 - jsuchome@suse.cz
+
+- check if Share value was changed by Browse button
+- added help text, renamed Snapper checkbox
+- 3.0.2 
+
+-------------------------------------------------------------------
 Thu Sep 12 17:11:20 CEST 2013 - jsuchome@suse.cz
 
 - added "Snapper Support" checkbox for shares (fate#313349)

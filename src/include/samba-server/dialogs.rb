@@ -928,7 +928,7 @@ module Yast
               # checkbox label
               Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true)),
               # checkbox label
-              Left(CheckBox(Id(:snapper_support), _("Snapper Support"), false))
+              Left(CheckBox(Id(:snapper_support), _("Expose Snapshots"), false))
             ),
             HSpacing(1)
           ))
@@ -980,7 +980,14 @@ module Yast
         elsif ret == :browse
           # translators: file selection dialog title
           dir = UI.AskForExistingDirectory(pathvalue, _("Path for a Share"))
-          UI.ChangeWidget(Id(:path), :Value, dir) unless dir
+          if dir
+            UI.ChangeWidget(Id(:path), :Value, dir)
+            if snapper_available?
+              subvolume = subvolume?(dir)
+              UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume)
+              UI.ChangeWidget(Id(:snapper_support), :Value, false) unless subvolume
+            end
+          end
           ret = nil
         elsif ret == :next
           # OK was pressed
@@ -1020,8 +1027,9 @@ module Yast
             res["read only"]    = read_only ? "Yes" : "No"
             res["inherit acls"] = inherit_acls ? "Yes" : "No"
             res["path"]         = pathvalue
-            res["vfs objects"]  = "snapper" if
-              snapper_available? && UI.QueryWidget(Id(:snapper_support), :Value)
+            if snapper_available? && UI.QueryWidget(Id(:snapper_support), :Value)
+              res["vfs objects"]  = "snapper"
+            end
           end
 
           if SambaConfig.ShareExists(name)

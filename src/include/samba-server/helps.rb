@@ -268,7 +268,10 @@ module Yast
             "<p><b>Inherit ACLS</b> can be used to ensure\n" +
               "that if default ACLs exist on parent directories, they are always\n" +
               "honored when creating a subdirectory.</p>\n"
-          ),
+          ) +
+          # add new share dialog help
+          _("<p>With <b>Expose Snapshots</b> selected, Samba exposes snapshots created by Snapper for access and manipulation by CIFS/SMB clients.
+This option is only available if Samba offers Snapper support, and the Share Path corresponds to a Btrfs backed Snapper configuration subvolume.</p>"),
         # help for LDAP Settings dialog
         "samba_ldap_setting_auth_widget"      => _(
           "<p><b><big>LDAP Settings</big></b><br>\n" +
