@@ -100,12 +100,14 @@ module Yast
       return false unless path
       stat      = SCR.Read(path(".target.stat"), path)
 
-      return true if
-        # 1. is btrfs subvolume
-        stat["inode"] == 256 &&
+      # 1. is btrfs subvolume
+      if stat["inode"] == 256 &&
         # 2. has snapper config
         SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
-      false
+        return true
+      else
+        return false
+      end
     end
 
 
