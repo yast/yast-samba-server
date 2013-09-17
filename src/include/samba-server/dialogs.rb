@@ -83,6 +83,7 @@ module Yast
       @autoyast_warning_done = false
 
       @snapper_available        = nil
+      @btrfs_available          = nil
     end
 
     # routines
@@ -98,21 +99,38 @@ module Yast
       @snapper_available
     end
 
+    # check if Btrfs support is available (initial check)
+    def btrfs_available?
+      if @btrfs_available.nil?
+        @btrfs_available      =
+          # check for the presence of Samba's Btrfs VFS module
+          0 == SCR.Execute(path(".target.bash"), "smbd --build-options | grep vfs_btrfs_init")
+      end
+      @btrfs_available
+    end
+
     # check if given path points to btrfs subvolume
     def subvolume?(path)
       return false unless path
       stat      = SCR.Read(path(".target.stat"), path)
 
-      # 1. is btrfs subvolume
-      if stat["inode"] == 256 &&
-        # 2. has snapper config
-        0 == SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
+      if stat["inode"] == 256
         return true
       else
         return false
       end
     end
 
+    # check if given path has a corresponding snapper configuration
+    def snapper_cfg?(path)
+      return false unless path
+
+      if 0 == SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
+        return true
+      else
+        return false
+      end
+    end
 
     def sharesItems(filt)
       shares = SambaConfig.GetShares
@@ -928,7 +946,9 @@ module Yast
               # checkbox label
               Left(CheckBox(Id(:inherit_acls), _("&Inherit ACLs"), true)),
               # checkbox label
-              Left(CheckBox(Id(:snapper_support), _("Expose Snapshots"), false))
+              Left(CheckBox(Id(:snapper_support), _("Expose Snapshots"), false)),
+              # checkbox label
+              Left(CheckBox(Id(:btrfs_support), _("Utilize Btrfs Features"), false))
             ),
             HSpacing(1)
           ))
@@ -946,7 +966,8 @@ module Yast
       Wizard.HideAbortButton
 
       UI.SetFocus(Id(:name))
-      UI.ChangeWidget(Id(:snapper_support), :Enabled, snapper_available? && subvolume?(default_path))
+      UI.ChangeWidget(Id(:snapper_support), :Enabled, snapper_available? && subvolume?(default_path) && snapper_cfg?(default_path))
+      UI.ChangeWidget(Id(:btrfs_support), :Enabled, btrfs_available? && subvolume?(default_path))
 
       ret = nil
       begin
@@ -974,7 +995,10 @@ module Yast
 
         if ret == :path
           if snapper_available?
-            UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume?(pathvalue))
+            UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume?(pathvalue) && snapper_cfg?(pathvalue))
+          end
+          if btrfs_available?
+            UI.ChangeWidget(Id(:btrfs_support), :Enabled, subvolume?(pathvalue))
           end
           ret = nil
         elsif ret == :browse
@@ -983,9 +1007,14 @@ module Yast
           if dir
             UI.ChangeWidget(Id(:path), :Value, dir)
             if snapper_available?
+              subvolume_cfg = subvolume?(dir) && snapper_cfg?(dir)
+              UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume_cfg)
+              UI.ChangeWidget(Id(:snapper_support), :Value, false) unless subvolume_cfg
+            end
+            if btrfs_available?
               subvolume = subvolume?(dir)
-              UI.ChangeWidget(Id(:snapper_support), :Enabled, subvolume)
-              UI.ChangeWidget(Id(:snapper_support), :Value, false) unless subvolume
+              UI.ChangeWidget(Id(:btrfs_support), :Enabled, subvolume)
+              UI.ChangeWidget(Id(:btrfs_support), :Value, false) unless subvolume
             end
           end
           ret = nil
@@ -1027,8 +1056,12 @@ module Yast
             res["read only"]    = read_only ? "Yes" : "No"
             res["inherit acls"] = inherit_acls ? "Yes" : "No"
             res["path"]         = pathvalue
+            res["vfs objects"]  = ""
             if snapper_available? && UI.QueryWidget(Id(:snapper_support), :Value)
-              res["vfs objects"]  = "snapper"
+              res["vfs objects"] << "snapper "
+            end
+            if btrfs_available? && UI.QueryWidget(Id(:btrfs_support), :Value)
+              res["vfs objects"] << "btrfs "
             end
           end
 
