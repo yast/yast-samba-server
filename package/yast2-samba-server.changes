@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 19 15:50:10 UTC 2013 - lslezak@suse.cz
+
+- do not use *.spec.in template, use *.spec file with RPM macros
+  instead
+- 3.1.0
+
+-------------------------------------------------------------------
 Fri Sep 13 15:57:19 UTC 2013 - ddiss@suse.com
 
 - Add "Utilize Btrfs Features" checkbox for shares.
