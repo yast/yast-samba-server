@@ -17,7 +17,7 @@
 
 
 Name:           yast2-samba-server
-Version:        3.1.1
+Version:        3.1.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -37,7 +37,7 @@ Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
 # samba-client/routines.rb
-Requires:	yast2-samba-client >= 3.0.0
+Requires:	yast2-samba-client >= 3.1.2
 Requires:	yast2-users
 
 # bnc #386473, recommend yast2-samba-server when installaing these packages
