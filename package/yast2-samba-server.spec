@@ -27,7 +27,7 @@ Group:          System/YaST
 License:        GPL-2.0
 # Service module switched to systemd
 BuildRequires:	yast2 >= 2.23.15
-BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-samba-client perl-XML-Writer update-desktop-files yast2-testsuite yast2-perl-bindings yast2-ldap-client yast2-users
+BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-samba-client perl-XML-Writer update-desktop-files yast2-testsuite yast2-perl-bindings yast2-ldap yast2-users
 BuildRequires:  yast2-devtools >= 3.1.10
 
 Requires:	perl-Crypt-SmbHash

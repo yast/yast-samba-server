@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jan 31 09:42:08 UTC 2014 - varkoly@suse.com
+
+- Change requirement from yast2-ldap-client to yast2-ldap 
+
+-------------------------------------------------------------------
 Wed Nov 13 15:56:18 UTC 2013 - jreidinger@suse.com
 
 - Add explicit COPYING file
