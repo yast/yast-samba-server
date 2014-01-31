@@ -33,8 +33,7 @@ BuildRequires:  yast2-devtools >= 3.1.10
 Requires:	perl-Crypt-SmbHash
 # Wizard::SetDesktopTitleAndIcon
 Requires:	yast2 >= 2.21.22
-Requires:	yast2-ldap >= 2.17.3
-Requires:	yast2-ldap-client
+Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
 # samba-client/routines.rb
