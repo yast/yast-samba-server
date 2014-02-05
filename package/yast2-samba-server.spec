@@ -17,7 +17,7 @@
 
 
 Name:           yast2-samba-server
-Version:        3.1.1
+Version:        3.1.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -27,18 +27,17 @@ Group:          System/YaST
 License:        GPL-2.0
 # Service module switched to systemd
 BuildRequires:	yast2 >= 2.23.15
-BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-samba-client perl-XML-Writer update-desktop-files yast2-testsuite yast2-perl-bindings yast2-ldap-client yast2-users
+BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-samba-client perl-XML-Writer update-desktop-files yast2-testsuite yast2-perl-bindings yast2-ldap yast2-users
 BuildRequires:  yast2-devtools >= 3.1.10
 
 Requires:	perl-Crypt-SmbHash
 # Wizard::SetDesktopTitleAndIcon
 Requires:	yast2 >= 2.21.22
-Requires:	yast2-ldap >= 2.17.3
-Requires:	yast2-ldap-client
+Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
 # samba-client/routines.rb
-Requires:	yast2-samba-client >= 3.0.0
+Requires:	yast2-samba-client >= 3.1.2
 Requires:	yast2-users
 
 # bnc #386473, recommend yast2-samba-server when installaing these packages
