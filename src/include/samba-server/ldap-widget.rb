@@ -272,8 +272,6 @@ module Yast
         SambaConfig.GlobalSetStr("idmap backend", nil)
         SambaBackend.RemovePassdbBackend("ldapsam")
       end
-      SambaLDAPSettingsEssentialWidgetInit(nil)
-
       nil
     end
 
