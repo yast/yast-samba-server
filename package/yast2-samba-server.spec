@@ -17,11 +17,12 @@
 
 
 Name:           yast2-samba-server
-Version:        3.1.3
+Version:        3.1.4
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source0:        %{name}-%{version}.tar.bz2
+Url:            https://github.com/yast/yast-samba-server
 
 Group:          System/YaST
 License:        GPL-2.0
