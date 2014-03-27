@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar 27 17:24:29 UTC 2014 - ddiss@suse.com
+
+- Refer to vfs_snapper and vfs_btrfs man pages in help text
+- Default to a standalone server instead of a PDC
+- 3.1.5
+
+-------------------------------------------------------------------
 Thu Mar  6 14:07:11 UTC 2014 - vmoravec@suse.com
 
 - Fix tests and add url to spec
