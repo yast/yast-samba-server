@@ -61,10 +61,13 @@ module Yast
         # Samba select Samba Server type - Installation step 2
         "inst_step2"                          => _(
           "<p><b><big>Samba Server Type</big></b></p>\n" +
-            "<p>A domain controller allows Windows clients to log in to a Windows domain.</p>\n" +
+            "<p>A domain controller allows Windows clients to log in to a Windows NT style domain.</p>\n" +
             "<p>The backup controller uses another domain controller for validation.\n" +
             "The primary controller uses its own information about users and their passwords.</p>\n" +
-            "<p>The options available in the configuration dialogs depend on the settings in this selection.</p>"
+            "<p>The options available in the configuration dialogs depend on " +
+            "the settings in this selection. Windows NT style domain " +
+            "controller functionality will be phased out in future " +
+            "releases.</p>"
         ),
         # Samba select Samba Server type - Installation step 2
         "inst_step2_no_bdc"                   => _(

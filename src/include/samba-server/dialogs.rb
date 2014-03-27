@@ -252,7 +252,7 @@ module Yast
                 Id("samba_server_type"),
                 VBox(
                   VSpacing(1),
-                  Left(RadioButton(Id("PDC"), @pdc, !has_pdc)),
+                  Left(RadioButton(Id("PDC"), @pdc, false)),
                   HBox(
                     HSpacing(4),
                     # appears on new line after Primary Domain Controller radio button
@@ -268,7 +268,7 @@ module Yast
                     Left(RadioButton(Id("BDC"), @bdc, false)),
                     HBox(HSpacing(4), Left(Label("")))
                   ),
-                  Left(RadioButton(Id("Standalone"), @standalone, has_pdc)),
+                  Left(RadioButton(Id("Standalone"), @standalone, true)),
                   VSpacing(1)
                 )
               )
