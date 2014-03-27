@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 # ------------------------------------------------------------------------------
-# Copyright (c) 2006-2012 Novell, Inc. All Rights Reserved.
+# Copyright (c) 2006-2014 Novell, Inc. All Rights Reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -270,10 +270,18 @@ module Yast
               "honored when creating a subdirectory.</p>\n"
           ) +
           # add new share dialog help
-          _("<p>With <b>Expose Snapshots</b> selected, Samba exposes snapshots created by Snapper for access and manipulation by CIFS/SMB clients.
-This option is only available if Samba offers Snapper support, and the Share Path corresponds to a Btrfs backed Snapper configuration subvolume.</p>") +
-          _("<p><b>Utilize Btrfs Features</b> instructs Samba to take advantage of features specific to the Btrfs filesystem.
-This option is only available if Samba offers Btrfs support, and the Share Path is a Btrfs subvolume.</p>"),
+          _("<p>With <b>Expose Snapshots</b> selected, Samba exposes " +
+	    "snapshots created by Snapper for access and manipulation by " +
+	    "CIFS/SMB clients. This option is only available if Samba offers " +
+	    "Snapper support, and the Share Path corresponds to a Btrfs " +
+	    "backed Snapper configuration subvolume.<br> " +
+	    "Relevant permissions must also be granted, see Samba's " +
+	   "<b>vfs_snapper(8)</b> man page for further details.</p>") +
+          _("<p><b>Utilize Btrfs Features</b> instructs Samba to take " +
+	    "advantage of features specific to the Btrfs filesystem. " +
+	    "This option is only available if Samba offers Btrfs support, " +
+	    "and the Share Path is a Btrfs subvolume. See Samba's " +
+	    "<b>vfs_btrfs(8)</b> man page for further details.</p>"),
         # help for LDAP Settings dialog
         "samba_ldap_setting_auth_widget"      => _(
           "<p><b><big>LDAP Settings</big></b><br>\n" +
