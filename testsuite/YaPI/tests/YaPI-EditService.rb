@@ -30,7 +30,7 @@ module Yast
             "target" => { "stat" => { 1 => 2 } }
           },
           {},
-          { "target" => { "bash_output" => { "exit" => 0 }, "bash" => 1 } }
+          { "target" => { "bash_output" => { "exit" => 0, 'stdout'=>'', 'stderr'=>'' }, "bash" => 1 } }
         ],
         nil
       )
@@ -46,7 +46,7 @@ module Yast
             "target" => { "stat" => { 1 => 2 } }
           },
           {},
-          { "target" => { "bash_output" => { "exit" => 0 }, "bash" => 1 } }
+          { "target" => { "bash_output" => { "exit" => 0, 'stdout'=>'', 'stderr'=>'' }, "bash" => 1 } }
         ],
         nil
       )
@@ -70,7 +70,7 @@ module Yast
             "target" => { "stat" => { 1 => 2 } }
           },
           {},
-          { "target" => { "bash_output" => { "exit" => 0 }, "bash" => 0 } }
+          { "target" => { "bash_output" => { "exit" => 0, 'stdout'=>'', 'stderr'=>'' }, "bash" => 0 } }
         ],
         nil
       )
@@ -96,9 +96,15 @@ module Yast
             "target" => { "stat" => { 1 => 2 } }
           },
           {},
-          { "target" => { "bash_output" => { "exit" => 0 }, "bash" => 0 } }
-        ],
-        nil
+          { "target" => {
+            "bash_output" => {
+              "exit" => 0, 'stdout'=>'', 'stderr'=>''
+            },
+            "bash" => 0
+          }
+        }
+      ],
+      nil
       )
 
       nil
