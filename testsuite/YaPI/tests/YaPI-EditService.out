@@ -1,20 +1,12 @@
 Return	Enable disabled service
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
-Execute	.target.bash "/bin/systemctl is-enabled nmb.service" 1
-Execute	.target.bash_output "/bin/systemctl enable nmb.service" $["exit":0]
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
-Execute	.target.bash_output "/bin/systemctl enable smb.service" $["exit":0]
+Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
+Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
 Return	true
 Return	Disable disabled service
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 1
 Return	true
 Return	Enable enabled service
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
+Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
+Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
 Return	true
 Return	Disable enabled service
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
-Execute	.target.bash "/bin/systemctl is-enabled nmb.service" 0
-Execute	.target.bash_output "/bin/systemctl  disable nmb.service" $["exit":0]
-Execute	.target.bash "/bin/systemctl is-enabled smb.service" 0
-Execute	.target.bash_output "/bin/systemctl  disable smb.service" $["exit":0]
 Return	true
