@@ -51,6 +51,8 @@ our $Modified = 0;
 # Is smb and nmb service enabled? 
 our $Service = 0;
 
+our @service_names = ("nmb", "smb");
+
 # Data was modified?
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
 sub GetModified {
@@ -89,10 +91,20 @@ BEGIN{$TYPEINFO{Write}=["function", "boolean"]}
 sub Write {
     my ($self) = @_;
     my $error = 0;
+
     return 1 unless $Modified;
+
     y2debug("Samba service if ". ($Service ? "enabled" : "disabled"));
-    Service->Adjust("nmb", $Service ? "enable" : "disable") or $error = 1;
-    Service->Adjust("smb", $Service ? "enable" : "disable") or $error = 1;
+    if ($Service) {
+        foreach my $service_name (@service_names) {
+            Service->Enable($service_name) or $error = 1;
+        }
+    } else {
+        foreach my $service_name (@service_names) {
+            Service->Disable($service_name) or $error = 1;
+        }
+    }
+
     $Modified = 0;
     return $error == 0;
 }
@@ -118,9 +130,8 @@ sub GetServiceAutoStart {
 BEGIN{$TYPEINFO{GetServiceRunning} = ["function", "boolean"]}
 sub GetServiceRunning {
     my $running = 1;
-    foreach("nmb", "smb") {
-	# '0' means -> running
-	if (Service->Status($_)) {
+    foreach(@service_names) {
+	if (! Service->Active($_)) {
 	    $running = 0;
 	}
     }
@@ -133,35 +144,36 @@ BEGIN{$TYPEINFO{StartStopNow}=["function", "boolean", "boolean"]};
 sub StartStopNow {
     my ($self, $on) = @_;
     my $error = 0;
-    
+
     # Zero connected users -> restart, einther -> reload
     my $connected_users = $self->ConnectedUsers();
-    my $run_command = (scalar(@$connected_users)>0 ? "reload":"restart");
+    my $nr_connected_users = scalar(@$connected_users);
 
-    foreach("nmb", "smb") {
+    foreach my $service_name (@service_names) {
 	if ($on) {
     	    # check, if the services run
-	    if (Service->Status($_)) {
+	    if (Service->Active($service_name)) {
 		# the service does not run => start it
-		unless (Service->Start($_)) {
-		    y2error("Service::Start($_) failed");
+		unless (Service->Start($service_name)) {
+		    y2error("Service::Start($service_name) failed");
 		    $error = 1;
 		}
 	    } else {
 		# the service runs => relaod it
 		# RunInitScript return exit code, 0 = OK
 		# Bugzilla #120080 - 'reload' instead of 'restart'
-		y2milestone("Number of connected users: ".scalar(@$connected_users).", running ".$_." -> ".$run_command);
-		if (Service->RunInitScript($_, $run_command)) {
-		    y2error("Service::RunInitScript(".$_.", '".$run_command."') failed");
+		my $run_command = (($nr_connected_users > 0) ? "Reload":"Restart");
+		y2milestone("Number of connected users: ".$nr_connected_users.", running ".$service_name." -> ".$run_command);
+		if (! Service->$run_command($service_name)) {
+		    y2error("Service::RunInitScript(".$service_name.", '".$run_command."') failed");
 		    $error = 1;
 		}
 	    }
 	} else {
 	    # turn services off
-	    unless (Service->Status($_)) {
-		unless (Service->Stop($_)) {
-		    y2error("Service::Stop($_) failed");
+	    unless (Service->Active($service_name)) {
+		unless (Service->Stop($service_name)) {
+		    y2error("Service::Stop($service_name) failed");
 		    $error = 1;
 		}
 	    }

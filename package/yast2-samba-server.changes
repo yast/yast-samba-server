@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 22 15:49:38 CEST 2014 - locilka@suse.com
+
+- Deprecated Service method calls replaced with new ones
+- 3.1.7
+
+-------------------------------------------------------------------
 Fri Mar 28 14:38:00 UTC 2014 - vmoravec@suse.com
 
 - Fix failing testsuite
