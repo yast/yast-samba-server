@@ -1,12 +1,8 @@
 Return	Enable disabled service
-Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
-Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
 Return	true
 Return	Disable disabled service
 Return	true
 Return	Enable enabled service
-Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
-Log	[DEPRECIATION] `Adjust' is deprecated; use `enable` or `disable` instead
 Return	true
 Return	Disable enabled service
 Return	true
