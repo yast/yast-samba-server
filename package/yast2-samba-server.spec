@@ -17,7 +17,7 @@
 
 
 Name:           yast2-samba-server
-Version:        3.1.6
+Version:        3.1.7
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -26,14 +26,14 @@ Url:            https://github.com/yast/yast-samba-server
 
 Group:          System/YaST
 License:        GPL-2.0
-# Service module switched to systemd
-BuildRequires:	yast2 >= 2.23.15
+# Service.Active
+BuildRequires:	yast2 >= 3.1.53
 BuildRequires:	libsmbclient libsmbclient-devel perl-Crypt-SmbHash perl-X500-DN samba-client yast2-samba-client perl-XML-Writer update-desktop-files yast2-testsuite yast2-perl-bindings yast2-ldap yast2-users
 BuildRequires:  yast2-devtools >= 3.1.10
 
 Requires:	perl-Crypt-SmbHash
-# Wizard::SetDesktopTitleAndIcon
-Requires:	yast2 >= 2.21.22
+# Service.Active
+Requires:	yast2 >= 3.1.53
 Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
