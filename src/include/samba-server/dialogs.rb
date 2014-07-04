@@ -1247,7 +1247,7 @@ module Yast
                 VSpacing(1),
                 "SERVICE START",
                 VSpacing(1),
-                Frame(_("Firewall Settings"), "FIREWALL"),
+                "FIREWALL",
                 VStretch()
               )
             ),
