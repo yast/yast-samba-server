@@ -74,6 +74,8 @@ my $Modified;
 my $RequiredPackages = ["samba", "samba-client"];
 # ... or another packages (BNC #657414)
 my $RequiredPackages_gplv3 = ["samba-gplv3", "samba-gplv3-client"];
+# cups packages needed for printer sharing
+my $CupsPackages = ["cups"];
 
 my $GlobalsConfigured = 0;
 
@@ -97,15 +99,31 @@ sub GetModified {
 	|| SambaAccounts->GetModified();
 };
 
-# Check that packages are installed or offer their installation
+# Check that base packages are installed or offer their installation
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
-sub CheckAndInstallPackages {
+sub CheckAndInstallBasePackages {
   # installed_required_packages? or installed_packages_gplv3? or install_packages!
   PackageSystem->InstalledAll($RequiredPackages) ||
     PackageSystem->InstalledAll($RequiredPackages_gplv3) ||
       PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) ||
         return 0;
   return 1;
+}
+
+BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
+sub CheckAndInstallCupsPackages {
+    my $printing = SambaConfig->GlobalGetStr("printing", "cups");
+
+    unless ((lc $printing eq "cups") and SambaConfig->ShareExists("printers")) {
+	# not sharing cups printers, package not needed
+	return 1;
+    }
+
+    if (PackageSystem->InstalledAll($CupsPackages)) {
+	return 1;
+    }
+
+    return PackageSystem->CheckAndInstallPackagesInteractive($CupsPackages);
 }
 
 # Read all samba-server settings
@@ -160,9 +178,12 @@ sub Read {
     Progress->NextStage();
     # check installed packages
     unless (Mode->test()) {
-	CheckAndInstallPackages() or return 0;
+	CheckAndInstallBasePackages() or return 0;
     }
     SambaConfig->Read();
+    unless (Mode->test()) {
+	CheckAndInstallCupsPackages() or return 0;
+    }
     Samba->ReadSharesSetting();
     
     # 2: read samba secrets
