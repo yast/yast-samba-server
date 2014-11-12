@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov 12 13:11:35 UTC 2014 - nopower@suse.com
+
+- Squash "Possible precedence issue with control flow operator
+  warning; (bnc#901597)
+- 3.1.11
+
+-------------------------------------------------------------------
 Fri Jul 25 12:27:04 UTC 2014 - ddiss@suse.com
 
 - Ensure CUPS is installed if printer sharing is configured; (bnc#873703).
