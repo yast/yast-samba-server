@@ -118,7 +118,7 @@ sub GetModified {
     my ($self,$name) = @_;
     my $admin_dn = SambaConfig->GlobalGetStr("ldap admin dn", "");
     # also modified if any "ldap suffix ..." modified => modified if any samba config entry modified
-    return $admin_dn ne $OrgAdminDN or $Passwd ne $OrgPasswd or SambaConfig::GetModified();
+    return (($admin_dn ne $OrgAdminDN) or ($Passwd ne $OrgPasswd) or SambaConfig::GetModified());
 }
 
 # return true if ldapsam is first passdb backend
