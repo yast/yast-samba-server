@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 27 17:36:21 UTC 2014 - ddiss@suse.com
+
+- Default to standalone server role; (fate#316502).
+- 2.18.0
+
+-------------------------------------------------------------------
 Tue Feb 19 10:19:05 CET 2013 - jsuchome@suse.cz
 
 - Shares table:  show share specific guest access status, added

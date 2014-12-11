@@ -148,7 +148,7 @@ any Installation_Step2 () {
 	`VSquash(`Frame(_("Samba Server Type"), `VBox(
 	    `RadioButtonGroup(`id("samba_server_type"), `VBox(
 		`VSpacing(1),
-		`Left(`RadioButton(`id("PDC"), pdc, !has_pdc)),
+		`Left(`RadioButton(`id("PDC"), pdc, false)),
 		`HBox(
 		    `HSpacing(4),
 		    // appears on new line after Primary Domain Controller radio button
@@ -159,7 +159,7 @@ any Installation_Step2 () {
 			    `HSpacing(4),
 			    `Left(`Label("")))
 		),
-		`Left(`RadioButton(`id ("Standalone"), standalone, has_pdc)),
+		`Left(`RadioButton(`id ("Standalone"), standalone, true)),
 		`VSpacing(1)))))),
 	`VStretch());
 	
