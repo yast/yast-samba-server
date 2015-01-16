@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan 13 11:54:52 UTC 2015 - nopower@suse.com
+
+- When joining domain provide osName & osVer arguments to "net ads join"
+  (bnc#873922).
+- 3.1.12
+
+-------------------------------------------------------------------
 Wed Nov 12 13:11:35 UTC 2014 - nopower@suse.com
 
 - Squash "Possible precedence issue with control flow operator

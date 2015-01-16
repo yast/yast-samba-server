@@ -56,6 +56,7 @@ module Yast
       Yast.import "CWMTab"
       Yast.import "CWMServiceStart"
       Yast.import "CWMFirewallInterfaces"
+      Yast.import "OSRelease"
 
       Yast.include include_target, "samba-server/helps.rb"
       Yast.include include_target, "samba-server/dialogs-items.rb"
@@ -1738,13 +1739,17 @@ module Yast
       return :skip if ret == :skip
       return :cancel if ret != :ok
 
+      relname = OSRelease.ReleaseName
+      relver = OSRelease.ReleaseVersion
       # try to join the domain
       error = SambaNetJoin.Join(
         workgroup,
         Builtins.tolower(role),
         user,
         passwd,
-        ""
+        "",
+        relname,
+        relver
       )
       if error != nil
         Popup.Error(error)
