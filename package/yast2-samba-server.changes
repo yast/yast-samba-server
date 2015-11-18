@@ -2,7 +2,7 @@
 Mon Nov 16 16:49:57 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix validation of AutoYaST profiles (bsc#954412)
-- 3.1.13
+- 3.1.12.1
 
 -------------------------------------------------------------------
 Tue Jan 13 11:54:52 UTC 2015 - nopower@suse.com
