@@ -21,6 +21,7 @@ samba-server =
 	element listentry {
 	    element disabled { attribute config:type { text }? & text }? &
 	    element name { text }? &
+	    element comment { text }? &
 	    element parameters {
           element NIS_homedir                           { text }? &
           element abort_shutdown_script                 { text }? &
