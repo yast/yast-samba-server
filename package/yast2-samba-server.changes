@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 23 17:55:31 UTC 2016 - lmuelle@suse.com
+
+- Don't require libsmbclient as it's pulled in by libsmbclient-devel;
+  (bsc#972197).
+- 3.1.14
+
+-------------------------------------------------------------------
 Mon Nov 16 16:49:57 UTC 2015 - igonzalezsosa@suse.com
 
 - Fix validation of AutoYaST profiles (bsc#954412)
