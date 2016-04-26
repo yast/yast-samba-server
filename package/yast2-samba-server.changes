@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr 26 11:52:28 UTC 2016 - igonzalezsosa@suse.com
+
+- Fix outdated message regarding smb and nmb services restart
+  (bsc#975880).
+- 3.1.15
+
+-------------------------------------------------------------------
 Wed Mar 23 17:55:31 UTC 2016 - lmuelle@suse.com
 
 - Don't require libsmbclient as it's pulled in by libsmbclient-devel;

@@ -89,7 +89,7 @@ module Yast
             "Because users are currently connected to this Samba server,\n" +
               "the server configuration has been reloaded instead of restarted.\n" +
               "To confirm that all settings are applied despite possibly disconnecting the users,\n" +
-              "run '/etc/init.d/smb restart' and '/etc/init.d/nmb restart'"
+              "run 'systemctl restart smb' and 'systemctl restart nmb'"
           )
         )
       end
