@@ -276,7 +276,7 @@ removeShare() {
 enableShare() {
     ...
     // [printers] is coupled with "load printers"
-    if( name == "printers" ) 
+    if( name eq "printers" ) 
 	global_config["load printers"] = on;
 
     ...

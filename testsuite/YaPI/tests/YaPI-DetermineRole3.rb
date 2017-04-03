@@ -17,7 +17,7 @@ module Yast
           "global" => {
             "workgroup"        => "Test",
             "domain master"    => "no",
-            "security"         => "user",
+            "security"         => "domain",
             "preferred master" => "yes",
             "domain logons"    => "yes",
             "local master"     => "yes"

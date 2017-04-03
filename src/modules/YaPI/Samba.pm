@@ -182,7 +182,7 @@ sub DetermineRole {
     my $self = shift;
     SambaConfig->Read();
     my $role = SambaRole->GetRole();
-    $role = "STANDALONE" if $role == "MEMBER";
+    $role = "STANDALONE" if $role eq "MEMBER";
     return lc $role;
 }
 
