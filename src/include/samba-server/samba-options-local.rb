@@ -280,7 +280,6 @@ module Yast
           "table" => { "unique" => true },
           "popup" => { "widget" => :checkbox }
         },
-        ""                              => { "table" => { "unique" => true } },
         "copy"                          => { "table" => { "unique" => true } },
         "include"                       => { "table" => { "unique" => true } },
         "exec"                          => { "table" => { "unique" => true } },
