@@ -60,6 +60,8 @@ YaST::YCP::Import("SambaNmbLookup");
 YaST::YCP::Import("SambaTrustDom");
 YaST::YCP::Import("SambaAccounts");
 YaST::YCP::Import("Samba");
+YaST::YCP::Import ("Popup");
+
 }
 
 use constant {
@@ -111,19 +113,17 @@ sub CheckAndInstallBasePackages {
 }
 
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
-sub CheckAndInstallCupsPackages {
+sub CheckNeedToInstallCupsPackages {
     my $printing = SambaConfig->GlobalGetStr("printing", "cups");
 
-    unless ((lc $printing eq "cups") and SambaConfig->ShareExists("printers")) {
-	# not sharing cups printers, package not needed
-	return 1;
+    unless ((lc $printing eq "cups") and SambaConfig->ShareExists("printers") and SambaConfig->ShareEnabled("printers")) {
+        return 0;
     }
-
     if (PackageSystem->InstalledAll($CupsPackages)) {
-	return 1;
+        return 0;
     }
 
-    return PackageSystem->CheckAndInstallPackagesInteractive($CupsPackages);
+    return 1;
 }
 
 # Read all samba-server settings
@@ -182,7 +182,15 @@ sub Read {
     }
     SambaConfig->Read();
     unless (Mode->test()) {
-	CheckAndInstallCupsPackages() or return 0;
+        if (CheckNeedToInstallCupsPackages()) {
+            my $answer = Popup->YesNo(__("Cups is required by samba for printing to \nwork correctly. Do you wish to disable printing?\nNote: To reenable printing you will need to \nmanually enable the \"printers\" share and install cups."));
+            if ($answer) {
+                SambaConfig->ShareDisable("printers");
+                SambaConfig->ShareSetModified("printers");
+            } else {
+                PackageSystem->CheckAndInstallPackagesInteractive($CupsPackages) or return 0
+            }
+        }
     }
     Samba->ReadSharesSetting();
     

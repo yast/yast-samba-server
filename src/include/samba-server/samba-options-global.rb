@@ -108,7 +108,6 @@ module Yast
           "table" => { "unique" => true },
           "popup" => { "widget" => :checkbox }
         },
-        ""                              => { "table" => { "unique" => true } },
         "client lanman auth"            => {
           "table" => { "unique" => true },
           "popup" => { "widget" => :checkbox }

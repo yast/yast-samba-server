@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Apr 3 18:42:42 UTC 2017 - nopower@suse.com
+
+- fix duplicated key warnings (bsc#1031613).
+- Don't require install of cups for yast samba-server
+  (bsc#1024670).
+- 3.2.1
+
+-------------------------------------------------------------------
 Thu Mar 16 15:51:19 UTC 2017 - kanderssen@suse.com
 
 - Fix string comparisons in SambaBackendLDAP.pm and YaPI/Samba.pm
