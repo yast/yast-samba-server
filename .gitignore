@@ -30,3 +30,4 @@ tmp.*
 /doc/autodocs
 /testsuite/Modules/
 /testsuite/YaPI/
+/.yardoc
