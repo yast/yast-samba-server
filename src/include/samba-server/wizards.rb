@@ -48,7 +48,6 @@ module Yast
     def MainSequence
       aliases = {
         "inst_step1"          => lambda { Installation_Step1() },
-        "inst_step2"          => lambda { Installation_Step2() },
         "conf_tab"            => lambda { Installation_Conf_Tab() },
         "share_edit"          => lambda { EditShareDialog() },
         "share_add"           => lambda { AddShareDialog() },
@@ -61,12 +60,6 @@ module Yast
       sequence = {
         "ws_start"            => "inst_step1",
         "inst_step1"          => {
-          :cancel => :cancel,
-          :abort  => :abort,
-          :next   => "inst_step2"
-        },
-        "inst_step2"          => {
-          :back   => "inst_step1",
           :cancel => :cancel,
           :abort  => :abort,
           :next   => "conf_tab"

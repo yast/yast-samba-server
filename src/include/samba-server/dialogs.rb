@@ -168,7 +168,7 @@ module Yast
 
 
     def Installation_Step1
-      caption = _("Samba Installation") + ": " + _("Step 1 of 2")
+      caption = _("Samba Installation") + ": " + _("Step 1 of 1")
 
       # feature dropped
       # list <string> workgroups = SambaNmbLookup::GetAvailableNeighbours(nil);
@@ -228,85 +228,6 @@ module Yast
       end
 
       Wizard.RestoreBackButton
-
-      deep_copy(ret)
-    end
-
-    def Installation_Step2
-      caption = _("Samba Installation") + ": " + _("Step 2 of 2")
-
-      workgroup = SambaConfig.GlobalGetStr("workgroup", "")
-      has_pdc = SambaNmbLookup.HasPDC(workgroup)
-      has_bdc = SambaNmbLookup.HasBDC(workgroup)
-
-      contents = VBox(
-        #header of status-like information. followed by domain name
-        VSquash(
-          Left(Label(Ops.add(_("Current Domain Name:") + " ", workgroup)))
-        ),
-        VSpacing(1),
-        VSquash(
-          Frame(
-            _("Samba Server Type"),
-            VBox(
-              RadioButtonGroup(
-                Id("samba_server_type"),
-                VBox(
-                  VSpacing(1),
-                  Left(RadioButton(Id("PDC"), @pdc, false)),
-                  HBox(
-                    HSpacing(4),
-                    # appears on new line after Primary Domain Controller radio button
-                    Left(
-                      Label(
-                        has_pdc ?
-                          _("Not available because a PDC is present.") :
-                          ""
-                      )
-                    )
-                  ),
-                  VBox(
-                    Left(RadioButton(Id("BDC"), @bdc, false)),
-                    HBox(HSpacing(4), Left(Label("")))
-                  ),
-                  Left(RadioButton(Id("Standalone"), @standalone, true)),
-                  VSpacing(1)
-                )
-              )
-            )
-          )
-        ),
-        VStretch()
-      )
-
-      help = Ops.get_string(@HELPS, "inst_step2", "")
-
-      Wizard.SetContents(caption, contents, help, true, true)
-
-      UI.ChangeWidget(Id("PDC"), :Enabled, !has_pdc)
-
-      ret = nil
-      while true
-        ret = UI.UserInput
-        if ret == :abort || ret == :cancel
-          break if confirmAbort
-          next
-        end
-        if ret == :back || ret == :next || ret == :abort || ret == :cancel
-          if ret == :next
-            # store the value
-            SambaRole.SetRole(
-              Convert.to_string(
-                UI.QueryWidget(Id("samba_server_type"), :CurrentButton)
-              )
-            )
-          end
-          break
-        else
-          Builtins.y2error("unexpected retcode: %1", ret)
-          next
-        end
-      end
 
       deep_copy(ret)
     end
