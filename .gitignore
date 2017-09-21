@@ -24,9 +24,15 @@ stamp-h*
 Makefile.am.common
 *.ami
 *.bz2
+*.spec
 .dep
 tmp.*
 *.log
+*.ybc
+/.yardoc
 /doc/autodocs
+doc/*.html
+doc/css
+doc/js
 /testsuite/Modules/
 /testsuite/YaPI/
