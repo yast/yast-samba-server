@@ -1283,9 +1283,9 @@ module Yast
         "FIREWALL"             => CWMFirewallInterfaces.CreateOpenFirewallWidget(
           {
             "services"        => [
-              "service:samba-server",
-              "service:netbios-server",
-              "service:samba-client"
+              "samba-server",
+              "netbios-server",
+              "samba-client"
             ],
             "display_details" => true
           }
