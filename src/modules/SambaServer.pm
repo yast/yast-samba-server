@@ -48,7 +48,7 @@ YaST::YCP::Import("Report");
 YaST::YCP::Import("Summary");
 YaST::YCP::Import("Progress");
 #HELPME: YaST::YCP::Import("Directory");
-YaST::YCP::Import("SuSEFirewall");
+YaST::YCP::Import("FirewalldWrapper");
 YaST::YCP::Import("PackageSystem");
 
 YaST::YCP::Import("SambaRole");
@@ -215,7 +215,7 @@ sub Read {
     # 6: read firewall setting
     Progress->NextStage();
     my $po = Progress->set(0);
-    SuSEFirewall->Read();
+    FirewalldWrapper->read();
     Progress->set($po);
 
     # 7: Read other settings
@@ -340,7 +340,7 @@ sub Write {
     # 5: save firewall settings
     Progress->NextStage();
     my $po = Progress->set(0);
-    SuSEFirewall->Write();
+    FirewalldWrapper->write();
     Progress->set($po);
     
     # progress finished

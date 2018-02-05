@@ -17,7 +17,7 @@
 
 
 Name:           yast2-samba-server
-Version:        3.2.2
+Version:        4.0.0
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -33,7 +33,8 @@ BuildRequires:  perl-X500-DN
 BuildRequires:  perl-XML-Writer
 BuildRequires:  samba-client
 BuildRequires:  update-desktop-files
-BuildRequires:  yast2 >= 3.1.53
+# SuSEFirewall2 replaced by firewalld (fate#323460)
+BuildRequires:  yast2 >= 4.0.39
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  yast2-ldap
 BuildRequires:  yast2-perl-bindings
@@ -42,8 +43,8 @@ BuildRequires:  yast2-testsuite
 BuildRequires:  yast2-users
 
 Requires:	perl-Crypt-SmbHash
-# Service.Active
-Requires:	yast2 >= 3.1.53
+# SuSEFirewall2 replaced by firewalld (fate#323460)
+Requires:	yast2 >= 4.0.39
 Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
