@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  1 12:40:05 UTC 2018 - knut.anderssen@suse.com
+
+- Use firewalld samba service definition (bsc#1083456)
+- 4.0.1
+
+-------------------------------------------------------------------
 Mon Feb  5 10:06:46 UTC 2018 - knut.anderssen@suse.com
 
 - SuSEFirewall2 replaced by firewalld (fate#323460)
