@@ -1282,6 +1282,7 @@ module Yast
         # BNC #247344, BNC #541958 (comment #18)
         "FIREWALL"             => CWMFirewallInterfaces.CreateOpenFirewallWidget(
           {
+            # Firewalld default service definition
             "services"        => ["samba"],
             "display_details" => true
           }
