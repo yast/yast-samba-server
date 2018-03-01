@@ -1282,11 +1282,7 @@ module Yast
         # BNC #247344, BNC #541958 (comment #18)
         "FIREWALL"             => CWMFirewallInterfaces.CreateOpenFirewallWidget(
           {
-            "services"        => [
-              "samba-server",
-              "netbios-server",
-              "samba-client"
-            ],
+            "services"        => ["samba"],
             "display_details" => true
           }
         ),
