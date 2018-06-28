@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 28 15:33:03 CEST 2018 - schubi@suse.de
+
+- Added additional searchkeys to desktop file (fate#321043).
+- 4.0.2
+
+-------------------------------------------------------------------
 Thu Mar  1 12:40:05 UTC 2018 - knut.anderssen@suse.com
 
 - Use firewalld samba service definition (bsc#1083456)
