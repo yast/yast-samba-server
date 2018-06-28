@@ -16,6 +16,7 @@ X-SuSE-YaST-AutoInstResource=samba-server
 X-SuSE-YaST-AutoInstClonable=true
 X-SuSE-YaST-AutoInstRequires=lan
 X-SuSE-YaST-AutoInstSchema=samba-server.rnc
+X-SuSE-YaST-Keywords=authentication,samba,windows,network
 
 Icon=yast-samba-server
 Exec=xdg-su -c "/sbin/yast2 samba-server"
