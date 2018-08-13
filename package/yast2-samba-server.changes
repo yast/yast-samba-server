@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Aug 13 08:11:01 UTC 2018 - dgonzalez@suse.com
+
+- Use Yast2::ServiceWidget to manage the service status
+  (part of fate#319428)
+- 4.1.0
+
+-------------------------------------------------------------------
 Fri Aug  3 09:45:19 UTC 2018 - igonzalezsosa@suse.com
 
 - Fix package building with yast2 4.0.80 (bsc#1103691).
