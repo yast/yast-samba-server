@@ -33,8 +33,8 @@ BuildRequires:  perl-X500-DN
 BuildRequires:  perl-XML-Writer
 BuildRequires:  samba-client
 BuildRequires:  update-desktop-files
-# SuSEFirewall2 replaced by firewalld (fate#323460)
-BuildRequires:  yast2 >= 4.0.39
+# Yast2::ServiceWidget
+BuildRequires:  yast2 >= 4.1.0
 BuildRequires:  yast2-devtools >= 3.1.10
 BuildRequires:  yast2-ldap
 BuildRequires:  yast2-perl-bindings
@@ -43,8 +43,8 @@ BuildRequires:  yast2-testsuite
 BuildRequires:  yast2-users
 
 Requires:	perl-Crypt-SmbHash
-# SuSEFirewall2 replaced by firewalld (fate#323460)
-Requires:	yast2 >= 4.0.39
+# Yast2::ServiceWidget
+Requires:	yast2 >= 4.1.0
 Requires:	yast2-ldap >= 3.1.2
 Requires:	yast2-perl-bindings
 Requires:	yast2-network
