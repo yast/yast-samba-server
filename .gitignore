@@ -36,3 +36,4 @@ doc/css
 doc/js
 /testsuite/Modules/
 /testsuite/YaPI/
+coverage/

@@ -26,6 +26,10 @@
 #		Lukas Ocilka <locilka@suse.cz>
 #
 # $Id$
+
+require "yast2/system_service"
+require "yast2/compound_service"
+
 module Yast
   module SambaServerComplexInclude
     def initialize_samba_server_complex(include_target)
@@ -39,8 +43,19 @@ module Yast
       Yast.import "Report"
       Yast.import "FileUtils"
       Yast.import "Popup"
+      Yast.import "Mode"
 
       Yast.include include_target, "samba-server/helps.rb"
+    end
+
+    # Services to configure
+    #
+    # @return [Yast2::CompoundService]
+    def services
+      @services ||= Yast2::CompoundService.new(
+        Yast2::SystemService.find("nmb"),
+        Yast2::SystemService.find("smb")
+      )
     end
 
     # Read settings dialog
@@ -63,26 +78,27 @@ module Yast
     end
 
     # Write settings dialog
-    # @return `abort if aborted and `next otherwise
+    #
+    # @return [Symbol] :next when service is saved successfully
+    #                  :abort otherwise
     def WriteDialog
       Wizard.RestoreHelp(Ops.get_string(@HELPS, "write", ""))
       # Bugzilla #120080 - 'reload' instead of 'restart'
-      # If there some connected users, SAMBA is running and should be running also after the Write() operation
-      #    and the Progress was turned on before Writing SAMBA conf
-      connected_users = SambaService.ConnectedUsers
-      Builtins.y2milestone(
-        "Number of connected users: %1",
-        Builtins.size(connected_users)
-      )
-      report_restart_popup = Ops.greater_than(Builtins.size(connected_users), 0) &&
+      # If there some connected users, SAMBA is running and should be running
+      # also after the Write() operation and the Progress was turned on before
+      # Writing SAMBA conf
+      connected_users = SambaService.ConnectedUsers.count
+      Builtins.y2milestone("Number of connected users: %1", connected_users)
+
+      switch_to_reload = connected_users > 0 &&
         SambaService.GetServiceRunning &&
         SambaService.GetServiceAutoStart &&
         ProgressStatus()
 
-      ret = SambaServer.Write(false)
+      ret = save_status(switch_to_reload)
 
       # If popup should be shown and SAMBA is still/again running
-      if report_restart_popup && SambaService.GetServiceRunning
+      if switch_to_reload && SambaService.GetServiceRunning
         # TRANSLATORS: a popup message
         Report.Message(
           _(
@@ -94,6 +110,27 @@ module Yast
         )
       end
       ret ? :next : :abort
+    end
+
+    # Saves service status (start mode and starts/stops the service)
+    #
+    # @note For AutoYaST and for command line actions, it uses the old way for
+    # backward compatibility, see {SambaServer#Write}. When the service is
+    # configured using the UI, it is directly saved. See
+    # {Yast2::SystemService#save}.
+    #
+    # @param switch_to_reload [Boolean] indicates if restart action must be
+    #   replaced with reload. See the Bugzilla #120080 stated in #WriteDialog
+    #   comments
+    #
+    # @return [Boolean] true if service is saved successfully; false otherwise
+    def save_status(switch_to_reload)
+      if Mode.auto || Mode.commandline
+        SambaServer.Write(false)
+      else
+        services.reload if services.action == :restart && switch_to_reload
+        services.save
+      end
     end
   end
 end

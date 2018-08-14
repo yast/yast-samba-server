@@ -26,8 +26,12 @@
 #		Lukas Ocilka <locilka@suse.cz>
 #
 # $Id$
+
+require "cwm/service_widget"
+
 module Yast
   module SambaServerDialogsInclude
+
     def initialize_samba_server_dialogs(include_target)
       Yast.import "UI"
 
@@ -85,6 +89,16 @@ module Yast
 
       @snapper_available        = nil
       @btrfs_available          = nil
+    end
+
+    # Widget to define status and start mode of the services
+    #
+    # There are two involved services, `smb` and `nmb`. See
+    # {Yast::SambaServerComplexInclude#services}
+    #
+    # @return [::CWM::ServiceWidget]
+    def service_widget
+      @service_widget ||= ::CWM::ServiceWidget.new(services)
     end
 
     # routines
@@ -1167,7 +1181,7 @@ module Yast
               100,
               VBox(
                 VSpacing(1),
-                "SERVICE START",
+                "service_widget",
                 VSpacing(1),
                 "FIREWALL",
                 VStretch()
@@ -1175,7 +1189,7 @@ module Yast
             ),
             HWeight(2, Empty())
           ),
-          "widget_names" => ["SERVICE START", "FIREWALL"]
+          "widget_names" => ["service_widget", "FIREWALL"]
         },
         "shares"   => {
           "header"       => _("&Shares"),
@@ -1267,18 +1281,7 @@ module Yast
       )
 
       tabs_widget_descr = {
-        "SERVICE START"        => CWMServiceStart.CreateAutoStartWidget(
-          {
-            "get_service_auto_start" => fun_ref(
-              SambaService.method(:GetServiceAutoStart),
-              "boolean ()"
-            ),
-            "set_service_auto_start" => fun_ref(
-              SambaService.method(:SetServiceAutoStart),
-              "void (boolean)"
-            )
-          }
-        ),
+        "service_widget"       => service_widget.cwm_definition,
         # BNC #247344, BNC #541958 (comment #18)
         "FIREWALL"             => CWMFirewallInterfaces.CreateOpenFirewallWidget(
           {
