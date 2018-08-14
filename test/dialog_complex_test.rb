@@ -51,7 +51,7 @@ describe "SambaServerComplexInclude" do
   describe "#WriteDialog" do
     subject(:samba) { TestComplexDialog.new }
 
-    let(:connected_users) { [1, 2] }
+    let(:connected_users) { ["john", "jane"] }
     let(:service_running) { false }
     let(:service_on_boot) { false }
 

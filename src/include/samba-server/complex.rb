@@ -120,7 +120,7 @@ module Yast
     # {Yast2::SystemService#save}.
     #
     # @param switch_to_reload [Boolean] indicates if restart action must be
-    #   replaced by reload. See the Bugzilla #120080 stated in #WriteDialog
+    #   replaced with reload. See the Bugzilla #120080 stated in #WriteDialog
     #   comments
     #
     # @return [Boolean] true if service is saved successfully; false otherwise
