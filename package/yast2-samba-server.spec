@@ -25,7 +25,7 @@ Source0:        %{name}-%{version}.tar.bz2
 Url:            https://github.com/yast/yast-samba-server
 
 Group:          System/YaST
-License:        GPL-2.0
+License:        GPL-2.0-only
 # Service.Active
 BuildRequires:  libsmbclient-devel
 BuildRequires:  perl-Crypt-SmbHash
