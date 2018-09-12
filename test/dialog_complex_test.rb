@@ -123,64 +123,86 @@ describe "SambaServerComplexInclude" do
     end
 
     context "when running in UI mode" do
-      it "saves the system service" do
-        expect(services).to receive(:save)
+      context "and fails written configuration" do
+        before do
+          allow(Yast::SambaServer).to receive(:Write).and_return(false)
 
-        samba.WriteDialog
-      end
+          it "does not save the system service" do
+            expect(services).to_not receive(:save)
 
-      it "returns :next when sevice is saved successfully" do
-        expect(samba.WriteDialog).to eq(:next)
-      end
-
-      it "returns :abort when fails saving the service" do
-        allow(services).to receive(:save).and_return(false)
-
-        expect(samba.WriteDialog).to eq(:abort)
-      end
-
-      context "and action is :restart" do
-        let(:action) { :restart }
-
-        context "but the service is already running" do
-          let(:service_running) { true }
-          let(:service_on_boot) { true }
-
-          context "with connected users" do
-            it "changes action to :reload" do
-              expect(services).to receive(:reload)
-
-              samba.WriteDialog
-            end
-
-            it "reports a message" do
-              allow(services).to receive(:reload)
-              expect(Yast::Report).to receive(:Message)
-
-              samba.WriteDialog
-            end
+            samba.WriteDialog
           end
 
-          context "without connected users" do
-            let(:connected_users) { [] }
-
-            it "performs the requested action" do
-              expect(services).to_not receive(:reload)
-
-              samba.WriteDialog
-            end
+          it "returns :abort" do
+            expect(samba.WriteDialog).to eq(:abort)
           end
         end
       end
 
-      context "and action is NOT :restart" do
-        let (:action) { :reload }
+      context "and configuration is written" do
+        before do
+          allow(Yast::SambaServer).to receive(:Write).and_return(true)
+        end
 
-        context "and there are connected users" do
-          it "does not report message" do
-            expect(Yast::Report).to_not receive(:Message)
+        it "saves the system service" do
+          expect(services).to receive(:save)
 
-            samba.WriteDialog
+          samba.WriteDialog
+        end
+
+        it "returns :next when sevice is saved successfully" do
+          expect(samba.WriteDialog).to eq(:next)
+        end
+
+        it "returns :abort when fails saving the service" do
+          allow(services).to receive(:save).and_return(false)
+
+          expect(samba.WriteDialog).to eq(:abort)
+        end
+
+        context "and action is :restart" do
+          let(:action) { :restart }
+
+          context "but the service is already running" do
+            let(:service_running) { true }
+            let(:service_on_boot) { true }
+
+            context "with connected users" do
+              it "changes action to :reload" do
+                expect(services).to receive(:reload)
+
+                samba.WriteDialog
+              end
+
+              it "reports a message" do
+                allow(services).to receive(:reload)
+                expect(Yast::Report).to receive(:Message)
+
+                samba.WriteDialog
+              end
+            end
+
+            context "without connected users" do
+              let(:connected_users) { [] }
+
+              it "performs the requested action" do
+                expect(services).to_not receive(:reload)
+
+                samba.WriteDialog
+              end
+            end
+          end
+        end
+
+        context "and action is NOT :restart" do
+          let (:action) { :reload }
+
+          context "and there are connected users" do
+            it "does not report message" do
+              expect(Yast::Report).to_not receive(:Message)
+
+              samba.WriteDialog
+            end
           end
         end
       end

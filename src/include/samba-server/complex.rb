@@ -114,23 +114,15 @@ module Yast
 
     # Saves service status (start mode and starts/stops the service)
     #
-    # @note For AutoYaST and for command line actions, it uses the old way for
-    # backward compatibility, see {SambaServer#Write}. When the service is
-    # configured using the UI, it is directly saved. See
-    # {Yast2::SystemService#save}.
-    #
     # @param switch_to_reload [Boolean] indicates if restart action must be
     #   replaced with reload. See the Bugzilla #120080 stated in #WriteDialog
     #   comments
     #
     # @return [Boolean] true if service is saved successfully; false otherwise
     def save_status(switch_to_reload)
-      if Mode.auto || Mode.commandline
-        SambaServer.Write(false)
-      else
-        services.reload if services.action == :restart && switch_to_reload
-        services.save
-      end
+      return false unless SambaServer.Write(false)
+      services.reload if services.action == :restart && switch_to_reload
+      services.save
     end
   end
 end

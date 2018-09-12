@@ -263,13 +263,10 @@ sub Write {
     my $caption = __("Saving Samba Server Configuration");
 
     # We do not set help text here, because it was set outside
-    Progress->New($caption, " ", 5, [
+    Progress->New($caption, " ", 4, [
 	    # translators: write progress stage
 	    _("Write global settings"),
 	    # translators: write progress stage
-	    ( !SambaService->GetServiceAutoStart() ? _("Disable Samba services") 
-	    # translators: write progress stage
-		: _("Enable Samba services") ),
 	    # translators: write progress stage
 	    _("Write back-end settings"),
 	    # translators: write progress stage
@@ -279,10 +276,6 @@ sub Write {
 	], [
 	    # translators: write progress step
 	    _("Writing global settings..."),
-	    # translators: write progress step
-	    ! SambaService->GetServiceAutoStart() ? _("Disabling Samba services...") 
-	    # translators: write progress step
-		: _("Enabling Samba services..."),
 	    # translators: write progress step
 	    _("Writing back-end settings..."),
 	    # translators: write progress step
@@ -320,24 +313,17 @@ sub Write {
     SCR->Execute(".target.bash", "touch " . DONE_ONCE_FILE);
     # write samba shares feature, only write => 1
     Samba->WriteShares();
-    
-    # 2: write services settings
-    Progress->NextStage();
-    SambaService->Write();
 
-    # 3: write backends settings && write trusted domains
+    # 2: write backends settings && write trusted domains
     Progress->NextStage();
     SambaBackend->Write();
     SambaTrustDom->Write();
-    
-    # 4: write accounts
+
+    # 3: write accounts
     Progress->NextStage();
     SambaAccounts->Write();
 
-    # 4.5: start, stop, reload service
-    SambaService->StartStopReload();
-
-    # 5: save firewall settings
+    # 4: save firewall settings
     Progress->NextStage();
     my $po = Progress->set(0);
     FirewalldWrapper->write();

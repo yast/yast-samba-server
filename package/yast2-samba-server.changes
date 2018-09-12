@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep  5 10:24:26 UTC 2018 - Samuel Cabrero <scabrero@suse.de>
+
+- Fix configuration not saved after new service status management
+  (bsc#1106876)
+- 4.1.1
+
+-------------------------------------------------------------------
 Mon Aug 20 16:09:08 CEST 2018 - schubi@suse.de
 
 - Switched license in spec file from SPDX2 to SPDX3 format.
