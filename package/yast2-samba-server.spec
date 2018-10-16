@@ -85,3 +85,4 @@ configuration.
 %{yast_desktopdir}/samba-server.desktop
 %{yast_schemadir}/autoyast/rnc/samba-server.rnc
 %doc %{yast_docdir}
+%license COPYING
