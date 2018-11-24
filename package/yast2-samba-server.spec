@@ -17,7 +17,7 @@
 
 
 Name:           yast2-samba-server
-Version:        4.1.1
+Version:        4.1.2
 Release:        0
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -84,5 +84,6 @@ configuration.
 %{yast_moduledir}/*
 %{yast_desktopdir}/samba-server.desktop
 %{yast_schemadir}/autoyast/rnc/samba-server.rnc
+%{_datadir}/icons/*
 %doc %{yast_docdir}
 %license COPYING
