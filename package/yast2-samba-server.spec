@@ -84,6 +84,6 @@ configuration.
 %{yast_moduledir}/*
 %{yast_desktopdir}/samba-server.desktop
 %{yast_schemadir}/autoyast/rnc/samba-server.rnc
-%{_datadir}/icons/*
+%{yast_icondir}
 %doc %{yast_docdir}
 %license COPYING
