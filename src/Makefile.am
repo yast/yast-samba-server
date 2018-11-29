@@ -45,6 +45,10 @@ ydata_DATA = \
 desktop_DATA = \
   desktop/samba-server.desktop
 
-EXTRA_DIST = $(module_DATA) $(module1_DATA) $(client_DATA) $(ynclude_DATA) $(schemafiles_DATA) $(ydata_DATA) $(desktop_DATA)
+scalabledir = @icondir@/hicolor/scalable/apps
+scalable_DATA = \
+  icons/hicolor/scalable/apps/yast-samba-server.svg
+
+EXTRA_DIST = $(module_DATA) $(module1_DATA) $(client_DATA) $(ynclude_DATA) $(schemafiles_DATA) $(ydata_DATA) $(desktop_DATA) $(scalable_DATA)
 
 include $(top_srcdir)/Makefile.am.common
