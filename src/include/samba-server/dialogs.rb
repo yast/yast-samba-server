@@ -142,7 +142,8 @@ module Yast
     def snapper_cfg?(path)
       return false unless path
 
-      if 0 == SCR.Execute(path(".target.bash"), "/usr/bin/grep SUBVOLUME=\\\"#{path.shellescape}\\\" /etc/snapper/configs/*")
+      pattern = "SUBVOLUME=\"#{path}\""
+      if 0 == SCR.Execute(path(".target.bash"), "/usr/bin/grep #{pattern.shellescape} /etc/snapper/configs/*")
         return true
       else
         return false
