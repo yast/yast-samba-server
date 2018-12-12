@@ -29,6 +29,8 @@
 
 require "cwm/service_widget"
 
+require "shellwords"
+
 module Yast
   module SambaServerDialogsInclude
 
@@ -109,7 +111,7 @@ module Yast
         @snapper_available      =
           Package.Installed("snapper") &&
           # check for the presence of Samba's Snapper VFS module
-          0 == SCR.Execute(path(".target.bash"), "smbd --build-options | grep vfs_snapper_init")
+          0 == SCR.Execute(path(".target.bash"), "/usr/sbin/smbd --build-options | /usr/bin/grep vfs_snapper_init")
       end
       @snapper_available
     end
@@ -119,7 +121,7 @@ module Yast
       if @btrfs_available.nil?
         @btrfs_available      =
           # check for the presence of Samba's Btrfs VFS module
-          0 == SCR.Execute(path(".target.bash"), "smbd --build-options | grep vfs_btrfs_init")
+          0 == SCR.Execute(path(".target.bash"), "/usr/sbin/smbd --build-options | /usr/bin/grep vfs_btrfs_init")
       end
       @btrfs_available
     end
@@ -140,7 +142,8 @@ module Yast
     def snapper_cfg?(path)
       return false unless path
 
-      if 0 == SCR.Execute(path(".target.bash"), "grep 'SUBVOLUME=\"#{path}\"' /etc/snapper/configs/*")
+      pattern = "SUBVOLUME=\"#{path}\""
+      if 0 == SCR.Execute(path(".target.bash"), "/usr/bin/grep #{pattern.shellescape} /etc/snapper/configs/*")
         return true
       else
         return false
