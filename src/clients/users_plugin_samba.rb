@@ -192,7 +192,7 @@ module Yast
         )
 
         Wizard.CreateDialog
-        Wizard.SetDesktopIcon("org.openSUSE.YaST.SambaServer")
+        Wizard.SetDesktopIcon("org.opensuse.yast.SambaServer")
 
         # dialog caption
         Wizard.SetContentsButtons(

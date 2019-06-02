@@ -43,7 +43,7 @@ ydata_DATA = \
   data/add_machine.rb
 
 desktop_DATA = \
-  desktop/org.openSUSE.YaST.SambaServer.desktop
+  desktop/org.opensuse.yast.SambaServer.desktop
 
 scalabledir = @icondir@/hicolor/scalable/apps
 scalable_DATA = \
