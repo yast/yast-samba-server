@@ -21,6 +21,7 @@ X-SuSE-YaST-Keywords=authentication,samba,windows,network
 Icon=yast-samba-server
 Exec=xdg-su -c "/sbin/yast2 samba-server"
 
-Name=Samba Server
-GenericName=Configure a Samba server
+Name=YaST Samba Server
+GenericName=Samba Server
+Comment=Configure a Samba server
 StartupNotify=true

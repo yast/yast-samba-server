@@ -12,20 +12,20 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
 
 Name:           yast2-samba-server
-Version:        4.1.3
+Version:        4.2.0
 Release:        0
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Source0:        %{name}-%{version}.tar.bz2
 Url:            https://github.com/yast/yast-samba-server
-
+Summary:        YaST2 - Samba Server Configuration
 Group:          System/YaST
 License:        GPL-2.0-only
+
+Source0:        %{name}-%{version}.tar.bz2
+
 # Service.Active
 BuildRequires:  libsmbclient-devel
 BuildRequires:  perl-Crypt-SmbHash
@@ -35,55 +35,53 @@ BuildRequires:  samba-client
 BuildRequires:  update-desktop-files
 # Yast2::ServiceWidget
 BuildRequires:  yast2 >= 4.1.0
-BuildRequires:  yast2-devtools >= 3.1.10
+BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-ldap
 BuildRequires:  yast2-perl-bindings
 BuildRequires:  yast2-samba-client
 BuildRequires:  yast2-testsuite
 BuildRequires:  yast2-users
 
-Requires:	perl-Crypt-SmbHash
+Requires:       perl-Crypt-SmbHash
 # Yast2::ServiceWidget
-Requires:	yast2 >= 4.1.0
-Requires:	yast2-ldap >= 3.1.2
-Requires:	yast2-perl-bindings
-Requires:	yast2-network
+Requires:       yast2 >= 4.1.0
+Requires:       yast2-ldap >= 3.1.2
+Requires:       yast2-perl-bindings
+Requires:       yast2-network
 # samba-client/routines.rb
-Requires:	yast2-samba-client >= 3.1.15
-Requires:	yast2-users
-
-# bnc #386473, recommend yast2-samba-server when installaing these packages
-Supplements:	samba
-
-BuildArchitectures:	noarch
-
+Requires:       yast2-samba-client >= 3.1.15
+Requires:       yast2-users
 Requires:       yast2-ruby-bindings >= 1.0.0
 
-Summary:	YaST2 - Samba Server Configuration
+# bnc #386473, recommend yast2-samba-server when installaing these packages
+Supplements:    samba
+
+BuildArch:      noarch
 
 %description
 This package contains the YaST2 component for Samba server
 configuration.
 
 %prep
-%setup -n %{name}-%{version}
+%setup -q
 
 %build
 %yast_build
 
 %install
 %yast_install
-
+%yast_metainfo
 
 %files
-%defattr(-,root,root)
-%dir %{yast_yncludedir}/samba-server
-%{yast_yncludedir}/samba-server/*
-%{yast_ydatadir}/*.rb
-%{yast_clientdir}/*.rb
-%{yast_moduledir}/*
-%{yast_desktopdir}/samba-server.desktop
-%{yast_schemadir}/autoyast/rnc/samba-server.rnc
+%{yast_yncludedir}
+%{yast_ydatadir}
+%{yast_clientdir}
+%{yast_moduledir}
+%{yast_desktopdir}
+%{yast_metainfodir}
+%{yast_schemadir}
 %{yast_icondir}
 %doc %{yast_docdir}
 %license COPYING
+
+%changelog
