@@ -13,6 +13,7 @@ config.sub
 configure
 configure.ac
 depcomp
+doc/autodocs
 install-sh
 *.pot
 libtool
@@ -26,6 +27,7 @@ Makefile.am.common
 *.bz2
 .dep
 tmp.*
+.yardoc/
 *.log
 /doc/autodocs
 /testsuite/Modules/
