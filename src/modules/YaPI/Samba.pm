@@ -17,11 +17,6 @@ $serverRole = DetermineRole()
   returns a string representing the currently configure role or
   undef on failure.
 
-$enabled = GetServiceStatus()
-
-  returns true if the services smbd and nmbd are enabled, false if either of
-  them is disabled or undef on failure.
-
 $enabled = EditService($enable)
 
   enabled/disables the smbd and nmbd services. returns the status of the
@@ -149,23 +144,6 @@ use strict;
 #######################################################
 # API start
 #######################################################
-
-=item *
-C<$hostList = GetServiceStatus ();>
-
-Returns the current status of smb and nmb services. True means 
-the services are both started in at least on runlevel.
-On error, undef is returned and the Error() function can be used
-to get the error hash.
-
-=cut
-
-BEGIN { $TYPEINFO{GetServiceStatus} = ["function", "string" ]; }
-sub GetServiceStatus {
-    my $self = shift;
-    SambaService->Read();
-    return SambaService->GetServiceAutoStart();
-}
 
 =item *
 C<$serverRole = DetermineRole();>
