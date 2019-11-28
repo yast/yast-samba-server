@@ -7,6 +7,10 @@ module Yast
       # $Id$
 
       Yast.import "SambaConfig"
+      # Import "Directory" just for avoid its initialization which reads the
+      # ".target.tmpdir". This change was consequence of bsc#1151291, which added
+      # an import of "Systemd" in Y2Network::Systemd::Unit
+      Yast.import "Directory"
 
       Yast.include self, "testsuite.rb"
       Yast.include self, "tests-common.rb"
