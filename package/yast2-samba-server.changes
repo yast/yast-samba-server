@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Dec 18 09:55:16 UTC 2019 - Petr Pavlu <petr.pavlu@suse.com>
+
+- Ensure nmbd is restarted following nmbstatus lookup (bsc#1158916)
+- 4.2.3
+
+-------------------------------------------------------------------
 Thu Nov 28 14:35:11 UTC 2019 - Knut Anderssen <kanderssen@suse.com>
 
 - Fix failing Samba.GetServiceStatus old testsuite forcing and

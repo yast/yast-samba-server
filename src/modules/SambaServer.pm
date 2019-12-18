@@ -224,6 +224,9 @@ sub Read {
     
     $GlobalsConfigured = $self->Configured();
 
+    # ensure nmbd is restarted if stopped for lookup
+    SambaNmbLookup->checkNmbstatus() unless Mode->test();
+
     y2milestone("Service:". (SambaService->GetServiceAutoStart() ? "Enabled" : "Disabled"));
     y2milestone("Role:". SambaRole->GetRoleName());
 
