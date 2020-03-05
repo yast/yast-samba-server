@@ -42,17 +42,18 @@ describe "SambaServerComplexInclude" do
     allow(Yast2::SystemService).to receive(:find).with(anything).and_return(service)
     allow(Yast2::CompoundService).to receive(:new).and_return(services)
     allow(services).to receive(:action).and_return(action)
+    allow(services).to receive(:currently_active?).and_return(service_running)
   end
 
   let(:service) { instance_double("Yast2::SystemService", save: true, is_a?: true) }
   let(:services) { instance_double("Yast2::CompoundService", save: true) }
+  let(:service_running) { false }
   let(:action) { :start }
 
   describe "#WriteDialog" do
     subject(:samba) { TestComplexDialog.new }
 
     let(:connected_users) { ["john", "jane"] }
-    let(:service_running) { false }
     let(:service_on_boot) { false }
 
     let(:auto) { false }

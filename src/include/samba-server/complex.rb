@@ -111,7 +111,8 @@ module Yast
     #
     # @return [Boolean] true if the service is running; false otherwise
     def need_to_restart?
-      SambaService.GetServiceRunning
+      # could be partialy active. i.e: smb is running and nmb is not
+      services.currently_active?
     end
 
     # Convenience method to check whether there are users connected to samba
