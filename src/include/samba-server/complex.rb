@@ -87,7 +87,7 @@ module Yast
       # If there some connected users, SAMBA is running and should be running
       # also after the Write() operation and the Progress was turned on before
       # Writing SAMBA conf
-      switch_to_reload = connected_users? && switch_to_reload? && ProgressStatus()
+      switch_to_reload = need_to_restart? && connected_users? && ProgressStatus()
 
       ret = save_status(switch_to_reload)
 
@@ -106,20 +106,12 @@ module Yast
       ret ? :next : :abort
     end
 
-    # Convenience method to check whether a reload should be used instead of a
-    # restart
-    #
-    # @return [Boolean] true if a reload is prefered; false otherwise
-    def switch_to_reload?
-      need_to_restart? && connected_users?
-    end
-
     # Convenience method to check whether a restart or reload should be used
     # after writing the configuration
     #
-    # @return [Boolean] true if a reload is prefered; false otherwise
+    # @return [Boolean] true if the service is running; false otherwise
     def need_to_restart?
-      SambaService.GetServiceRunning && SambaService.GetServiceAutoStart
+      SambaService.GetServiceRunning
     end
 
     # Convenience method to check whether there are users connected to samba
