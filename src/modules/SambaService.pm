@@ -145,7 +145,7 @@ sub StartStopNow {
     my ($self, $on) = @_;
     my $error = 0;
 
-    # Zero connected users -> restart, einther -> reload
+    # Zero connected users -> restart, either -> reload
     my $connected_users = $self->ConnectedUsers();
     my $nr_connected_users = scalar(@$connected_users);
 

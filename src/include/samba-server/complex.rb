@@ -87,13 +87,7 @@ module Yast
       # If there some connected users, SAMBA is running and should be running
       # also after the Write() operation and the Progress was turned on before
       # Writing SAMBA conf
-      connected_users = SambaService.ConnectedUsers.count
-      Builtins.y2milestone("Number of connected users: %1", connected_users)
-
-      switch_to_reload = connected_users > 0 &&
-        SambaService.GetServiceRunning &&
-        SambaService.GetServiceAutoStart &&
-        ProgressStatus()
+      switch_to_reload = need_to_restart? && connected_users? && ProgressStatus()
 
       ret = save_status(switch_to_reload)
 
@@ -110,6 +104,26 @@ module Yast
         )
       end
       ret ? :next : :abort
+    end
+
+    # Convenience method to check whether a restart or reload should be used
+    # after writing the configuration
+    #
+    # @return [Boolean] true if the service is running; false otherwise
+    def need_to_restart?
+      # could be partialy active. i.e: smb is running and nmb is not
+      services.currently_active?
+    end
+
+    # Convenience method to check whether there are users connected to samba
+    # service or not
+    #
+    # @return [Boolean] true if some user is connected to the service; false
+    #   otherwise
+    def connected_users?
+      connected_users = SambaService.ConnectedUsers.count
+      Builtins.y2milestone("Number of connected users: %1", connected_users)
+      connected_users > 0
     end
 
     # Saves service status (start mode and starts/stops the service)

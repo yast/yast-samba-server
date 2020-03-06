@@ -100,7 +100,10 @@ module Yast
     #
     # @return [::CWM::ServiceWidget]
     def service_widget
-      @service_widget ||= ::CWM::ServiceWidget.new(services)
+      return @service_widget if @service_widget
+      @service_widget = ::CWM::ServiceWidget.new(services)
+      @service_widget.default_action = :restart if need_to_restart? && !connected_users
+      @service_widget
     end
 
     # routines
