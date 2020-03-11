@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 11 10:00:37 UTC 2020 - Knut Anderssen <kanderssen@suse.com>
+
+- Fix check of connected users when proposing the default service
+  action (bsc#1166303)
+- 4.1.5
+
+-------------------------------------------------------------------
 Thu Mar  5 13:59:38 UTC 2020 - Knut Anderssen <kanderssen@suse.com>
 
 - Propose to restart samba services by default when writing the
