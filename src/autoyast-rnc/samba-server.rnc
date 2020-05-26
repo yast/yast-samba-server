@@ -484,6 +484,6 @@ samba_options = element options {
   MAP,
   element option { MAP, samba_option_key, samba_option_val? }*
 }
-share = element share { (STRING | y2_share)* }
+share = element share { (text | y2_share)* }
 samba_option_key = element key { STRING }
 samba_option_val = element value { STRING }
