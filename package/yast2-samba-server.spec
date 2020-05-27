@@ -38,7 +38,6 @@ BuildRequires:  yast2-devtools >= 4.2.2
 BuildRequires:  yast2-ldap
 BuildRequires:  yast2-perl-bindings
 BuildRequires:  yast2-samba-client
-BuildRequires:  yast2-testsuite
 BuildRequires:  yast2-users
 
 Requires:       perl-Crypt-SmbHash
