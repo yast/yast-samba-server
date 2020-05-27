@@ -1,8 +1,0 @@
-Return	Enable disabled service
-Return	true
-Return	Disable disabled service
-Return	true
-Return	Enable enabled service
-Return	true
-Return	Disable enabled service
-Return	true

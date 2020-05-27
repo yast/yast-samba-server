@@ -30,7 +30,6 @@ Source0:        %{name}-%{version}.tar.bz2
 BuildRequires:  libsmbclient-devel
 BuildRequires:  perl-Crypt-SmbHash
 BuildRequires:  perl-X500-DN
-BuildRequires:  perl-XML-Writer
 BuildRequires:  samba-client
 BuildRequires:  update-desktop-files
 # Yast2::ServiceWidget
