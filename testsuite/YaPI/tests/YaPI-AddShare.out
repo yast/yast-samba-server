@@ -1,8 +1,0 @@
-Write	.etc.smb.value.test.path ["/home/test"] true
-Write	.etc.smb.value_type.test.path [0] true
-Write	.etc.smb.value.test.printable ["no"] true
-Write	.etc.smb.value_type.test.printable [0] true
-Write	.etc.smb.section_type.test [0] true
-Write	.etc.smb.section_comment.test ["\n"] true
-Write	.etc.smb nil true
-Return	true

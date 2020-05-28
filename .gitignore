@@ -36,6 +36,4 @@ tmp.*
 doc/*.html
 doc/css
 doc/js
-/testsuite/Modules/
-/testsuite/YaPI/
 coverage/
