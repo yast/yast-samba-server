@@ -38,6 +38,10 @@ BuildRequires:  yast2-ldap
 BuildRequires:  yast2-perl-bindings
 BuildRequires:  yast2-users
 
+# Test suite
+BuildRequires:  rubygem(%{rb_default_ruby_abi}:yast-rake)
+BuildRequires:  rubygem(%{rb_default_ruby_abi}:rspec)
+
 Requires:       perl-Crypt-SmbHash
 # Yast2::ServiceWidget
 Requires:       yast2 >= 4.1.0
@@ -60,6 +64,9 @@ configuration.
 
 %prep
 %setup -q
+
+%check
+rake test:unit
 
 %build
 %yast_build
