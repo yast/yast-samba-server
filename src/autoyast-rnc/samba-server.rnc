@@ -6,7 +6,7 @@ include "common.rnc"
 
 workgroup = element workgroup { STRING }
 accounts = element accounts {
-    attribute config:type { text }?,
+    LIST,
     element account { STRING }*
 }
 
@@ -20,12 +20,15 @@ samba-server =
         element fixme { STRING }*
       }? &
       element config {
+        # WTF, this should be a "LIST", but
+        # https://github.com/yast/yast-samba-client/blob/cfd7b2c61b1cae9df1035ea8399fb10213ea0c99/src/modules/SambaConfig.pm#L536
+        # allows a hash
         attribute config:type { text }? &
         element comment { STRING }? &
         element listentry {
           MAP,
           (
-            element disabled { attribute config:type { text }? & STRING }? &
+            element disabled { BOOLEAN }? &
             element name { STRING }? &
             element comment { STRING }? &
             element parameters {
@@ -481,6 +484,6 @@ samba_options = element options {
   MAP,
   element option { MAP, samba_option_key, samba_option_val? }*
 }
-share = element share { (STRING | y2_share)* }
+share = element share { (text | y2_share)* }
 samba_option_key = element key { STRING }
 samba_option_val = element value { STRING }
