@@ -72,6 +72,10 @@ jobs:
     - name: Git Checkout
       uses: actions/checkout@v2
 
+    # needed for perl checks as we need all perl modules
+    - name: Install Dependencies
+      run: rake build_dependencies:install
+
     - name: Perl Syntax
       run: yast-ci-ruby -o perl_syntax
 
