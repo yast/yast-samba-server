@@ -171,6 +171,7 @@ describe "SambaServerComplexInclude" do
             context "with connected users" do
               it "changes action to :reload" do
                 expect(services).to receive(:reload)
+                allow(Yast::Report).to receive(:Message)
 
                 samba.WriteDialog
               end
