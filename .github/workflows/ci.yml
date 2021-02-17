@@ -15,6 +15,10 @@ jobs:
     - name: Git Checkout
       uses: actions/checkout@v2
 
+    # workaround issue with missing useradd
+    - name: Install useradd
+      run: zypper --non-interactive in shadow
+
     - name: Install Dependencies
       run: rake build_dependencies:install
 
@@ -42,6 +46,10 @@ jobs:
 
     - name: Git Checkout
       uses: actions/checkout@v2
+
+    # workaround issue with missing useradd
+    - name: Install useradd
+      run: zypper --non-interactive in shadow
 
     - name: Install Dependencies
       run: rake build_dependencies:install
