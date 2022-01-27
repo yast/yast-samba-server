@@ -49,7 +49,7 @@ YaST::YCP::Import("Summary");
 YaST::YCP::Import("Progress");
 #HELPME: YaST::YCP::Import("Directory");
 YaST::YCP::Import("FirewalldWrapper");
-YaST::YCP::Import("PackageSystem");
+YaST::YCP::Import("Package");
 
 YaST::YCP::Import("SambaRole");
 YaST::YCP::Import("SambaConfig");
@@ -105,9 +105,9 @@ sub GetModified {
 BEGIN{ $TYPEINFO{GetModified} = ["function", "boolean"] }
 sub CheckAndInstallBasePackages {
   # installed_required_packages? or installed_packages_gplv3? or install_packages!
-  PackageSystem->InstalledAll($RequiredPackages) ||
-    PackageSystem->InstalledAll($RequiredPackages_gplv3) ||
-      PackageSystem->CheckAndInstallPackagesInteractive($RequiredPackages) ||
+  Package->InstalledAll($RequiredPackages) ||
+    Package->InstalledAll($RequiredPackages_gplv3) ||
+      Package->CheckAndInstallPackagesInteractive($RequiredPackages) ||
         return 0;
   return 1;
 }
@@ -119,7 +119,7 @@ sub CheckNeedToInstallCupsPackages {
     unless ((lc $printing eq "cups") and SambaConfig->ShareExists("printers") and SambaConfig->ShareEnabled("printers")) {
         return 0;
     }
-    if (PackageSystem->InstalledAll($CupsPackages)) {
+    if (Package->InstalledAll($CupsPackages)) {
         return 0;
     }
 
@@ -188,7 +188,7 @@ sub Read {
                 SambaConfig->ShareDisable("printers");
                 SambaConfig->ShareSetModified("printers");
             } else {
-                PackageSystem->CheckAndInstallPackagesInteractive($CupsPackages) or return 0
+                Package->CheckAndInstallPackagesInteractive($CupsPackages) or return 0
             }
         }
     }
@@ -299,7 +299,7 @@ sub Write {
 #    # check, if we need samba-pdb package
 #    my %backends = map {/:/;$`||$_,1} split " ", SambaConfig->GlobalGetStr("passdb backend", "");
 #    if($backends{mysql}) {
-#	PackageSystem->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
+#	Package->CheckAndInstallPackagesInteractive(["samba-pdb"]) or return 0;
 #    }
 
     y2milestone ("Writing WINS Host Resolution=", Samba->GetHostsResolution());
