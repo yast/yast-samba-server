@@ -115,14 +115,6 @@ module Yast
       # add the user
       Builtins.y2milestone(YaPI::USERS.UserAdd(@config_map, @data_map))
 
-      @run_nscd = Convert.to_map(
-        SCR.Execute(path(".target.bash_output"), "/usr/sbin/nscd -i passwd")
-      )
-      if Ops.get_integer(@res, "exit", -1) != 0
-        Builtins.y2error("nscd failed: %1", @run_nscd)
-        return false
-      end
-
       true
     end
 
